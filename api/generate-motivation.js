@@ -1,7 +1,7 @@
 const DEFAULT_UPSTAGE_API_URL = "https://api.upstage.ai/v1/chat/completions";
 const DEFAULT_OPENAI_API_URL = "https://api.openai.com/v1/responses";
 const DEFAULT_OPENAI_MODEL = "gpt-5.6-luna";
-const TaskTypeConfig = require("../js/task-types.js");
+const TaskTypeConfig = require("../public/js/task-types.js");
 
 const normalizeUpstageApiUrl = (value) => {
   const trimmed = String(value || DEFAULT_UPSTAGE_API_URL).trim().replace(/\/+$/, "");
