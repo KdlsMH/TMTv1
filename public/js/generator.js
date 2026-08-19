@@ -138,64 +138,13 @@ ${rawText.trim()}
    * 작업 맥락을 특허 문서에 설명 가능한 "심리 프레임"으로 변환한다.
    * 이 단계가 단순 LLM 호출과 구분되는 핵심 로직이다.
    */
-  assessWorkload(workload = {}, riskLevel = "medium", fatigueLevel = "medium", singleTaskLimitMinutes = 15) {
-    const valueScore = (value, map) => map[value] || 0;
-    const totalCount = Math.max(0, Number(workload.totalCount || 0));
-    const batchSize = Math.max(1, Number(workload.batchSize || 1));
-    const repetitions = Math.max(1, Number(workload.repetitionCount || Math.ceil(totalCount / batchSize) || 1));
-    const itemMinutes = Math.max(0, Number(workload.itemEstimatedMinutes || 0));
-    const totalLimit = Math.max(0, Number(workload.totalTimeLimitMinutes || 0));
-    const estimatedTotalMinutes = Math.round(totalCount * itemMinutes * 10) / 10;
-
-    let score = 0;
-    score += valueScore(workload.dataType, { text: 3, image: 7, audio: 10, video: 15, mixed: 18 });
-    score += valueScore(workload.complexity, { low: 2, medium: 9, high: 16, extreme: 24 });
-    score += valueScore(workload.sensitiveData, { none: 0, limited: 9, high: 17 });
-    score += valueScore(workload.criteriaClarity, { clear: 0, mixed: 7, unclear: 15 });
-    score += valueScore(workload.subjectivity, { low: 0, medium: 7, high: 14 });
-    score += valueScore(workload.difficulty, { easy: 0, medium: 5, hard: 11, expert: 17 });
-    score += totalCount > 5000 ? 15 : totalCount > 1000 ? 11 : totalCount > 100 ? 7 : 3;
-    score += batchSize > 100 ? 10 : batchSize > 30 ? 6 : 2;
-    score += repetitions > 50 ? 8 : repetitions > 10 ? 5 : 2;
-    score += riskLevel === "high" ? 10 : riskLevel === "medium" ? 5 : 0;
-    score += fatigueLevel === "high" ? 10 : fatigueLevel === "medium" ? 5 : 0;
-    score = Math.min(100, Math.round(score));
-
-    const warnings = [];
-    if (itemMinutes > Number(singleTaskLimitMinutes || 0)) {
-      warnings.push(`작업당 예상 ${itemMinutes}분이 단일 작업 제한 ${singleTaskLimitMinutes}분을 초과합니다. 제한을 늘리거나 작업 단위를 줄여 주세요.`);
-    }
-    if (totalLimit && estimatedTotalMinutes > totalLimit) {
-      warnings.push(`전체 예상 ${estimatedTotalMinutes}분이 전체 제한 ${totalLimit}분을 초과합니다. 데이터 수, 작업량 또는 제한 시간을 조정해 주세요.`);
-    }
-    if (workload.complexity === "extreme" && workload.criteriaClarity === "unclear") {
-      warnings.push("복잡도가 매우 높고 판단 기준도 모호합니다. 전문가 검토와 예시 기준을 먼저 추가하는 것을 권장합니다.");
-    }
-    if (workload.sensitiveData === "high" && !workload.breakFrequencyMinutes) {
-      warnings.push("민감정보가 많습니다. 정기 휴식과 접근 권한 안내를 함께 설정해 주세요.");
-    }
-
-    const level = score >= 70 ? "high" : score >= 40 ? "medium" : "low";
-    return {
-      score,
-      level,
-      levelLabel: level === "high" ? "높음" : level === "medium" ? "중간" : "낮음",
-      estimatedTotalMinutes,
-      singleTaskLimitMinutes: Number(singleTaskLimitMinutes || 0),
-      totalTimeLimitMinutes: totalLimit,
-      expectedTaskCount: repetitions,
-      breakIncluded: workload.breakIncluded || "excluded",
-      warnings
-    };
-  }
-
-  buildPsychologicalProfile(title, category, description, riskLevel, fatigueLevel, objective, socialImpact, workerContext, workload = {}, singleTaskLimitMinutes = 15, taskType = "") {
+  buildPsychologicalProfile(title, category, description, riskLevel, fatigueLevel, objective, socialImpact, workerContext, singleTaskLimitMinutes = 15, taskType = "") {
     const activeProfile = this.categoryMappings[category] || this.categoryMappings.general;
 
     const safeObjective = this.cleanInput(objective) || this.inferObjective(title, description, activeProfile);
     const safeImpact = this.cleanInput(socialImpact) || activeProfile.socialImpact;
     const safeContext = this.cleanInput(workerContext) || "짧은 시간 안에 여러 항목을 연속적으로 판단해야 하는 온라인 마이크로태스크 환경";
-    const taskTypeInput = { title, category, description, riskLevel, fatigueLevel, objective: safeObjective, socialImpact: safeImpact, workerContext: safeContext, workload };
+    const taskTypeInput = { title, category, description, riskLevel, fatigueLevel, objective: safeObjective, socialImpact: safeImpact, workerContext: safeContext };
     const taskTypeRecommendation = TaskTypeRegistry.recommendTaskType(taskTypeInput);
     const confirmedTaskTypeKey = TaskTypeRegistry.normalizeTaskTypeKey(taskType) || taskTypeRecommendation.key;
     const confirmedTaskType = TaskTypeRegistry.getTaskType(confirmedTaskTypeKey);
@@ -212,8 +161,6 @@ ${rawText.trim()}
     }
     const primaryTaskType = confirmedTaskType.label;
     const primaryFrameRule = this.getFrameRule(primaryTaskType);
-    const workloadAssessment = this.assessWorkload(workload, riskLevel, fatigueLevel, singleTaskLimitMinutes);
-
     const burdens = [];
     burdens.push(primaryFrameRule.burden);
     if (riskLevel === "high") burdens.push("정서적 부담 또는 높은 책임감");
@@ -221,7 +168,6 @@ ${rawText.trim()}
     if (fatigueLevel === "high") burdens.push("높은 반복 피로와 시각적 집중 부담");
     if (fatigueLevel === "medium") burdens.push("반복 수행으로 인한 중간 수준의 피로");
     if (safeContext) burdens.push(`작업 특성: ${safeContext}`);
-    burdens.push(`데이터 특성과 양을 함께 계산한 예상 부담: ${workloadAssessment.levelLabel} (${workloadAssessment.score}/100)`);
 
     const opportunities = [];
     opportunities.push(`구체적 작업 목표를 의미화: ${safeObjective}`);
@@ -229,7 +175,7 @@ ${rawText.trim()}
     opportunities.push(`프레임 적용 목적: ${primaryFrameRule.purpose}`);
     if (fatigueLevel !== "low") opportunities.push("짧은 시간 안에 끝낼 수 있다는 완료 기대감 제공");
     if (riskLevel !== "low") opportunities.push("작업자의 판단 역량을 과장 없이 인정");
-    opportunities.push("작업 순서·작업량·휴식 주기·추천 설정을 작업자가 조정할 수 있도록 선택권 제공");
+    opportunities.push("안내 기준 안에서 Worker의 판단과 속도를 존중하는 표현 사용");
 
     const sdtAnalysis = TaskTypeRegistry.analyzeSDTNeeds({ ...taskTypeInput, taskType: confirmedTaskTypeKey });
     const selectedFrames = sdtAnalysis.frames;
@@ -246,8 +192,7 @@ ${rawText.trim()}
       objective: safeObjective,
       socialImpact: safeImpact,
       workerContext: safeContext,
-      workload,
-      workloadAssessment,
+      singleTaskLimitMinutes: Number(singleTaskLimitMinutes || 15),
       inferredTaskTypes,
       primaryTaskType,
       taskType: confirmedTaskTypeKey,
@@ -264,7 +209,7 @@ ${rawText.trim()}
         "죄책감 유발 표현 금지",
         "생산성 압박 또는 성과 강요 금지",
         "작업 목표 1회 이상 포함",
-        "확정된 Task Type과 workload·risk·context를 함께 분석하여 핵심 SDT 프레임 2개 선택",
+        "확정된 Task Type과 risk·fatigue·context를 함께 분석하여 핵심 SDT 프레임 2개 선택",
         "선택되지 않은 SDT 프레임을 최종 문구에 기계적으로 추가하지 않음",
         "극단값을 임의로 평균화하지 않고 조건 충돌 시 경고와 대안 제시"
       ]
@@ -319,7 +264,7 @@ ${rawText.trim()}
     const detectedTypes = inferredTaskTypes.map(item => item.type).join(", ");
     const rule = this.getFrameRule(primaryTaskType || this.selectPrimaryTaskType(inferredTaskTypes));
     const selectedLabel = selectedFrames.map(frame => this.toFrameLabel(frame)).join(" + ");
-    return `확정된 Task Type은 ${rule.taskTypeLabel}이며, 함께 감지된 작업 신호는 ${detectedTypes || rule.taskTypeLabel}입니다. Task Type 우선순위만 고정 적용하지 않고 workload·risk·context를 함께 분석해 ${selectedLabel || rule.frameLabel}을 추천했습니다.`;
+    return `확정된 Task Type은 ${rule.taskTypeLabel}이며, 함께 감지된 작업 신호는 ${detectedTypes || rule.taskTypeLabel}입니다. Task Type과 정서적 부담, 반복·집중 부담, 작업 맥락을 함께 분석해 ${selectedLabel || rule.frameLabel}을 추천했습니다.`;
   }
 
   getFrameNeed(frame = "") {
@@ -334,14 +279,13 @@ ${rawText.trim()}
     const allFrames = ["Autonomy support", "Competence", "Meaningfulness/Relatedness"];
     const orderedFrames = [...selectedFrames, ...allFrames]
       .filter((frame, index, frames) => frames.findIndex(item => this.getFrameNeed(item) === this.getFrameNeed(frame)) === index);
-    const shouldIncludeOptional = (profile.workloadAssessment?.score || 0) >= 40
-      || profile.riskLevel !== "low"
+    const shouldIncludeOptional = profile.riskLevel !== "low"
       || profile.fatigueLevel !== "low"
       || (profile.inferredTaskTypes || []).length > 1;
     const visibleFrames = shouldIncludeOptional ? orderedFrames.slice(0, 3) : orderedFrames.slice(0, 2);
 
     const checks = {
-      autonomy: "지나친 명령형이나 성과 압박 없이, 작업자가 판단 속도·휴식·가능한 설정을 선택할 수 있다고 안내하는지 확인합니다.",
+      autonomy: "판단을 재촉하지 않고, 애매한 항목을 무리해 단정하지 않아도 된다고 안내하는지 확인합니다.",
       competence: "작업자의 판단 능력과 구체적인 기여를 신뢰하되 정답이나 성과를 과장하지 않는지 확인합니다.",
       relatedness: "참여에 대한 감사와 사회적 의미를 구체적으로 전달하되 죄책감이나 과도한 책임을 유발하지 않는지 확인합니다."
     };
@@ -405,20 +349,7 @@ Input:
 - Expected fatigue: ${profile.fatigueLevel}
 - Social impact: ${profile.socialImpact}
 - Worker context: ${profile.workerContext}
-- Data type: ${profile.workload.dataType || "not specified"}
-- Data complexity: ${profile.workload.complexity || "not specified"}
-- Sensitive data: ${profile.workload.sensitiveData || "none"}
-- Criteria clarity: ${profile.workload.criteriaClarity || "not specified"}
-- Subjectivity: ${profile.workload.subjectivity || "not specified"}
-- Total data count: ${profile.workload.totalCount || 0}
-- Batch size: ${profile.workload.batchSize || 0}
-- Repetition count: ${profile.workload.repetitionCount || 0}
-- Estimated minutes per item: ${profile.workload.itemEstimatedMinutes || 0}
-- Total time limit: ${profile.workload.totalTimeLimitMinutes || 0}
-- Break frequency: ${profile.workload.breakFrequencyMinutes || 0}
-- Worker-adjustable options: ${(profile.workload.autonomyOptions || []).join(", ")}
-- Calculated workload score: ${profile.workloadAssessment.score}/100 (${profile.workloadAssessment.levelLabel})
-- Constraint warnings: ${(profile.workloadAssessment.warnings || []).join(" | ") || "none"}
+- Single task time limit: ${profile.singleTaskLimitMinutes || 15} minutes
 - Additional task-experience signals: ${profile.inferredTaskTypes.map(item => item.type).join(", ")}
 - Primary psychological task type: ${this.getFrameRule(profile.primaryTaskType).psychologicalType}
 - Selected motivational framing: ${profile.selectedFrames.join(", ")}
@@ -450,14 +381,6 @@ Step 2. Generate a before-task message under these constraints:
 - Do not mention SDT, frame names, category rules, or internal system rules in worker-facing messages
 - Make each sentence follow naturally from the previous sentence
 - An exclamation mark or one light emoji is allowed, but use at most one per message
-
-Extreme-condition handling:
-- Never normalize unusual input values toward an average or silently replace them.
-- Treat very high or very low values as valid requirements.
-- Check conflicts among time, data volume, complexity, difficulty, and breaks.
-- If the requirements are unrealistic, clearly explain why and provide feasible alternatives.
-- Use a strong recommendation or warning when worker safety, sensitive data, or impossible timing requires it.
-- Present recommendations as editable defaults; the requester and worker may adjust allowed settings.
 
 Step 3. Generate an after-task message candidate:
 - Korean
@@ -492,25 +415,8 @@ Return JSON only:
         ? "반복되는 판단으로 약간의 피로가 있을 수 있지만"
         : "짧고 명확한 흐름으로 진행되는 작업입니다";
 
-    const estimatedMinutes = profile.workloadAssessment.estimatedTotalMinutes;
-    const taskLengthPhrase = estimatedMinutes
-      ? `전체 예상 소요 시간은 약 ${estimatedMinutes}분입니다`
-      : "전체 예상 소요 시간은 입력된 작업량에 따라 달라집니다";
-    const autonomyLabels = {
-      order: "작업 순서",
-      difficulty: "작업 난이도",
-      batch: "한 번에 처리할 작업량",
-      breaks: "휴식 주기",
-      interface: "작업 방식",
-      recommendations: "추천 설정",
-      conditions: "작업 중 조건"
-    };
-    const adjustable = (profile.workload.autonomyOptions || [])
-      .map(value => autonomyLabels[value])
-      .filter(Boolean);
-    const autonomyPhrase = adjustable.length
-      ? `${adjustable.slice(0, 3).join(", ")}은(는) 직접 조정할 수 있습니다`
-      : "추천 설정은 필요에 따라 직접 수정할 수 있습니다";
+    const taskLengthPhrase = `단일 작업 제한 시간은 ${profile.singleTaskLimitMinutes || 15}분입니다`;
+    const autonomyPhrase = "안내 기준 안에서 자신의 판단과 속도에 따라 진행할 수 있습니다";
 
     if (phase === "before") {
       if (strategy === "meaningfulness") {
@@ -520,7 +426,7 @@ Return JSON only:
         return `이 작업은 빠르게 누르는 것보다 천천히 구분해 주시는 눈이 더 중요합니다. ${objective} 과정에서는 사람의 맥락 판단이 데이터 품질을 꽤 많이 좌우하거든요. 그리고 그 데이터는 ${impact}라는 목표에 맞춰 쓰이게 됩니다. ${taskLengthPhrase}이니, 확인 가능한 기준 안에서 편한 속도로 진행해 주세요. 애매한 항목은 안내 기준을 다시 살펴본 뒤 가장 적절하다고 생각하는 쪽을 선택해 주시면 됩니다.`;
       }
       if (strategy === "autonomy") {
-        return `시작하기 전에 짧게 안내드릴게요. ${objective}를 하다 보면 애매한 항목이 있을 수 있는데, 그럴 때는 무리해서 추측하지 않아도 괜찮습니다. ${autonomyPhrase}. ${fatiguePhrase}, 본인에게 편한 속도로 진행하고 설정된 주기에 맞춰 쉬어도 괜찮습니다. 이렇게 모인 판단은 ${impact}에 필요한 데이터 품질을 높이는 데 쓰입니다.`;
+        return `시작하기 전에 짧게 안내드릴게요. ${objective}를 하다 보면 애매한 항목이 있을 수 있는데, 그럴 때는 무리해서 추측하지 않아도 괜찮습니다. ${autonomyPhrase}. ${fatiguePhrase}, 본인에게 편한 속도로 진행하고 필요하면 잠시 쉬어도 괜찮습니다. 이렇게 모인 판단은 ${impact}에 필요한 데이터 품질을 높이는 데 쓰입니다.`;
       }
       return `참여해 주셔서 감사합니다! ${objective} 작업은 ${impact}에 필요한 작은 판단들을 차곡차곡 모으는 과정입니다. ${fatiguePhrase}, ${taskLengthPhrase}. 너무 부담 갖지 마시고, 기준을 보면서 한 항목씩 편하게 선택해 주세요. 판단이 어려운 항목은 무리해서 단정하지 않고 안내된 범위 안에서 골라 주셔도 괜찮습니다.`;
     }
@@ -541,7 +447,7 @@ Return JSON only:
    * 선택형 메시지 세트를 만든다. 각 옵션은 같은 템플릿을 반복하는 것이 아니라
    * 서로 다른 심리 프레임을 명시적으로 반영한다.
    */
-  generateInterventions(title, category, description, riskLevel, fatigueLevel, objective, socialImpact, workerContext, reward = "1.50", workload = {}, taskType = "") {
+  generateInterventions(title, category, description, riskLevel, fatigueLevel, objective, socialImpact, workerContext, reward = "1.50", singleTaskLimitMinutes = 15, taskType = "") {
     const profile = this.buildPsychologicalProfile(
       title,
       category,
@@ -551,8 +457,7 @@ Return JSON only:
       objective,
       socialImpact,
       workerContext,
-      workload,
-      workload.singleTaskLimitMinutes || 15,
+      singleTaskLimitMinutes,
       taskType
     );
 
@@ -587,8 +492,7 @@ Return JSON only:
         selectedFrames: profile.selectedFrames,
         reviewCriteria: this.buildReviewCriteria(profile),
         frameSelectionReason: profile.frameSelectionReason,
-        constraintsApplied: profile.constraintsApplied,
-        workloadAssessment: profile.workloadAssessment
+        constraintsApplied: profile.constraintsApplied
       },
       selectedFrames: profile.selectedFrames,
       taskType: profile.taskType,
@@ -801,9 +705,9 @@ Return JSON only:
    * 에이전트 심리 프레임 분석 로그.
    * 사용자에게는 내부 chain-of-thought가 아니라, 특허 문서에 설명 가능한 처리 단계만 보여준다.
    */
-  async generateThoughtsLog(title, category, description, riskLevel, fatigueLevel, objective, socialImpact, workerContext, workload = {}, callback, taskType = "") {
+  async generateThoughtsLog(title, category, description, riskLevel, fatigueLevel, objective, socialImpact, workerContext, singleTaskLimitMinutes = 15, callback, taskType = "") {
     const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-    const profile = this.buildPsychologicalProfile(title, category, description, riskLevel, fatigueLevel, objective, socialImpact, workerContext, workload, workload.singleTaskLimitMinutes || 15, taskType);
+    const profile = this.buildPsychologicalProfile(title, category, description, riskLevel, fatigueLevel, objective, socialImpact, workerContext, singleTaskLimitMinutes, taskType);
 
     callback(`[시스템] 마이크로태스크 이탈 방지를 위한 맥락 기반 메시지 생성 절차를 시작합니다.`, "system");
     await sleep(250);
@@ -818,7 +722,6 @@ Return JSON only:
 
     callback(`[2단계: 심리 부담 추정] 다음 부담 요인을 감지했습니다.`, "process");
     profile.psychologicalBurden.forEach(item => callback(`  - ${item}`, "process"));
-    profile.workloadAssessment.warnings.forEach(item => callback(`  - 조건 경고: ${item}`, "warning"));
     await sleep(300);
 
     callback(`[3단계: 동기 기회 추출] 작업 이탈 방지를 위해 활용 가능한 동기 요인을 정리했습니다.`, "process");

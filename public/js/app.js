@@ -115,25 +115,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const taskObjectiveBox = document.getElementById("task-objective");
   const taskSocialImpactBox = document.getElementById("task-social-impact");
   const taskWorkerContextBox = document.getElementById("task-worker-context");
-  const taskDataTypeSelect = document.getElementById("task-data-type");
-  const taskComplexitySelect = document.getElementById("task-complexity");
-  const taskSensitiveDataSelect = document.getElementById("task-sensitive-data");
-  const taskCriteriaClaritySelect = document.getElementById("task-criteria-clarity");
-  const taskSubjectivitySelect = document.getElementById("task-subjectivity");
-  const taskDifficultySelect = document.getElementById("task-difficulty");
-  const taskTotalCountBox = document.getElementById("task-total-count");
-  const taskBatchSizeBox = document.getElementById("task-batch-size");
-  const taskRepetitionCountBox = document.getElementById("task-repetition-count");
-  const taskItemMinutesBox = document.getElementById("task-item-minutes");
-  const taskTotalTimeLimitBox = document.getElementById("task-total-time-limit");
-  const taskBreakFrequencyBox = document.getElementById("task-break-frequency");
-  const taskBreakIncludedSelect = document.getElementById("task-break-included");
-  const taskUnitBox = document.getElementById("task-unit");
-  const taskPrioritySelect = document.getElementById("task-priority");
-  const taskDetailLevelSelect = document.getElementById("task-detail-level");
-  const taskAutoRecommendBox = document.getElementById("task-auto-recommend");
-  const taskDirectModeBox = document.getElementById("task-direct-mode");
-  const autonomyOptionBoxes = [...document.querySelectorAll('input[name="autonomy-option"]')];
   const taskTypeOptions = document.getElementById("task-type-options");
   const recommendedTaskTypeLabel = document.getElementById("recommended-task-type-label");
   const recommendedTaskTypeReason = document.getElementById("recommended-task-type-reason");
@@ -144,7 +125,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const whyMotivation = document.getElementById("why-motivation");
   const whySdt = document.getElementById("why-sdt");
   const howItWorks = document.getElementById("how-it-works");
-  const btnHeroLearn = document.getElementById("btn-hero-learn");
   const btnStartDesigning = document.getElementById("btn-start-designing");
   const btnWorkspaceSdt = document.getElementById("btn-workspace-sdt");
   const navWhySdt = document.getElementById("nav-why-sdt");
@@ -172,8 +152,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const factorBurdens = document.getElementById("factor-burdens");
   const factorMotivators = document.getElementById("factor-motivators");
   const factorSelectionReason = document.getElementById("factor-selection-reason");
-  const workloadSummary = document.getElementById("workload-summary");
-  const workloadWarnings = document.getElementById("workload-warnings");
   const reviewCriteriaList = document.getElementById("review-criteria-list");
   const factorPrimaryTask = document.getElementById("factor-primary-task");
   const factorFrameSummary = document.getElementById("factor-frame-summary");
@@ -182,7 +160,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const factorTaskContext = document.getElementById("factor-task-context");
   const factorTaskCharacteristics = document.getElementById("factor-task-characteristics");
   const factorRecommendedSdt = document.getElementById("factor-recommended-sdt");
-  const factorContextWorkload = document.getElementById("factor-context-workload");
+  const factorContextRisk = document.getElementById("factor-context-risk");
+  const factorContextFatigue = document.getElementById("factor-context-fatigue");
   const factorContextTime = document.getElementById("factor-context-time");
 
   const shareCard = document.getElementById("share-card");
@@ -205,10 +184,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const workspaceTaskDesc = document.getElementById("workspace-task-desc");
   const workerSpecReward = document.getElementById("worker-spec-reward");
   const workerSpecTimeLimit = document.getElementById("worker-spec-time-limit");
-  const workerSpecTotalTimeLimit = document.getElementById("worker-spec-total-time-limit");
-  const workerSpecItemTime = document.getElementById("worker-spec-item-time");
-  const workerSpecTaskCount = document.getElementById("worker-spec-task-count");
-  const workerSpecBreakPolicy = document.getElementById("worker-spec-break-policy");
   const btnStartTask = document.getElementById("btn-start-task");
   const workspaceTaskTitle = document.getElementById("workspace-task-title");
 
@@ -296,7 +271,6 @@ document.addEventListener("DOMContentLoaded", () => {
       timeLimitMinutes: "10",
       riskLevel: "high",
       fatigueLevel: "high",
-      workload: { dataType: "text", complexity: "medium", sensitiveData: "none", criteriaClarity: "clear", subjectivity: "medium", difficulty: "medium", totalCount: 80, batchSize: 10, repetitionCount: 8, itemEstimatedMinutes: 0.8, totalTimeLimitMinutes: 70, breakFrequencyMinutes: 15 },
       objective: "각 댓글을 확인하고 Safe 또는 Harmful 중 하나로 분류하기",
       socialImpact: "커뮤니티 운영자가 유해성 분류 기준과 데이터 품질을 점검하는 데 활용",
       workerContext: "연구용으로 완화된 댓글 예시를 반복적으로 읽고 정책 기준을 적용하는 환경",
@@ -316,7 +290,6 @@ document.addEventListener("DOMContentLoaded", () => {
       timeLimitMinutes: "10",
       riskLevel: "medium",
       fatigueLevel: "medium",
-      workload: { dataType: "text", complexity: "high", sensitiveData: "none", criteriaClarity: "clear", subjectivity: "low", difficulty: "hard", totalCount: 50, batchSize: 8, repetitionCount: 6, itemEstimatedMinutes: 1.2, totalTimeLimitMinutes: 60, breakFrequencyMinutes: 20 },
       objective: "가상의 의료 기록과 시스템의 알레르기 경고가 일치하는지 검수하기",
       socialImpact: "연구용 의료 정보 품질 검수 절차를 평가하는 데 활용",
       workerContext: "실제 환자 정보나 진단 없이 합성 기록의 경고 일치 여부를 신중하게 대조하는 환경",
@@ -338,7 +311,6 @@ document.addEventListener("DOMContentLoaded", () => {
       timeLimitMinutes: "8",
       riskLevel: "low",
       fatigueLevel: "high",
-      workload: { dataType: "image", complexity: "medium", sensitiveData: "none", criteriaClarity: "clear", subjectivity: "low", difficulty: "medium", totalCount: 120, batchSize: 12, repetitionCount: 10, itemEstimatedMinutes: 0.6, totalTimeLimitMinutes: 70, breakFrequencyMinutes: 20 },
       objective: "영수증 이미지의 가격과 OCR 추출 가격이 일치하는지 확인하기",
       socialImpact: "영수증 텍스트 추출 데이터의 일관성과 품질을 점검하는 데 활용",
       workerContext: "유사한 가격 대조 판단을 같은 기준으로 반복 수행하는 환경",
@@ -358,7 +330,6 @@ document.addEventListener("DOMContentLoaded", () => {
       timeLimitMinutes: "10",
       riskLevel: "low",
       fatigueLevel: "medium",
-      workload: { dataType: "mixed", complexity: "medium", sensitiveData: "none", criteriaClarity: "clear", subjectivity: "low", difficulty: "medium", totalCount: 70, batchSize: 10, repetitionCount: 7, itemEstimatedMinutes: 1, totalTimeLimitMinutes: 70, breakFrequencyMinutes: 20 },
       objective: "공공시설 접근성 데이터가 이미지 또는 설명과 일치하는지 검수하기",
       socialImpact: "공공시설 접근성 정보의 정확도를 점검하고 정보 수정이 필요한 항목을 찾는 데 활용",
       workerContext: "시설 이미지와 접근성 설명을 차분히 대조하되 개별 판단의 영향을 과장하지 않는 환경",
@@ -378,7 +349,6 @@ document.addEventListener("DOMContentLoaded", () => {
       timeLimitMinutes: "5",
       riskLevel: "low",
       fatigueLevel: "low",
-      workload: { dataType: "image", complexity: "low", sensitiveData: "none", criteriaClarity: "clear", subjectivity: "high", difficulty: "easy", totalCount: 20, batchSize: 5, repetitionCount: 4, itemEstimatedMinutes: 0.5, totalTimeLimitMinutes: 20, breakFrequencyMinutes: 15 },
       objective: "두 상품 이미지 중 더 선호하는 이미지를 선택하기",
       socialImpact: "익명 선호 응답을 상품 이미지 표현 연구의 참고 자료로 활용",
       workerContext: "정답이나 높은 책임 없이 개인의 선호를 간단히 선택하는 환경",
@@ -430,13 +400,7 @@ document.addEventListener("DOMContentLoaded", () => {
     workerContext: taskWorkerContextBox?.value || "",
     category: selectedCategory,
     riskLevel: taskRiskLevelSelect?.value || "medium",
-    fatigueLevel: taskFatigueLevelSelect?.value || "medium",
-    workload: {
-      repetitionCount: Number(taskRepetitionCountBox?.value || 0),
-      complexity: taskComplexitySelect?.value || "medium",
-      criteriaClarity: taskCriteriaClaritySelect?.value || "mixed",
-      sensitiveData: taskSensitiveDataSelect?.value || "none"
-    }
+    fatigueLevel: taskFatigueLevelSelect?.value || "medium"
   });
 
   const selectTaskType = (taskType, { sync = true } = {}) => {
@@ -706,29 +670,7 @@ document.addEventListener("DOMContentLoaded", () => {
     fatigueLevel: taskFatigueLevelSelect.value,
     objective: taskObjectiveBox.value.trim(),
     socialImpact: taskSocialImpactBox.value.trim(),
-    workerContext: taskWorkerContextBox.value.trim(),
-    workload: {
-      dataType: taskDataTypeSelect?.value || "image",
-      complexity: taskComplexitySelect?.value || "medium",
-      sensitiveData: taskSensitiveDataSelect?.value || "none",
-      criteriaClarity: taskCriteriaClaritySelect?.value || "mixed",
-      subjectivity: taskSubjectivitySelect?.value || "medium",
-      difficulty: taskDifficultySelect?.value || "medium",
-      totalCount: Number(taskTotalCountBox?.value || 0),
-      batchSize: Number(taskBatchSizeBox?.value || 0),
-      repetitionCount: Number(taskRepetitionCountBox?.value || 0),
-      itemEstimatedMinutes: Number(taskItemMinutesBox?.value || 0),
-      singleTaskLimitMinutes: Number(taskTimeLimitBox?.value || 0),
-      totalTimeLimitMinutes: Number(taskTotalTimeLimitBox?.value || 0),
-      breakFrequencyMinutes: Number(taskBreakFrequencyBox?.value || 0),
-      breakIncluded: taskBreakIncludedSelect?.value || "excluded",
-      unit: taskUnitBox?.value.trim() || "항목",
-      priority: taskPrioritySelect?.value || "quality",
-      detailLevel: taskDetailLevelSelect?.value || "standard",
-      autoRecommend: Boolean(taskAutoRecommendBox?.checked),
-      directMode: Boolean(taskDirectModeBox?.checked),
-      autonomyOptions: autonomyOptionBoxes.filter(box => box.checked).map(box => box.value)
-    }
+    workerContext: taskWorkerContextBox.value.trim()
   };
   };
 
@@ -795,7 +737,6 @@ document.addEventListener("DOMContentLoaded", () => {
     psychologicalFactors.reviewCriteria = psychologicalFactors.reviewCriteria || raw.reviewCriteria || fallback.psychologicalFactors?.reviewCriteria || fallback.reviewCriteria || [];
     psychologicalFactors.psychologicalBurdens = psychologicalFactors.psychologicalBurdens || raw.psychologicalBurden || [];
     psychologicalFactors.motivationalFactors = psychologicalFactors.motivationalFactors || raw.motivationalOpportunity || [];
-    psychologicalFactors.workloadAssessment = raw.workloadAssessment || psychologicalFactors.workloadAssessment || fallback.psychologicalFactors?.workloadAssessment || {};
 
     const composedFinalBeforeText = aiGenerator.composeFinalBeforeFromCandidates(
       title,
@@ -868,37 +809,23 @@ document.addEventListener("DOMContentLoaded", () => {
     renderPills(factorSelectedFrames, factors.selectedFrames || []);
     renderList(factorBurdens, factors.psychologicalBurdens || []);
     renderList(factorMotivators, factors.motivationalFactors || []);
-    const assessment = factors.workloadAssessment || {};
-    if (workloadSummary) {
-      workloadSummary.innerHTML = [
-        ["부담 수준", assessment.levelLabel || "분석됨"],
-        ["부담 점수", Number.isFinite(assessment.score) ? `${assessment.score} / 100` : "—"],
-        ["전체 예상 시간", Number.isFinite(assessment.estimatedTotalMinutes) ? `${assessment.estimatedTotalMinutes}분` : "—"],
-        ["단일 작업 제한", assessment.singleTaskLimitMinutes ? `${assessment.singleTaskLimitMinutes}분` : "—"],
-        ["전체 작업 제한", assessment.totalTimeLimitMinutes ? `${assessment.totalTimeLimitMinutes}분` : "—"],
-        ["예상 작업 수", assessment.expectedTaskCount ? `${assessment.expectedTaskCount}개` : "—"]
-      ].map(([label, value]) => `<div class="workload-metric"><strong>${value}</strong><span>${label}</span></div>`).join("");
-    }
-    renderList(workloadWarnings, assessment.warnings || ["시간과 데이터 조건 간 충돌이 발견되지 않았습니다."]);
-
     const taskTypeDefinition = TaskTypeConfig.getTaskType(factors.taskType || factors.taskTypeLabel);
     const characteristicLabels = (factors.taskTypeCharacteristics?.length
       ? factors.taskTypeCharacteristics
       : taskTypeDefinition?.characteristics || [])
       .map(item => typeof item === "string" ? item : item.label)
       .filter(Boolean);
-    const estimatedMinutes = Number(assessment.estimatedTotalMinutes || 0);
-    const estimatedRange = estimatedMinutes > 0
-      ? `${Math.max(1, Math.floor(estimatedMinutes * 0.8))}–${Math.max(2, Math.ceil(estimatedMinutes * 1.2))} min`
-      : assessment.singleTaskLimitMinutes ? `최대 ${assessment.singleTaskLimitMinutes} min` : "—";
+    const riskLabels = { low: "낮음", medium: "중간", high: "높음" };
+    const fatigueLabels = { low: "낮음", medium: "중간", high: "높음" };
 
     if (factorTaskTypeLabel) factorTaskTypeLabel.textContent = factors.taskTypeLabel || taskTypeDefinition?.label || factors.primaryTaskType || "—";
     if (factorTaskTypeReason) factorTaskTypeReason.textContent = factors.taskTypeReason || taskTypeDefinition?.recommendationReason || "—";
     if (factorTaskContext) factorTaskContext.textContent = TASK_CONTEXT_LABELS[selectedCategory] || factors.taskContext || "General Crowd Task";
     if (factorTaskCharacteristics) factorTaskCharacteristics.textContent = characteristicLabels.join(" · ") || "—";
     if (factorRecommendedSdt) factorRecommendedSdt.textContent = (factors.selectedFrames || []).map(toDisplayFactorLabel).join(" · ") || "—";
-    if (factorContextWorkload) factorContextWorkload.textContent = assessment.levelLabel || "—";
-    if (factorContextTime) factorContextTime.textContent = estimatedRange;
+    if (factorContextRisk) factorContextRisk.textContent = riskLabels[taskRiskLevelSelect?.value] || "—";
+    if (factorContextFatigue) factorContextFatigue.textContent = fatigueLabels[taskFatigueLevelSelect?.value] || "—";
+    if (factorContextTime) factorContextTime.textContent = taskTimeLimitBox?.value ? `${taskTimeLimitBox.value} min` : "—";
 
     if (factorPrimaryTask) {
       factorPrimaryTask.textContent = factors.taskTypeLabel || factors.primaryTaskType || "Task Type";
@@ -967,10 +894,64 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const scrollToElement = (element, focusElement = null) => {
+    if (!element) return;
     const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    element?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+    const headerOffset = (document.querySelector("header")?.getBoundingClientRect().height || 60) + 16;
+    const targetTop = Math.max(0, window.scrollY + element.getBoundingClientRect().top - headerOffset);
+    window.scrollTo({ top: targetTop, behavior: reduceMotion ? "auto" : "smooth" });
     if (focusElement) setTimeout(() => focusElement.focus({ preventScroll: true }), reduceMotion ? 0 : 500);
   };
+
+  const navSections = [
+    { section: platformOverview, button: navTabRequester },
+    { section: whyMotivation, button: navTabRequester },
+    { section: whySdt, button: navWhySdt },
+    { section: document.getElementById("why-task-messages"), button: navWhySdt },
+    { section: document.getElementById("worker-experience"), button: navWhySdt },
+    { section: howItWorks, button: navHowItWorks },
+    { section: document.getElementById("onboarding-ready"), button: navHowItWorks },
+    { section: requesterWorkspace, button: navWorkspace }
+  ].filter(item => item.section && item.button);
+  const navButtons = [navTabRequester, navWhySdt, navHowItWorks, navWorkspace].filter(Boolean);
+  let navClickLockUntil = 0;
+  let navScrollFrame = null;
+
+  const setActiveNavigation = button => {
+    if (!button || button.classList.contains("hidden")) return;
+    navButtons.forEach(item => {
+      const isActive = item === button;
+      item.classList.toggle("active", isActive);
+      if (isActive) item.setAttribute("aria-current", "page");
+      else item.removeAttribute("aria-current");
+    });
+  };
+
+  const updateNavigationFromScroll = () => {
+    navScrollFrame = null;
+    if (document.body.classList.contains("worker-mode") || performance.now() < navClickLockUntil) return;
+    const headerOffset = (document.querySelector("header")?.getBoundingClientRect().height || 60) + 32;
+    let activeButton = navTabRequester;
+    navSections.forEach(({ section, button }) => {
+      if (button.classList.contains("hidden")) return;
+      if (section.getBoundingClientRect().top <= headerOffset) activeButton = button;
+    });
+    setActiveNavigation(activeButton);
+  };
+
+  const requestNavigationUpdate = () => {
+    if (navScrollFrame !== null) return;
+    navScrollFrame = window.requestAnimationFrame(updateNavigationFromScroll);
+  };
+
+  const navigateToSection = (button, section, focusElement = null) => {
+    setActiveNavigation(button);
+    navClickLockUntil = performance.now() + 1200;
+    scrollToElement(section, focusElement);
+    window.setTimeout(updateNavigationFromScroll, 1250);
+  };
+
+  window.addEventListener("scroll", requestNavigationUpdate, { passive: true });
+  window.addEventListener("resize", requestNavigationUpdate);
 
   const ONBOARDING_STORAGE_KEY = "taskMessageStudioOnboardingCompleted";
 
@@ -988,7 +969,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // The Workspace still opens when browser storage is unavailable.
     }
     setWorkspaceAvailability(true);
-    scrollToElement(requesterWorkspace, taskTitleBox);
+    navigateToSection(navWorkspace, requesterWorkspace, taskTitleBox);
   };
 
   // Development and study reset helper: run this in the browser console when needed.
@@ -999,16 +980,20 @@ document.addEventListener("DOMContentLoaded", () => {
       // Ignore storage restrictions and reset the visible state.
     }
     setWorkspaceAvailability(false);
-    scrollToElement(platformOverview);
+    navigateToSection(navTabRequester, platformOverview);
   };
 
-  btnHeroLearn?.addEventListener("click", () => scrollToElement(whyMotivation));
   btnStartDesigning?.addEventListener("click", completeOnboarding);
-  btnWorkspaceSdt?.addEventListener("click", () => scrollToElement(whySdt));
-  navTabRequester?.addEventListener("click", () => scrollToElement(platformOverview));
-  navWhySdt?.addEventListener("click", () => scrollToElement(whySdt));
-  navHowItWorks?.addEventListener("click", () => scrollToElement(howItWorks));
-  navWorkspace?.addEventListener("click", () => scrollToElement(requesterWorkspace, taskTitleBox));
+  btnWorkspaceSdt?.addEventListener("click", () => navigateToSection(navWhySdt, whySdt));
+  navTabRequester?.addEventListener("click", () => navigateToSection(navTabRequester, platformOverview));
+  navWhySdt?.addEventListener("click", () => navigateToSection(navWhySdt, whySdt));
+  navHowItWorks?.addEventListener("click", () => navigateToSection(navHowItWorks, howItWorks));
+  navWorkspace?.addEventListener("click", () => navigateToSection(navWorkspace, requesterWorkspace, taskTitleBox));
+  document.querySelector(".motivation-to-sdt")?.addEventListener("click", event => {
+    event.preventDefault();
+    navigateToSection(navWhySdt, whySdt);
+  });
+  requestNavigationUpdate();
 
   const syncSelectedCandidateText = () => {
     if (synthesizedBeforeOptions.length > 0) {
@@ -1103,19 +1088,6 @@ document.addEventListener("DOMContentLoaded", () => {
     taskObjectiveBox.value = preset.objective;
     taskSocialImpactBox.value = preset.socialImpact;
     taskWorkerContextBox.value = preset.workerContext;
-    const presetWorkload = preset.workload || {};
-    if (taskDataTypeSelect) taskDataTypeSelect.value = presetWorkload.dataType || "image";
-    if (taskComplexitySelect) taskComplexitySelect.value = presetWorkload.complexity || "medium";
-    if (taskSensitiveDataSelect) taskSensitiveDataSelect.value = presetWorkload.sensitiveData || "none";
-    if (taskCriteriaClaritySelect) taskCriteriaClaritySelect.value = presetWorkload.criteriaClarity || "mixed";
-    if (taskSubjectivitySelect) taskSubjectivitySelect.value = presetWorkload.subjectivity || "medium";
-    if (taskDifficultySelect) taskDifficultySelect.value = presetWorkload.difficulty || "medium";
-    if (taskTotalCountBox) taskTotalCountBox.value = presetWorkload.totalCount || 80;
-    if (taskBatchSizeBox) taskBatchSizeBox.value = presetWorkload.batchSize || 10;
-    if (taskRepetitionCountBox) taskRepetitionCountBox.value = presetWorkload.repetitionCount || 8;
-    if (taskItemMinutesBox) taskItemMinutesBox.value = presetWorkload.itemEstimatedMinutes || 1;
-    if (taskTotalTimeLimitBox) taskTotalTimeLimitBox.value = presetWorkload.totalTimeLimitMinutes || 60;
-    if (taskBreakFrequencyBox) taskBreakFrequencyBox.value = presetWorkload.breakFrequencyMinutes || 20;
     const presetPayload = getTaskPayloadFromForm();
 
     currentTask = {
@@ -1135,7 +1107,6 @@ document.addEventListener("DOMContentLoaded", () => {
       objective: preset.objective,
       socialImpact: preset.socialImpact,
       workerContext: preset.workerContext,
-      workload: presetPayload.workload,
       beforeText: "",
       afterText: "",
       beforeCandidates: [],
@@ -1186,12 +1157,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const editableTaskControls = [
     taskTitleBox, taskRewardBox, taskTimeLimitBox, taskDescBox, taskObjectiveBox,
-    taskSocialImpactBox, taskWorkerContextBox, taskRiskLevelSelect, taskFatigueLevelSelect,
-    taskDataTypeSelect, taskComplexitySelect, taskSensitiveDataSelect, taskCriteriaClaritySelect,
-    taskSubjectivitySelect, taskDifficultySelect, taskTotalCountBox, taskBatchSizeBox,
-    taskRepetitionCountBox, taskItemMinutesBox, taskTotalTimeLimitBox, taskBreakFrequencyBox,
-    taskBreakIncludedSelect, taskUnitBox, taskPrioritySelect, taskDetailLevelSelect,
-    taskAutoRecommendBox, taskDirectModeBox, ...autonomyOptionBoxes
+    taskSocialImpactBox, taskWorkerContextBox, taskRiskLevelSelect, taskFatigueLevelSelect
   ].filter(Boolean);
 
   editableTaskControls.forEach(control => {
@@ -1211,13 +1177,6 @@ document.addEventListener("DOMContentLoaded", () => {
     pendingRegenerate = true;
     activeGenerationController?.abort();
     showToast("현재 분석을 취소하고 수정된 조건으로 다시 시작합니다.");
-  });
-
-  taskDirectModeBox?.addEventListener("change", () => {
-    if (taskDirectModeBox.checked && taskAutoRecommendBox) taskAutoRecommendBox.checked = false;
-  });
-  taskAutoRecommendBox?.addEventListener("change", () => {
-    if (taskAutoRecommendBox.checked && taskDirectModeBox) taskDirectModeBox.checked = false;
   });
 
   const closeExamplePopovers = (except = null) => {
@@ -1317,7 +1276,7 @@ document.addEventListener("DOMContentLoaded", () => {
         generationPayload.objective,
         generationPayload.socialImpact,
         generationPayload.workerContext,
-        generationPayload.workload,
+        Number(generationPayload.timeLimitMinutes || 15),
         addThoughtLog,
         generationPayload.taskType
       );
@@ -1334,12 +1293,12 @@ document.addEventListener("DOMContentLoaded", () => {
         generationPayload.socialImpact,
         generationPayload.workerContext,
         generationPayload.reward,
-        generationPayload.workload,
+        Number(generationPayload.timeLimitMinutes || 15),
         generationPayload.taskType
       );
       const fallbackFactors = fallbackResults.psychologicalFactors || {};
       addThoughtLog(`[Task Type] 확정: ${fallbackFactors.taskTypeLabel || payload.taskTypeLabel}`, "process");
-      addThoughtLog(`[SDT 분석] Task Type과 workload·risk·context를 함께 반영한 선택 프레임: ${(fallbackFactors.selectedFrames || fallbackResults.selectedFrames || []).join(" + ")}`, "process");
+      addThoughtLog(`[SDT 분석] Task Type과 정서적 부담, 반복·집중 부담, 작업 맥락을 함께 반영한 선택 프레임: ${(fallbackFactors.selectedFrames || fallbackResults.selectedFrames || []).join(" + ")}`, "process");
       setGenerationStep("frames", "done");
       setGenerationStep("constraints", "active");
       addThoughtLog("[제약조건] 후보 문구는 각각 자연스럽게 이어지는 한국어 5문장으로 만들고, 최종 작업 전 문구에는 분석으로 선택된 핵심 SDT 프레임만 반영합니다.", "process");
@@ -1414,7 +1373,6 @@ document.addEventListener("DOMContentLoaded", () => {
         objective: payload.objective,
         socialImpact: payload.socialImpact,
         workerContext: payload.workerContext,
-        workload: payload.workload,
         createdAt: new Date().toISOString()
       };
 
@@ -1628,7 +1586,6 @@ document.addEventListener("DOMContentLoaded", () => {
     currentTask.objective = taskObjectiveBox.value.trim();
     currentTask.socialImpact = taskSocialImpactBox.value.trim();
     currentTask.workerContext = taskWorkerContextBox.value.trim();
-    currentTask.workload = draftPayload.workload;
     saveDraftToStorage();
   };
 
@@ -1802,7 +1759,7 @@ document.addEventListener("DOMContentLoaded", () => {
     workerPostTask.classList.add("hidden");
 
     // Opening the link creates an "opened" session. Task timing starts only after the explicit start action.
-    createWorkerSession(taskId, task.workload?.repetitionCount || 10, task.category, task.taskType, task.taskTypeLabel);
+    createWorkerSession(taskId, 10, task.category, task.taskType, task.taskTypeLabel);
     const timeLimitMinutes = parseInt(task.timeLimitMinutes || "15", 10);
     const safeTimeLimitMinutes = Number.isFinite(timeLimitMinutes)
       ? Math.min(Math.max(timeLimitMinutes, 1), 180)
@@ -1827,12 +1784,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (workerSpecTimeLimit) {
       workerSpecTimeLimit.textContent = `${safeTimeLimitMinutes} 분`;
     }
-    const workload = task.workload || {};
-    if (workerSpecTotalTimeLimit) workerSpecTotalTimeLimit.textContent = `${workload.totalTimeLimitMinutes || "미설정"}${workload.totalTimeLimitMinutes ? " 분" : ""}`;
-    if (workerSpecItemTime) workerSpecItemTime.textContent = `${workload.itemEstimatedMinutes || "미설정"}${workload.itemEstimatedMinutes ? " 분" : ""}`;
-    if (workerSpecTaskCount) workerSpecTaskCount.textContent = `${workload.repetitionCount || workerSession.totalItems} 개`;
-    if (workerSpecBreakPolicy) workerSpecBreakPolicy.textContent = workload.breakIncluded === "included" ? "전체 제한 시간에 포함" : "전체 제한 시간에서 제외";
-
     if (workerMotivationPrime) {
       workerMotivationPrime.textContent = task.beforeText || "귀하의 세심한 인지적 가치는 고품질 데이터 구축의 핵심 주춧돌이 됩니다.";
     }

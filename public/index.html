@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Task Message Studio</title>
-  <meta name="description" content="공정한 보상을 존중하면서 Worker의 자율적인 동기와 기본 심리 욕구를 지원하는 SDT 기반 Crowd Task Message Design System입니다.">
+  <meta name="description" content="Worker의 내재적 동기와 작업 경험을 고려해 작업 전후 메시지를 설계하는 SDT 기반 Crowd Task Message Design System입니다.">
   
   <!-- Stylesheets -->
   <link rel="stylesheet" href="css/style.css">
@@ -44,16 +44,9 @@
            ==================================================================== -->
       <section id="requester-view" class="requester-container">
         <section id="platform-overview" class="landing-hero purpose-hero" aria-labelledby="landing-title">
-          <div class="landing-kicker">Human-centered Crowd Work Communication</div>
-          <h2 id="landing-title">더 나은 작업 메시지를 넘어,<br><span>더 나은 크라우드워크를 설계하세요.</span></h2>
-          <p class="hero-lead">Worker의 동기와 작업 경험까지 고려하는 Crowd Task Message Design System</p>
-          <p class="hero-support">금전적 보상은 Crowd Work에서 여전히 중요한 요소입니다. Task Message Studio는 이를 대체하는 것이 아니라, 작업 커뮤니케이션을 통해 Worker의 자율적인 동기와 기본 심리 욕구를 추가적으로 지원하는 방법을 탐색합니다.</p>
-          <div class="landing-actions">
-            <button id="btn-hero-learn" type="button" class="btn btn-primary"><i class="lucide-arrow-down"></i>플랫폼 알아보기</button>
-          </div>
-          <div class="hero-principles" aria-label="플랫폼이 함께 고려하는 가치">
-            <span>Fair Reward</span><b>+</b><span>Worker Experience</span><b>+</b><span>Task Quality</span>
-          </div>
+          <h2 id="landing-title"><span class="hero-line hero-line-primary">더 나은 작업 메시지를 넘어,</span><span class="hero-line hero-line-accent">더 나은 크라우드워크를 설계하세요.</span></h2>
+          <p class="hero-lead">Worker의 내재적 동기와 작업 경험까지 고려하는 Crowd Task Message Design System</p>
+          <p class="hero-support">Task Message Studio는 Worker가 작업의 의미와 자신의 기여를 이해할 수 있도록, Task 특성에 맞는 작업 전후 커뮤니케이션을 설계합니다.</p>
         </section>
 
         <section id="why-motivation" class="overview-section motivation-section" aria-labelledby="motivation-title">
@@ -69,35 +62,21 @@
               <h3>내재적 동기</h3>
               <strong>일 자체에서 오는 동기</strong>
               <p>활동 자체에서 재미, 흥미 또는 만족을 느껴 스스로 하고 싶어서 행동하는 동기입니다.</p>
-              <div class="motivation-why"><b>왜 하나요?</b><ul><li>재미있어서</li><li>흥미가 있어서</li><li>활동 자체가 만족스러워서</li></ul></div>
-              <blockquote>“이 문제를 해결하는 과정 자체가 재미있어요.”</blockquote>
             </article>
             <article class="motivation-definition-card" data-motivation="extrinsic">
               <div class="motivation-card-heading"><span>Extrinsic Motivation</span><i class="lucide-circle-dollar-sign" aria-hidden="true"></i></div>
               <h3>외재적 동기</h3>
               <strong>외부의 결과에서 오는 동기</strong>
               <p>보상, 평가, 인정 또는 특정한 결과를 얻기 위해 행동하는 동기입니다.</p>
-              <div class="motivation-why"><b>왜 하나요?</b><ul><li>돈이나 보상을 받기 위해</li><li>좋은 평가를 받기 위해</li><li>특정 결과를 얻기 위해</li></ul></div>
-              <blockquote>“이 작업을 완료하면 보상을 받을 수 있어서 참여해요.”</blockquote>
             </article>
           </div>
 
           <div class="crowd-motivation-block" aria-labelledby="crowd-example-title">
             <div class="motivation-subheading"><span>Crowd Work Example</span><h3 id="crowd-example-title">Crowd Work에서는 이렇게 나타날 수 있습니다.</h3></div>
             <div class="crowd-example-grid">
-              <article><span>Extrinsic Motivation</span><blockquote>“이 작업을 완료하면 보상을 받을 수 있습니다.”</blockquote><p>Worker는 보상이라는 외부 결과를 얻기 위해 Task에 참여할 수 있습니다.</p></article>
-              <article><span>More Autonomous Motivation</span><blockquote>“이 작업의 결과는 AI 데이터의 품질을 개선하는 데 활용됩니다.”</blockquote><p>Worker가 자신의 작업이 왜 필요한지 이해하고, 그 중요성이나 가치를 스스로 받아들일 수 있도록 지원할 수 있습니다.</p><small>이 문장만으로 내재적 동기라고 단정하지 않습니다.</small></article>
+              <article><blockquote>“이 작업의 결과는 AI 데이터의 품질을 개선하는 데 활용됩니다.”</blockquote><p>Worker는 자신의 작업이 필요한 이유와 기여의 의미를 이해할 수 있습니다.</p></article>
+              <article><blockquote>“이 작업을 완료하면 보상을 받을 수 있습니다.”</blockquote><p>Worker는 보상이라는 외부 결과를 고려해 Task에 참여할 수 있습니다.</p></article>
             </div>
-          </div>
-
-          <div class="motivation-continuum" aria-labelledby="continuum-title">
-            <div class="motivation-subheading"><span>Motivation is not simply intrinsic or extrinsic.</span><h3 id="continuum-title">동기는 두 가지로만 나뉘지 않습니다.</h3><p>사람은 외부 보상을 받으면서도 자신이 하는 일의 가치와 의미를 스스로 받아들일 수 있습니다.</p></div>
-            <div class="motivation-spectrum" aria-label="통제된 동기에서 자율적 동기로 이어지는 스펙트럼">
-              <div class="spectrum-end controlled"><span>Controlled Motivation</span><strong>“해야 하니까 한다.”</strong><small>“보상 때문에 한다.”</small></div>
-              <div class="spectrum-track" aria-hidden="true"><span></span><i class="lucide-arrow-right"></i></div>
-              <div class="spectrum-end autonomous"><span>Autonomous Motivation</span><strong>“내가 중요하다고 생각해서 한다.”</strong><small>“내가 선택했다고 느낀다.”</small></div>
-            </div>
-            <p class="continuum-note">SDT에서는 단순히 보상이 있느냐 없느냐보다, 사람이 자신의 행동을 얼마나 자율적으로 받아들이는지를 중요하게 봅니다.</p>
           </div>
 
           <div class="crowd-work-meaning" aria-labelledby="crowd-meaning-title">
@@ -115,13 +94,13 @@
         <section id="why-sdt" class="overview-section sdt-section" aria-labelledby="sdt-title">
           <div class="landing-section-heading">
             <span>What is Self-Determination Theory?</span>
-            <h2 id="sdt-title">보다 자율적인 작업 경험을 지원하는 세 가지 기본 심리 욕구</h2>
-            <p>Self-Determination Theory(SDT)는 동기의 종류뿐 아니라 사람이 자신의 행동을 얼마나 자율적으로 받아들이는지도 살펴봅니다. 그 과정에서 Autonomy, Competence, Relatedness를 중요한 기본 심리 욕구로 다룹니다.</p>
+            <h2 id="sdt-title">Crowd Worker의 작업 경험을 지원하는 세 가지 기본 심리 욕구</h2>
+            <p>Self-Determination Theory(SDT)는 Autonomy, Competence, Relatedness가 충족될수록 활동에 자발적으로 참여하고 내재적 동기를 이어가기 좋은 조건이 형성된다고 설명합니다.</p>
           </div>
           <div class="sdt-card-grid">
-            <article class="sdt-card" data-sdt="autonomy"><span class="sdt-number">01</span><i class="lucide-sliders-horizontal"></i><h3>Autonomy <small>자율성</small></h3><blockquote>“내가 선택하고 판단할 수 있다.”</blockquote><p>과도한 통제보다 Worker의 판단과 선택이 존중된다고 느끼도록 지원합니다.</p><div class="keyword-list"><span>Choice</span><span>Agency</span><span>Control</span></div></article>
-            <article class="sdt-card" data-sdt="competence"><span class="sdt-number">02</span><i class="lucide-badge-check"></i><h3>Competence <small>유능감</small></h3><blockquote>“나는 이 일을 잘 해낼 수 있다.”</blockquote><p>Worker의 판단과 기여 능력을 인정하고 효과적으로 수행할 수 있다는 감각을 지원합니다.</p><div class="keyword-list"><span>Capability</span><span>Progress</span><span>Mastery</span></div></article>
-            <article class="sdt-card" data-sdt="relatedness"><span class="sdt-number">03</span><i class="lucide-users"></i><h3>Relatedness <small>관계성</small></h3><blockquote>“내 작업은 누군가와 연결되어 있다.”</blockquote><p>자신의 기여가 다른 사람이나 더 큰 목적과 연결된다고 느끼도록 지원합니다.</p><div class="keyword-list"><span>Connection</span><span>Contribution</span><span>Appreciation</span></div></article>
+            <article class="sdt-card" data-sdt="autonomy"><span class="sdt-number">01</span><i class="lucide-sliders-horizontal"></i><h3>Autonomy <small>자율성</small></h3><blockquote>“내가 선택하고 판단할 수 있다.”</blockquote><p>과도한 통제보다 Worker의 판단과 선택이 존중된다고 느끼도록 지원합니다.</p></article>
+            <article class="sdt-card" data-sdt="competence"><span class="sdt-number">02</span><i class="lucide-badge-check"></i><h3>Competence <small>유능감</small></h3><blockquote>“나는 이 일을 잘 해낼 수 있다.”</blockquote><p>Worker의 판단과 기여 능력을 인정하고 효과적으로 수행할 수 있다는 감각을 지원합니다.</p></article>
+            <article class="sdt-card" data-sdt="relatedness"><span class="sdt-number">03</span><i class="lucide-users"></i><h3>Relatedness <small>관계성</small></h3><blockquote>“내 작업은 누군가와 연결되어 있다.”</blockquote><p>자신의 기여가 다른 사람이나 더 큰 목적과 연결된다고 느끼도록 지원합니다.</p></article>
           </div>
         </section>
 
@@ -139,7 +118,7 @@
         <section id="worker-experience" class="overview-section worker-experience-section" aria-labelledby="worker-experience-title">
           <div class="landing-section-heading">
             <span>How Workers Experience It</span>
-            <h2 id="worker-experience-title">저희 시스템과 요청자가 함께 작성한 메시지는 작업자가 작업을 시작하기 전과 작업을 마친 후에 제공됩니다.</h2>
+            <h2 id="worker-experience-title">저희 시스템과 requester가 함께 작성한 메시지는 작업자가 작업을 시작하기 전과 작업을 마친 후에 제공됩니다.</h2>
             <p>모든 메시지에 세 요소를 고정하지 않습니다. Task의 부담과 책임, 반복성, 사회적 의미를 분석해 필요한 지원의 우선순위를 정합니다.</p>
           </div>
           <div class="worker-preview-grid">
@@ -159,17 +138,16 @@
               <div class="message-annotations"><span><b>Relatedness</b> 기여의 연결과 감사</span></div>
             </article>
           </div>
-          <div class="worker-flow-line" aria-label="Requester에서 Worker까지의 메시지 흐름"><span>Requester</span><i class="lucide-arrow-right"></i><span>Task Information</span><i class="lucide-arrow-right"></i><span>SDT Analysis</span><i class="lucide-arrow-right"></i><span>Before Message</span><i class="lucide-arrow-right"></i><span>Task</span><i class="lucide-arrow-right"></i><span>After Message</span></div>
+          <div class="worker-flow-line" aria-label="Requester에서 Worker까지의 메시지 흐름"><span>Requester</span><i class="lucide-arrow-right" aria-hidden="true"></i><span>Task Information</span><i class="lucide-arrow-right" aria-hidden="true"></i><span>SDT Analysis</span><i class="lucide-arrow-right" aria-hidden="true"></i><span>Before Message</span><i class="lucide-arrow-right" aria-hidden="true"></i><span>Task</span><i class="lucide-arrow-right" aria-hidden="true"></i><span>After Message</span></div>
         </section>
 
         <section id="how-it-works" class="overview-section how-section" aria-labelledby="how-title">
           <div class="landing-section-heading">
             <span>How it works</span>
             <h2 id="how-title">이제 실제 화면에서 설계 흐름을 확인하세요.</h2>
-            <p>각 단계의 Preview는 아래 Requester Workspace와 Worker 화면에서 그대로 이어집니다.</p>
           </div>
           <ol class="how-preview-steps">
-            <li><div class="how-step-copy"><span>STEP 1</span><h3>작업 정보 입력</h3><p>작업 목적, 유형, 난이도와 Worker가 수행할 내용을 입력합니다.</p></div><div class="mini-ui-preview"><label>작업 제목</label><div class="mini-form-control">도로 장면 객체 분류</div><label>작업자가 할 일</label><div class="mini-form-control muted">보행자·차량·장애물 분류</div></div></li>
+            <li><div class="how-step-copy"><span>STEP 1</span><h3>작업 정보 입력</h3><p>작업 목적, Task Type, Worker가 수행할 내용과 메시지 참고 정보를 입력합니다.</p></div><div class="mini-ui-preview"><label>작업 제목</label><div class="mini-form-control">도로 장면 객체 분류</div><label>작업자가 할 일</label><div class="mini-form-control muted">보행자·차량·장애물 분류</div></div></li>
             <li><div class="how-step-copy"><span>STEP 2</span><h3>작업 특성 분석</h3><p>Task 특성과 Worker 경험을 분석하고 적합한 SDT 요소를 추천합니다.</p></div><div class="mini-ui-preview"><small>Recommended Motivation Support</small><div class="mini-support-row"><b>Competence</b><span>Primary</span></div><div class="mini-support-row"><b>Relatedness</b><span>Secondary</span></div><p>정확한 판단 책임과 사회적 영향을 반영한 우선순위입니다.</p></div></li>
             <li><div class="how-step-copy"><span>STEP 3</span><h3>SDT 기반 메시지 생성</h3><p>분석 결과를 바탕으로 Before / After 후보 메시지를 생성합니다.</p></div><div class="mini-ui-preview mini-candidates"><div><span class="candidate-frame-tag">유능감</span><p>세심한 판단이 데이터 품질을…</p></div><div><span class="candidate-frame-tag">관계성</span><p>제출한 결과는 안전 검토에…</p></div></div></li>
             <li><div class="how-step-copy"><span>STEP 4</span><h3>메시지 검토 및 수정</h3><p>선택된 SDT 요소와 이유를 확인하고 메시지를 선택·수정합니다.</p></div><div class="mini-ui-preview"><div class="mini-review-title"><i class="lucide-badge-check"></i><b>유능감</b><span>핵심</span></div><p>신중한 판단이 중요한 작업이므로 Worker의 판단 능력을 인정하는 표현을 확인합니다.</p><div class="mini-textarea">최종 메시지를 직접 수정할 수 있습니다.</div></div></li>
@@ -273,7 +251,7 @@
                       <i class="lucide-sliders-horizontal"></i>
                       <div>
                         <strong>메시지 참고 정보</strong>
-                        <span>데이터의 특성과 규모를 함께 입력하면 실제 작업 부담과 권장 작업 방식을 더 정확히 계산합니다.</span>
+                        <span>Task Type과 Worker가 겪을 수 있는 부담, 작업의 기여 맥락을 메시지 분석에 반영합니다.</span>
                       </div>
                       <div class="example-help">
                         <button type="button" class="example-help-btn" aria-expanded="false" aria-label="메시지 참고 정보 작성 예시 보기"><i class="lucide-circle-help"></i>예시</button>
@@ -346,161 +324,6 @@
                       </div>
                     </div>
 
-                    <details id="advanced-settings" class="advanced-settings">
-                      <summary><i class="lucide-settings-2"></i>고급 작업 조건 조정 <span>선택</span></summary>
-                      <p class="field-help advanced-intro">추천값을 그대로 사용하거나 데이터 특성, 작업량, 시간과 자율성 설정을 직접 조정할 수 있습니다.</p>
-
-                      <div class="advanced-section">
-                        <div class="advanced-section-heading">
-                          <h4>데이터 특성</h4>
-                          <div class="example-help">
-                            <button type="button" class="example-help-btn" aria-expanded="false" aria-label="데이터 특성 작성 예시 보기"><i class="lucide-circle-help"></i>예시</button>
-                            <div class="example-help-popover" role="tooltip">
-                              <strong>데이터 특성 예시</strong>
-                              <dl>
-                                <div><dt>유형</dt><dd>이미지</dd></div>
-                                <div><dt>복잡도</dt><dd>중간</dd></div>
-                                <div><dt>민감정보</dt><dd>포함하지 않음</dd></div>
-                                <div><dt>판단 기준</dt><dd>명확함</dd></div>
-                                <div><dt>주관성·난이도</dt><dd>낮음 · 보통</dd></div>
-                              </dl>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="form-grid-2">
-                          <div class="form-group">
-                            <label for="task-data-type">데이터 유형</label>
-                            <select id="task-data-type" class="form-control select-control">
-                              <option value="text">텍스트</option>
-                              <option value="image" selected>이미지</option>
-                              <option value="audio">음성</option>
-                              <option value="video">영상</option>
-                              <option value="mixed">혼합 데이터</option>
-                            </select>
-                          </div>
-                          <div class="form-group">
-                            <label for="task-complexity">데이터 복잡도</label>
-                            <select id="task-complexity" class="form-control select-control">
-                              <option value="low">낮음</option>
-                              <option value="medium" selected>중간</option>
-                              <option value="high">높음</option>
-                              <option value="extreme">매우 높음</option>
-                            </select>
-                          </div>
-                          <div class="form-group">
-                            <label for="task-sensitive-data">민감정보 포함</label>
-                            <select id="task-sensitive-data" class="form-control select-control">
-                              <option value="none" selected>포함하지 않음</option>
-                              <option value="limited">일부 포함</option>
-                              <option value="high">다수 포함</option>
-                            </select>
-                          </div>
-                          <div class="form-group">
-                            <label for="task-criteria-clarity">판단 기준 명확성</label>
-                            <select id="task-criteria-clarity" class="form-control select-control">
-                              <option value="clear">명확함</option>
-                              <option value="mixed" selected>일부 예외 있음</option>
-                              <option value="unclear">모호함</option>
-                            </select>
-                          </div>
-                          <div class="form-group">
-                            <label for="task-subjectivity">주관적 해석 정도</label>
-                            <select id="task-subjectivity" class="form-control select-control">
-                              <option value="low">낮음</option>
-                              <option value="medium" selected>중간</option>
-                              <option value="high">높음</option>
-                            </select>
-                          </div>
-                          <div class="form-group">
-                            <label for="task-difficulty">작업 난이도</label>
-                            <select id="task-difficulty" class="form-control select-control">
-                              <option value="easy">쉬움</option>
-                              <option value="medium" selected>보통</option>
-                              <option value="hard">어려움</option>
-                              <option value="expert">전문가 수준</option>
-                            </select>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div class="advanced-section">
-                        <div class="advanced-section-heading">
-                          <h4>데이터 양과 시간</h4>
-                          <div class="example-help">
-                            <button type="button" class="example-help-btn" aria-expanded="false" aria-label="데이터 양과 시간 작성 예시 보기"><i class="lucide-circle-help"></i>예시</button>
-                            <div class="example-help-popover" role="tooltip">
-                              <strong>데이터 양과 시간 예시</strong>
-                              <dl>
-                                <div><dt>전체 데이터</dt><dd>96개 이미지</dd></div>
-                                <div><dt>한 번에 처리</dt><dd>12개</dd></div>
-                                <div><dt>예상 반복</dt><dd>8회</dd></div>
-                                <div><dt>작업당 예상</dt><dd>1분</dd></div>
-                                <div><dt>전체 제한</dt><dd>60분</dd></div>
-                                <div><dt>휴식</dt><dd>20분마다 · 제한 시간에서 제외</dd></div>
-                              </dl>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="form-grid-2">
-                          <div class="form-group"><label for="task-total-count">전체 데이터 수</label><input id="task-total-count" type="number" class="form-control" min="1" value="80"></div>
-                          <div class="form-group"><label for="task-batch-size">한 번에 처리할 작업량</label><input id="task-batch-size" type="number" class="form-control" min="1" value="10"></div>
-                          <div class="form-group"><label for="task-repetition-count">예상 반복 횟수</label><input id="task-repetition-count" type="number" class="form-control" min="1" value="8"></div>
-                          <div class="form-group"><label for="task-item-minutes">작업당 예상 소요 시간</label><div class="input-with-suffix"><input id="task-item-minutes" type="number" class="form-control" min="0.1" step="0.1" value="1"><span class="input-suffix">분</span></div></div>
-                          <div class="form-group"><label for="task-total-time-limit">전체 작업 제한 시간</label><div class="input-with-suffix"><input id="task-total-time-limit" type="number" class="form-control" min="1" value="60"><span class="input-suffix">분</span></div></div>
-                          <div class="form-group"><label for="task-break-frequency">휴식 권장 주기</label><div class="input-with-suffix"><input id="task-break-frequency" type="number" class="form-control" min="0" value="20"><span class="input-suffix">분</span></div></div>
-                          <div class="form-group">
-                            <label for="task-break-included">휴식 시간의 제한 포함 여부</label>
-                            <select id="task-break-included" class="form-control select-control"><option value="included">전체 제한 시간에 포함</option><option value="excluded" selected>전체 제한 시간에서 제외</option></select>
-                          </div>
-                          <div class="form-group"><label for="task-unit">작업 단위</label><input id="task-unit" class="form-control" value="항목" placeholder="예: 이미지, 문장, 영상 클립"></div>
-                        </div>
-                      </div>
-
-                      <div class="advanced-section">
-                        <div class="advanced-section-heading">
-                          <h4>운영 방식</h4>
-                          <div class="example-help">
-                            <button type="button" class="example-help-btn" aria-expanded="false" aria-label="운영 방식 작성 예시 보기"><i class="lucide-circle-help"></i>예시</button>
-                            <div class="example-help-popover" role="tooltip">
-                              <strong>운영 방식 예시</strong>
-                              <dl>
-                                <div><dt>우선순위</dt><dd>품질 우선</dd></div>
-                                <div><dt>상세 수준</dt><dd>표준</dd></div>
-                                <div><dt>설정 방식</dt><dd>자동 추천을 시작값으로 사용하고 필요할 때 직접 수정</dd></div>
-                              </dl>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="form-grid-2">
-                          <div class="form-group"><label for="task-priority">우선순위</label><select id="task-priority" class="form-control select-control"><option value="quality" selected>품질 우선</option><option value="balanced">균형</option><option value="speed">속도 우선</option></select></div>
-                          <div class="form-group"><label for="task-detail-level">결과물 상세 수준</label><select id="task-detail-level" class="form-control select-control"><option value="simple">간단</option><option value="standard" selected>표준</option><option value="detailed">상세</option></select></div>
-                          <label class="setting-toggle"><input id="task-auto-recommend" type="checkbox" checked><span><strong>자동 추천 사용</strong><small>조건을 분석해 시작 설정을 제안합니다.</small></span></label>
-                          <label class="setting-toggle"><input id="task-direct-mode" type="checkbox"><span><strong>직접 설정 모드</strong><small>추천보다 입력값을 우선 적용합니다.</small></span></label>
-                        </div>
-                      </div>
-
-                      <div class="advanced-section">
-                        <div class="advanced-section-heading">
-                          <h4>작업자가 조정할 수 있는 항목</h4>
-                          <div class="example-help">
-                            <button type="button" class="example-help-btn" aria-expanded="false" aria-label="작업자 선택권 설정 예시 보기"><i class="lucide-circle-help"></i>예시</button>
-                            <div class="example-help-popover" role="tooltip">
-                              <strong>작업자 선택권 설정 예시</strong>
-                              <p>작업 순서, 한 번에 처리할 작업량, 휴식 주기, 추천 설정 수정을 허용합니다. 난이도나 인터페이스가 고정되어야 한다면 해당 항목은 선택하지 않습니다.</p>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="autonomy-grid">
-                          <label><input type="checkbox" name="autonomy-option" value="order" checked>작업 순서</label>
-                          <label><input type="checkbox" name="autonomy-option" value="difficulty">작업 난이도</label>
-                          <label><input type="checkbox" name="autonomy-option" value="batch" checked>한 번에 처리할 작업량</label>
-                          <label><input type="checkbox" name="autonomy-option" value="breaks" checked>휴식 주기</label>
-                          <label><input type="checkbox" name="autonomy-option" value="interface">작업 방식·인터페이스</label>
-                          <label><input type="checkbox" name="autonomy-option" value="recommendations" checked>추천 설정 수정</label>
-                          <label><input type="checkbox" name="autonomy-option" value="conditions">작업 중 조건 변경</label>
-                        </div>
-                      </div>
-                    </details>
                   </div>
                 </div>
 
@@ -526,7 +349,7 @@
                 <span class="empty-state-label">아직 분석 전</span>
                 <i class="lucide-layout-template"></i>
                 <strong>생성된 결과가 없습니다.</strong>
-                <p>왼쪽에 데이터와 작업 조건을 입력한 뒤 <strong>안내 메시지 만들기</strong>를 눌러 주세요. 결과 영역은 분석이 끝날 때까지 비활성 상태로 유지됩니다.</p>
+                <p>왼쪽에 작업 정보와 메시지 참고 정보를 입력한 뒤 <strong>안내 메시지 만들기</strong>를 눌러 주세요. 결과 영역은 분석이 끝날 때까지 비활성 상태로 유지됩니다.</p>
               </div>
 
               <div id="generation-edit-notice" class="generation-edit-notice hidden" aria-live="polite">
@@ -560,16 +383,12 @@
                       <div><dt>Task Context</dt><dd id="factor-task-context">—</dd></div>
                       <div><dt>Task Characteristics</dt><dd id="factor-task-characteristics">—</dd></div>
                       <div><dt>Recommended SDT Support</dt><dd id="factor-recommended-sdt">—</dd></div>
-                      <div><dt>Workload</dt><dd id="factor-context-workload">—</dd></div>
-                      <div><dt>Estimated Time</dt><dd id="factor-context-time">—</dd></div>
+                      <div><dt>Emotional Load</dt><dd id="factor-context-risk">—</dd></div>
+                      <div><dt>Focus Load</dt><dd id="factor-context-fatigue">—</dd></div>
+                      <div><dt>Single Task Time</dt><dd id="factor-context-time">—</dd></div>
                     </dl>
                   </div>
                   <div class="factor-grid">
-                    <div class="factor-block factor-block-wide">
-                      <span class="factor-label">예상 작업 부담</span>
-                      <div id="workload-summary" class="workload-summary"></div>
-                      <ul id="workload-warnings" class="factor-list workload-warnings"></ul>
-                    </div>
                     <div class="factor-block">
                       <span class="factor-label">작업 특성</span>
                       <div id="factor-task-types" class="factor-pill-list"></div>
@@ -724,22 +543,6 @@
               <div class="spec-item">
                 <span class="spec-label">단일 작업 제한 시간</span>
                 <span id="worker-spec-time-limit" class="spec-value">15 분</span>
-              </div>
-              <div class="spec-item">
-                <span class="spec-label">전체 작업 제한 시간</span>
-                <span id="worker-spec-total-time-limit" class="spec-value">60 분</span>
-              </div>
-              <div class="spec-item">
-                <span class="spec-label">작업당 예상 소요</span>
-                <span id="worker-spec-item-time" class="spec-value">1 분</span>
-              </div>
-              <div class="spec-item">
-                <span class="spec-label">예상 작업 수</span>
-                <span id="worker-spec-task-count" class="spec-value">8 개</span>
-              </div>
-              <div class="spec-item">
-                <span class="spec-label">휴식 시간</span>
-                <span id="worker-spec-break-policy" class="spec-value">제한 시간에서 제외</span>
               </div>
               <div class="spec-item">
                 <span class="spec-label">품질 요구도</span>

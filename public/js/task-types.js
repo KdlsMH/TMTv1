@@ -30,7 +30,7 @@
       keywords: ["유해", "혐오", "욕설", "공격", "괴롭힘", "위협", "악플", "모더레이션", "toxic", "harmful", "hate", "abuse", "harassment", "moderation"],
       categoryHints: ["moderation"],
       reviewReasons: {
-        autonomy: "정서적으로 부담될 수 있어 Worker가 속도와 휴식을 스스로 조절할 수 있다는 안내가 필요합니다.",
+        autonomy: "정서적 부담을 느낄 때 잠시 멈추거나 안내 기준 안에서 자신의 속도로 판단해도 된다고 알려야 합니다.",
         competence: "모호한 내용을 기준에 따라 판단하는 역량을 과장 없이 인정할 필요가 있습니다.",
         relatedness: "불편한 내용을 다루는 참여와 수고를 인정하고 정서적 거리를 확보하도록 돕는 것이 중요합니다."
       }
@@ -82,7 +82,7 @@
       keywords: ["ocr", "영수증", "전사", "라벨", "레이블", "어노테이션", "반복", "분류", "대조", "match", "mismatch", "transcription", "labeling"],
       categoryHints: ["ocr"],
       reviewReasons: {
-        autonomy: "반복 피로가 예상되므로 작업량과 휴식 주기를 조절할 수 있다는 선택권이 중요합니다.",
+        autonomy: "반복 피로가 예상되므로 빠른 처리보다 기준에 따른 판단을 우선하고 필요하면 잠시 쉬어도 된다고 알려야 합니다.",
         competence: "같은 기준을 꾸준히 적용하는 Worker의 정확성과 수행 가능성을 북돋울 필요가 있습니다.",
         relatedness: "반복적으로 제공한 판단이 전체 데이터 품질에 미치는 영향을 알려 참여 의미를 유지합니다."
       }
@@ -177,15 +177,12 @@
       scores[type.key] = { key: type.key, label: type.label, score, matches };
     });
 
-    const repetitionCount = Number(input.workload?.repetitionCount || 0);
     if (input.fatigueLevel === "high") scores.repetitive_cognitive.score += 3;
     else if (input.fatigueLevel === "medium") scores.repetitive_cognitive.score += 1;
-    if (repetitionCount >= 8) scores.repetitive_cognitive.score += 2;
     if (input.riskLevel === "high") {
       scores.emotionally_demanding.score += category === "moderation" ? 4 : 1;
       scores.high_responsibility.score += category !== "moderation" ? 2 : 0;
     }
-    if (input.workload?.sensitiveData === "high") scores.high_responsibility.score += 2;
     if (String(input.socialImpact || "").trim()) scores.socially_meaningful.score += 1;
 
     return Object.values(scores).sort((a, b) => b.score - a.score);
@@ -221,10 +218,7 @@
       scores.relatedness += 2;
     }
     if (input.fatigueLevel === "high") scores.autonomy += 2;
-    if (Number(input.workload?.repetitionCount || 0) >= 8) scores.competence += 1;
-    if (["high", "extreme"].includes(input.workload?.complexity)) scores.competence += 2;
     if (String(input.socialImpact || "").trim()) scores.relatedness += 1;
-    if (input.workload?.criteriaClarity === "unclear") scores.autonomy += 1;
 
     const order = Object.keys(scores).sort((a, b) => {
       if (scores[b] !== scores[a]) return scores[b] - scores[a];
