@@ -352,14 +352,18 @@ Input:
 - Single task time limit: ${profile.singleTaskLimitMinutes || 15} minutes
 - Additional task-experience signals: ${profile.inferredTaskTypes.map(item => item.type).join(", ")}
 - Primary psychological task type: ${this.getFrameRule(profile.primaryTaskType).psychologicalType}
-- Selected motivational framing: ${profile.selectedFrames.join(", ")}
+- Primary SDT support (message's central strategy): ${profile.selectedFrames[0] || "None"}
+- Secondary SDT support (strategy that meaningfully complements Primary): ${profile.selectedFrames[1] || "None"}
 - Generation phase: ${phase}
 
 Step 1. Preserve the task-specific selected frame priority.
 - Still generate three before-task candidates: Meaningfulness, Competence, and Autonomy support.
 - Each candidate must be exactly 5 complete, naturally connected sentences.
 - finalBeforeText has no sentence-count limit.
-- finalBeforeText must naturally blend only the candidates matching the selected frames.
+- Both finalBeforeText and finalAfterText must naturally reflect Primary and Secondary.
+- Primary must remain the central message strategy; Secondary must complement it with less emphasis.
+- Apply the meaning of each SDT dimension to the message strategy, not by inserting stock keywords.
+- finalBeforeText and finalAfterText must blend only the candidates matching the selected frames.
 - Do not mechanically add an unselected SDT frame to finalBeforeText.
 
 Step 2. Generate a before-task message under these constraints:
@@ -521,14 +525,14 @@ Return JSON only:
     return [...new Set(needs)];
   }
 
-  getBeforeCandidateIndexForFrame(frame = "") {
+  getCandidateIndexForFrame(frame = "") {
     if (/Competence|유능/.test(frame)) return 1;
     if (/Autonomy|자율/.test(frame)) return 2;
     return 0;
   }
 
   getSelectedBeforeCandidateIndexes(selectedFrames = []) {
-    const indexes = selectedFrames.map(frame => this.getBeforeCandidateIndexForFrame(frame));
+    const indexes = selectedFrames.map(frame => this.getCandidateIndexForFrame(frame));
     return [...new Set(indexes)].slice(0, 3);
   }
 
@@ -625,12 +629,22 @@ Return JSON only:
     const impact = pick(item => /데이터|자율주행|도로|안전|커뮤니티|의료|접근성|품질/.test(item));
     const guidance = pick(item => /애매|무리|기준|천천히|속도|괜찮|흐린|불편|가능한 만큼/.test(item));
     const competence = pick(item => /세심|신중|차분|판단|살펴|다듬/.test(item));
+    const secondarySentences = selectedBodies[1]
+      ? this.splitSentences(selectedBodies[1])
+        .map(sentence => this.normalizeRequesterTone(sentence))
+        .filter(sentence => sentence && !this.isBoilerplateFinalSentence(sentence))
+      : [];
+    const secondarySupport = secondarySentences.find(sentence => !used.has(sentence)) || "";
+    if (secondarySupport) used.add(secondarySupport);
 
     const finalSentences = [opening];
     if (intro) finalSentences.push(intro);
     if (impact) finalSentences.push(this.withConnector(impact, "그리고 "));
     if (guidance) finalSentences.push(this.withConnector(guidance, /^(흐린|애매)/.test(guidance) ? "혹시 " : "다만 "));
     if (competence) finalSentences.push(this.withConnector(competence, "이렇게 "));
+    if (secondarySupport && !finalSentences.some(sentence => sentence.includes(secondarySupport))) {
+      finalSentences.push(this.withConnector(secondarySupport, "또한 "));
+    }
 
     sentences
       .filter(sentence => !used.has(sentence))
@@ -640,6 +654,45 @@ Return JSON only:
       });
 
     return finalSentences.join(" ").replace(/\s+/g, " ").trim();
+  }
+
+  composeFinalAfterFromCandidates(selectedFrames = [], afterOptions = [], fallbackText = "") {
+    const selectedIndexes = this.getSelectedBeforeCandidateIndexes(selectedFrames);
+    const selectedGroups = selectedIndexes
+      .map(index => this.splitSentences(afterOptions[index] || "")
+        .map(sentence => this.normalizeRequesterTone(sentence))
+        .filter(Boolean))
+      .filter(group => group.length > 0);
+
+    if (selectedGroups.length === 0) return this.polishAfterMessage(fallbackText);
+
+    const seen = new Set();
+    const takeUnique = (sentences, limit, predicate = () => true) => sentences
+      .filter(sentence => predicate(sentence) && !seen.has(sentence))
+      .slice(0, limit)
+      .map(sentence => {
+        seen.add(sentence);
+        return sentence;
+      });
+
+    const primary = selectedGroups[0] || [];
+    const secondary = selectedGroups[1] || [];
+    const finalSentences = takeUnique(primary, 3);
+    const secondaryStrategy = takeUnique(
+      secondary,
+      1,
+      sentence => !/^(작업을|끝까지|참여해).*감사/.test(sentence)
+    );
+    finalSentences.push(...(secondaryStrategy.length ? secondaryStrategy : takeUnique(secondary, 1)));
+
+    const rewardSentence = takeUnique(
+      [...primary, ...secondary],
+      1,
+      sentence => /보상|정산|기록/.test(sentence)
+    );
+    finalSentences.push(...rewardSentence);
+
+    return this.polishAfterMessage(finalSentences.join(" ") || fallbackText);
   }
 
   polishAfterMessage(message = "") {
@@ -697,7 +750,11 @@ Return JSON only:
         beforeOptions,
         `우선 저희 "${profile.title}" 작업에 참여해주셔서 진심으로 감사합니다. ${fallbackBeforeText}`
       ),
-      finalAfterText: this.polishAfterMessage(`작업을 끝까지 진행해 주셔서 감사합니다. 제출해 주신 판단은 ${objective} 관련 데이터를 정리할 때 차분히 참고하겠습니다. 덕분에 ${impact}라는 목표에 맞춰 결과를 조금 더 안정적으로 점검할 수 있습니다. 승인된 보상금 $${reward}이(가) 기록되었습니다. 참여해 주신 점 다시 한번 감사드립니다.`)
+      finalAfterText: this.composeFinalAfterFromCandidates(
+        profile.selectedFrames,
+        afterOptions,
+        `작업을 끝까지 진행해 주셔서 감사합니다. 제출해 주신 판단은 ${objective} 관련 데이터를 정리할 때 차분히 참고하겠습니다. 덕분에 ${impact}라는 목표에 맞춰 결과를 조금 더 안정적으로 점검할 수 있습니다. 승인된 보상금 $${reward}이(가) 기록되었습니다. 참여해 주신 점 다시 한번 감사드립니다.`
+      )
     };
   }
 

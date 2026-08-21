@@ -144,6 +144,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const afterTextBox = document.getElementById("after-text");
   const finalBeforeTextBox = document.getElementById("final-before-text");
   const finalAfterTextBox = document.getElementById("final-after-text");
+  const finalSdtBadges = document.getElementById("final-sdt-badges");
+  const finalSdtPrimary = document.getElementById("final-sdt-primary");
+  const finalSdtSecondary = document.getElementById("final-sdt-secondary");
 
   const psychologyFactorPanel = document.getElementById("psychology-factor-panel");
   const llmProviderBadge = document.getElementById("llm-provider-badge");
@@ -759,7 +762,11 @@ document.addEventListener("DOMContentLoaded", () => {
       structuredPrompt: raw.structuredPrompt || fallback.structuredPrompt || raw.structuredPromptSummary || "",
       theme: raw.theme || fallback.theme || "",
       finalBeforeText: composedFinalBeforeText,
-      finalAfterText: aiGenerator.polishAfterMessage(raw.finalAfterText || fallback.finalAfterText || afterMessages[0]),
+      finalAfterText: aiGenerator.composeFinalAfterFromCandidates(
+        selectedFrames,
+        afterMessages,
+        raw.finalAfterText || fallback.finalAfterText || afterMessages[0]
+      ),
       provider: raw.provider || "local",
       model: raw.model || ""
     };
@@ -776,6 +783,23 @@ document.addEventListener("DOMContentLoaded", () => {
       "Relatedness / Appreciation": "관계성(감사·공감)"
     };
     return labelMap[label] || label;
+  };
+
+  const toSdtBadgeLabel = value => {
+    const frame = String(value || "");
+    if (/Autonomy|자율/.test(frame)) return "자율성";
+    if (/Competence|유능/.test(frame)) return "유능감";
+    if (/Relatedness|Meaningfulness|Appreciation|관계/.test(frame)) return "관계성";
+    return "";
+  };
+
+  const renderFinalSdtBadges = (selectedFrames = []) => {
+    const primaryLabel = toSdtBadgeLabel(selectedFrames[0]);
+    const secondaryLabel = toSdtBadgeLabel(selectedFrames[1]);
+    const hasMetadata = Boolean(primaryLabel && secondaryLabel);
+    finalSdtBadges?.classList.toggle("hidden", !hasMetadata);
+    if (finalSdtPrimary) finalSdtPrimary.textContent = primaryLabel ? `핵심 · ${primaryLabel}` : "";
+    if (finalSdtSecondary) finalSdtSecondary.textContent = secondaryLabel ? `보조 · ${secondaryLabel}` : "";
   };
 
   const renderPills = (container, items = []) => {
@@ -1215,6 +1239,8 @@ document.addEventListener("DOMContentLoaded", () => {
     selectTaskType("general_low_risk", { sync: false });
     synthesizedBeforeOptions = [];
     synthesizedAfterOptions = [];
+    latestPsychologicalFactors = null;
+    renderFinalSdtBadges([]);
     previewContainer?.classList.add("hidden");
     reviewEmptyState?.classList.remove("hidden");
     shareCard?.classList.add("hidden");
@@ -1301,7 +1327,7 @@ document.addEventListener("DOMContentLoaded", () => {
       addThoughtLog(`[SDT 분석] Task Type과 정서적 부담, 반복·집중 부담, 작업 맥락을 함께 반영한 선택 프레임: ${(fallbackFactors.selectedFrames || fallbackResults.selectedFrames || []).join(" + ")}`, "process");
       setGenerationStep("frames", "done");
       setGenerationStep("constraints", "active");
-      addThoughtLog("[제약조건] 후보 문구는 각각 자연스럽게 이어지는 한국어 5문장으로 만들고, 최종 작업 전 문구에는 분석으로 선택된 핵심 SDT 프레임만 반영합니다.", "process");
+      addThoughtLog("[제약조건] 후보 문구는 각각 자연스럽게 이어지는 한국어 5문장으로 만들고, 최종 Pre/Post 문구에는 핵심 SDT를 중심 전략으로, 보조 SDT를 보완 전략으로 함께 반영합니다.", "process");
       setGenerationStep("constraints", "done");
 
       let rawResults;
@@ -1380,6 +1406,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       renderOptionSelectors();
       renderPsychologicalFactors(results.psychologicalFactors, latestLLMProvider, latestLLMModel);
+      renderFinalSdtBadges(results.selectedFrames);
 
       beforeTextBox.value = synthesizedBeforeOptions[0];
       afterTextBox.value = synthesizedAfterOptions[0];
