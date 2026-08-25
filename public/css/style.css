@@ -4645,7 +4645,7 @@ body.worker-mode .app-container {
 
 .example-task-section .test-case-presets {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   gap: 0.5rem;
   margin: 0;
 }
@@ -4654,6 +4654,7 @@ body.worker-mode .app-container {
   display: grid;
   gap: 0.25rem;
   min-width: 0;
+  min-height: 7.5rem;
   padding: 0.7rem 0.75rem;
   border: 1px solid #dbe4f0;
   border-radius: 10px;
@@ -4664,9 +4665,8 @@ body.worker-mode .app-container {
   transition: border-color 150ms ease, background 150ms ease, transform 150ms ease;
 }
 
-.example-task-section .test-case-btn:last-child { grid-column: 1 / -1; }
-.example-task-section .test-case-btn span { color: #4f46e5; font-size: 0.6rem; font-weight: 800; }
-.example-task-section .test-case-btn strong { color: #0f172a; font-size: 0.7rem; line-height: 1.35; }
+.example-task-section .test-case-btn span { color: #4f46e5; font-size: 0.68rem; font-weight: 800; line-height: 1.35; }
+.example-task-section .test-case-btn strong { color: #475569; font-size: 0.62rem; font-weight: 600; line-height: 1.5; }
 .example-task-section .test-case-btn:hover { border-color: #a5b4fc; background: #eef2ff; transform: translateY(-1px); }
 .example-task-section .test-case-btn:focus-visible { outline: 3px solid rgba(79,70,229,.25); outline-offset: 2px; }
 
@@ -4749,8 +4749,7 @@ body.worker-mode .app-container {
 @media (max-width: 720px) {
   .example-task-section .test-case-presets,
   .task-type-card-grid,
-  .message-context-summary dl { grid-template-columns: 1fr; }
-  .example-task-section .test-case-btn:last-child,
+  .message-context-summary dl { grid-template-columns: 1fr !important; }
   .task-type-card-grid .task-type-card:last-child { grid-column: auto; }
   .task-type-recommendation { align-items: stretch; flex-direction: column; }
   .task-type-recommendation .btn { width: 100%; }

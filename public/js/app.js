@@ -265,10 +265,95 @@ document.addEventListener("DOMContentLoaded", () => {
   let activeGenerationController = null;
 
   const testCasePresets = {
-    emotionally_demanding: {
+    annotation_classification: {
+      taskType: "repetitive_cognitive",
+      category: "general",
+      groupLabel: "Annotation and Classification",
+      groupExamples: "(e.g., image/text/audio/video labeling, object detection, or information categorization)",
+      title: "도로 장면 객체 라벨링",
+      reward: "1.30",
+      timeLimitMinutes: "10",
+      riskLevel: "low",
+      fatigueLevel: "high",
+      objective: "도로 이미지에서 차량, 보행자, 표지판을 찾아 지정된 범주로 라벨링하기",
+      socialImpact: "도로 장면 인식 데이터의 일관성과 품질을 점검하는 데 활용",
+      workerContext: "유사한 이미지를 반복해서 확인하며 동일한 분류 기준을 적용하는 환경",
+      description: `### 작업 개요
+도로 이미지를 확인하고 차량, 보행자, 표지판을 지정된 범주로 분류해 주세요.
+
+### Worker Task
+- Vehicle
+- Pedestrian
+- Traffic sign`
+    },
+    data_collection_creation_processing: {
+      taskType: "general_low_risk",
+      category: "general",
+      groupLabel: "Data Collection, Creation, and Processing",
+      groupExamples: "(e.g., audio/video recording, data entry, transcription, translation, writing, or generating/editing content using AI)",
+      title: "AI 기반 상품 설명 작성 및 편집",
+      reward: "1.40",
+      timeLimitMinutes: "12",
+      riskLevel: "low",
+      fatigueLevel: "medium",
+      objective: "제공된 상품 정보를 바탕으로 AI 초안을 생성하고 사실에 맞게 편집하기",
+      socialImpact: "상품 정보 작성 방식과 AI 편집 과정의 품질을 평가하는 데 활용",
+      workerContext: "제공된 정보 범위 안에서 짧은 문장을 작성하고 AI 초안의 오류를 수정하는 환경",
+      description: `### 작업 개요
+제공된 상품 정보를 바탕으로 짧은 설명을 작성하고 AI가 생성한 초안을 정확하게 편집해 주세요.
+
+### Worker Task
+- Generate draft
+- Check facts
+- Edit final copy`
+    },
+    search_verification_cleanup: {
+      taskType: "high_responsibility",
+      category: "general",
+      groupLabel: "Search, Verification, and Data Clean-up",
+      groupExamples: "(e.g., information search, fact-checking, removing duplicates, verifying details, or formatting data)",
+      title: "기업 정보 검색 및 검증",
+      reward: "1.70",
+      timeLimitMinutes: "12",
+      riskLevel: "medium",
+      fatigueLevel: "medium",
+      objective: "공식 출처에서 기업 정보를 찾아 기존 데이터와 일치하는지 검증하기",
+      socialImpact: "기업 정보 데이터베이스의 정확성과 중복 여부를 점검하는 데 활용",
+      workerContext: "여러 출처를 대조하고 명칭과 주소 형식을 같은 기준으로 정리하는 환경",
+      description: `### 작업 개요
+공식 웹사이트에서 기업명과 주소를 확인하고 제공된 정보가 정확한지 검증해 주세요.
+
+### Worker Task
+- Search official source
+- Verify details
+- Remove duplicates or correct formatting`
+    },
+    evaluation_comparison: {
+      taskType: "high_responsibility",
+      category: "preference",
+      groupLabel: "Evaluation and Comparison",
+      groupExamples: "(e.g., evaluating AI-generated responses, rating search results, or evaluating products and services)",
+      title: "AI 응답 품질 비교 평가",
+      reward: "1.20",
+      timeLimitMinutes: "8",
+      riskLevel: "medium",
+      fatigueLevel: "medium",
+      objective: "두 AI 응답을 정확성, 관련성, 명확성 기준으로 비교 평가하기",
+      socialImpact: "AI 응답 평가 기준의 일관성과 결과 품질을 점검하는 데 활용",
+      workerContext: "두 응답을 같은 평가 기준으로 차분히 비교하고 근거를 선택하는 환경",
+      description: `### 작업 개요
+동일한 질문에 대한 두 AI 응답을 읽고 정확성, 관련성, 명확성을 비교해 주세요.
+
+### Worker Task
+- Response A is better
+- Response B is better
+- Similar quality`
+    },
+    content_moderation_safety: {
       taskType: "emotionally_demanding",
       category: "moderation",
-      exampleName: "Toxic Comment Moderation",
+      groupLabel: "Content Moderation and Safety Review",
+      groupExamples: "(e.g., reviewing or classifying harmful, offensive, or inappropriate content)",
       title: "온라인 댓글 유해성 분류",
       reward: "1.20",
       timeLimitMinutes: "10",
@@ -284,69 +369,11 @@ document.addEventListener("DOMContentLoaded", () => {
 - Safe
 - Harmful`
     },
-    high_responsibility: {
-      taskType: "high_responsibility",
-      category: "medical_alert",
-      exampleName: "Medical Alert Verification",
-      title: "의료 경고 정보 검수",
-      reward: "2.00",
-      timeLimitMinutes: "10",
-      riskLevel: "medium",
-      fatigueLevel: "medium",
-      objective: "가상의 의료 기록과 시스템의 알레르기 경고가 일치하는지 검수하기",
-      socialImpact: "연구용 의료 정보 품질 검수 절차를 평가하는 데 활용",
-      workerContext: "실제 환자 정보나 진단 없이 합성 기록의 경고 일치 여부를 신중하게 대조하는 환경",
-      description: `### 작업 개요
-연구용으로 생성된 가상의 의료 기록을 확인하고 시스템이 표시한 알레르기 경고가 기록 내용과 일치하는지 확인해 주세요.
-
-**Synthetic research data · 실제 환자 정보 없음 · 실제 의료 진단 아님**
-
-### Worker Task
-- Correct alert
-- Incorrect alert`
-    },
-    repetitive_cognitive: {
-      taskType: "repetitive_cognitive",
-      category: "ocr",
-      exampleName: "OCR Verification",
-      title: "영수증 OCR 결과 검수",
-      reward: "1.30",
-      timeLimitMinutes: "8",
-      riskLevel: "low",
-      fatigueLevel: "high",
-      objective: "영수증 이미지의 가격과 OCR 추출 가격이 일치하는지 확인하기",
-      socialImpact: "영수증 텍스트 추출 데이터의 일관성과 품질을 점검하는 데 활용",
-      workerContext: "유사한 가격 대조 판단을 같은 기준으로 반복 수행하는 환경",
-      description: `### 작업 개요
-영수증 이미지와 자동으로 추출된 텍스트를 비교하고 상품 가격이 정확하게 인식되었는지 확인해 주세요.
-
-### Worker Task
-- Match
-- Mismatch`
-    },
-    socially_meaningful: {
-      taskType: "socially_meaningful",
-      category: "accessibility",
-      exampleName: "Accessibility Data Review",
-      title: "공공시설 접근성 정보 검수",
-      reward: "1.60",
-      timeLimitMinutes: "10",
-      riskLevel: "low",
-      fatigueLevel: "medium",
-      objective: "공공시설 접근성 데이터가 이미지 또는 설명과 일치하는지 검수하기",
-      socialImpact: "공공시설 접근성 정보의 정확도를 점검하고 정보 수정이 필요한 항목을 찾는 데 활용",
-      workerContext: "시설 이미지와 접근성 설명을 차분히 대조하되 개별 판단의 영향을 과장하지 않는 환경",
-      description: `### 작업 개요
-공공시설의 접근성 정보를 확인하여 제공된 데이터가 이미지 또는 설명과 일치하는지 검수해 주세요.
-
-### Worker Task
-- Information correct
-- Information needs correction`
-    },
-    general_low_risk: {
+    surveys_online_experiments: {
       taskType: "general_low_risk",
       category: "preference",
-      exampleName: "Preference Survey",
+      groupLabel: "Surveys and Online Experiments",
+      groupExamples: "(e.g., academic surveys, market research, behavioral studies, or usability studies)",
       title: "상품 이미지 선호도 조사",
       reward: "0.80",
       timeLimitMinutes: "5",
@@ -378,19 +405,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const renderExampleTaskButtons = () => {
     if (!exampleTaskPresets) return;
     exampleTaskPresets.innerHTML = "";
-    Object.values(TaskTypeConfig.TASK_TYPES).forEach(type => {
-      const preset = testCasePresets[type.key];
-      if (!preset) return;
+    Object.entries(testCasePresets).forEach(([caseId, preset]) => {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "test-case-btn";
-      button.dataset.testCase = type.key;
+      button.dataset.testCase = caseId;
       const typeLabel = document.createElement("span");
-      typeLabel.textContent = type.shortLabel;
+      typeLabel.textContent = preset.groupLabel;
       const title = document.createElement("strong");
-      title.textContent = preset.exampleName;
+      title.textContent = preset.groupExamples;
       button.append(typeLabel, title);
-      button.addEventListener("click", () => applyTestCasePreset(type.key));
+      button.addEventListener("click", () => applyTestCasePreset(caseId));
       exampleTaskPresets.appendChild(button);
     });
   };
@@ -1145,7 +1170,7 @@ document.addEventListener("DOMContentLoaded", () => {
     reviewEmptyState?.classList.remove("hidden");
     shareCard?.classList.add("hidden");
     refreshTaskTypeRecommendation();
-    showToast(`${preset.exampleName} 예시와 Task Type이 입력되었습니다.`);
+    showToast(`${preset.groupLabel} 예시가 입력되었습니다.`);
   };
 
   // Requester convenience: completion meter, validation, reset
