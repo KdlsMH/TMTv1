@@ -67,10 +67,12 @@ const resolveGenerationSelection = (payload) => {
   const taskType = TaskTypeConfig.getTaskType(payload.taskType)
     || TaskTypeConfig.TASK_TYPES[TaskTypeConfig.DEFAULT_TASK_TYPE];
   const sdtAnalysis = TaskTypeConfig.analyzeSDTNeeds({ ...payload, taskType: taskType.key });
+  const surveySelection = TaskTypeConfig.getStrategySelection(taskType.key);
   const selectedFrames = sdtAnalysis.frames.slice(0, 2);
   return {
     taskType,
     sdtAnalysis,
+    surveySelection,
     selectedFrames,
     coreStrategy: selectedFrames[0] || "",
     supportingStrategy: selectedFrames[1] || ""
@@ -82,7 +84,8 @@ const buildMessages = (payload) => {
     taskType,
     selectedFrames,
     coreStrategy,
-    supportingStrategy
+    supportingStrategy,
+    surveySelection
   } = resolveGenerationSelection(payload);
   return [
   {
@@ -91,7 +94,8 @@ const buildMessages = (payload) => {
       "당신은 크라우드소싱 작업자에게 전달할 한국어 안내 메시지를 작성하는 UX 라이터입니다.",
       "Task Type에 고정 매핑된 Autonomy, Competence, Appreciation 전략을 사용하되 Worker용 문장에는 전략 이름을 직접 드러내지 마세요.",
       "작업 시작 전 후보 3개, 작업 완료 후 후보 3개, 최종 작업 전/후 문구를 JSON으로만 반환하세요.",
-      "beforeOptions와 afterOptions의 각 후보 message는 반드시 서로 자연스럽게 이어지는 완결된 한국어 5문장으로 작성하세요. 짧은 구절을 마침표로 나누어 문장 수만 맞추지 마세요.",
+      "beforeOptions와 afterOptions의 각 후보 및 finalBeforeText와 finalAfterText는 반드시 서로 자연스럽게 이어지는 완결된 한국어 4~5문장으로 작성하세요.",
+      "3문장 이하 또는 6문장 이상은 허용하지 않으며, 짧은 구절을 마침표로 나누거나 같은 의미를 반복해 문장 수만 맞추지 마세요.",
       "문구는 과장, 압박, 죄책감, 홍보성 표현 없이 차분하고 구체적으로 작성하세요.",
       "후보군에는 Appreciation, Competence, Autonomy 관점을 각각 포함하세요.",
       "finalBeforeText와 finalAfterText에는 아래 Core와 Supporting을 모두 자연스럽게 반영하세요.",
@@ -99,10 +103,14 @@ const buildMessages = (payload) => {
       "전략별 고정 키워드를 끼워 넣지 말고, 각 요소의 의미가 문장 전체의 메시지 전략에 드러나게 하세요.",
       `Core strategy (중심 전략): ${coreStrategy}`,
       `Supporting strategy (보완 전략): ${supportingStrategy}`,
+      `Survey evidence (N=${TaskTypeConfig.SURVEY_SAMPLE_SIZE}): Core ${coreStrategy} ${surveySelection.corePercentage.toFixed(1)}%, Supporting ${supportingStrategy} ${surveySelection.supportingPercentage.toFixed(1)}%.`,
+      "Message length evidence: Medium was preferred by 66.7% (80/120), so both final messages use 4–5 sentences.",
       "selectedFrames는 위 두 값을 같은 순서로 정확히 반환하고 다른 프레임으로 바꾸지 마세요.",
       `확정된 Task Type은 ${taskType.label}입니다. 이는 Worker의 작업 경험 분류이며 인터페이스 종류를 뜻하지 않습니다.`,
       `Figure 기반 고정 전략 우선순위는 ${selectedFrames.join(" + ")}입니다.`,
-      "JSON을 반환하기 전에 Pre-task와 Post-task 각각을 자체 점검하세요: Task Type 일치, Core 중심성, Supporting 보완성, 두 역할의 구분, 간결하고 자연스러운 문체.",
+      "Post-task에는 완료 acknowledgment, 시간이나 노력에 대한 감사, Task Type에 맞는 구체적이고 과장 없는 기여 의미를 모두 포함하세요.",
+      "Post-task는 Core + Supporting + 공통적인 감사·기여 구조로 작성하되, 공통 감사가 Core/Supporting 우선순위를 바꾸지 않게 하세요.",
+      "JSON을 반환하기 전에 Pre-task와 Post-task 각각을 자체 점검하세요: 완전한 4~5문장, Task Type 일치, Core 중심성, Supporting 보완성, Core > Supporting 비중, 반복 없음, 내부 전략명 비노출, 시점에 맞는 내용. Post-task는 완료 acknowledgment, 시간·노력 감사, Task Type별 기여 의미, 과장 없는 기여 주장도 확인하세요.",
       "어느 조건이라도 맞지 않으면 내부적으로 문장을 수정한 뒤, 수정이 끝난 JSON만 반환하세요.",
       "finalBeforeText는 반드시 다음 문장으로 시작하세요: 안녕하세요, \"" + clean(payload.title) + "\" 작업에 참여해 주셔서 감사합니다."
     ].join("\n")
@@ -129,6 +137,7 @@ const buildMessages = (payload) => {
       `Core strategy: ${coreStrategy}`,
       `Supporting strategy: ${supportingStrategy}`,
       "Pre-task와 Post-task 최종 메시지 모두 Core를 중심으로 전개하고 Supporting을 보완적으로 반영하세요.",
+      "Post-task에는 Task Type에 맞는 기여 의미를 구체적으로 설명하세요: Annotation/Classification=정확성·품질·신뢰성, Data Collection/Creation=향후 분석·콘텐츠 구축 자료, Search/Verification=정보 정확성·신뢰성, Evaluation/Comparison=평가·의사결정, Content Moderation=안전하고 신뢰할 수 있는 환경, Surveys/Experiments=연구 결과·사용자 이해.",
       "",
       "[반환 JSON 스키마]",
       JSON.stringify({
@@ -145,20 +154,26 @@ const buildMessages = (payload) => {
           sdtNeeds: selectedFrames.map(frame => frame === "Appreciation" ? "relatedness" : frame.toLowerCase()),
           selectedFrames,
           frameSelectionReason: taskType.mappingReason,
+          surveyEvidence: {
+            sampleSize: TaskTypeConfig.SURVEY_SAMPLE_SIZE,
+            corePercentage: surveySelection.corePercentage,
+            supportingPercentage: surveySelection.supportingPercentage,
+            messageLength: TaskTypeConfig.MESSAGE_LENGTH_EVIDENCE
+          },
           constraintsApplied: ["비압박", "비과장", "구체적 기준 유지"]
         },
         beforeOptions: [
-          { label: "감사/기여 인정", frame: "Appreciation", message: "자연스럽게 이어지는 완결된 5문장의 작업 시작 전 후보 문구" },
-          { label: "유능감/판단 신뢰", frame: "Competence", message: "자연스럽게 이어지는 완결된 5문장의 작업 시작 전 후보 문구" },
-          { label: "자율성/선택 존중", frame: "Autonomy", message: "자연스럽게 이어지는 완결된 5문장의 작업 시작 전 후보 문구" }
+          { label: "감사/기여 인정", frame: "Appreciation", message: "자연스럽게 이어지는 완결된 4~5문장의 작업 시작 전 후보 문구" },
+          { label: "유능감/판단 신뢰", frame: "Competence", message: "자연스럽게 이어지는 완결된 4~5문장의 작업 시작 전 후보 문구" },
+          { label: "자율성/선택 존중", frame: "Autonomy", message: "자연스럽게 이어지는 완결된 4~5문장의 작업 시작 전 후보 문구" }
         ],
         afterOptions: [
-          { label: "감사/기여 인정", frame: "Appreciation", message: "자연스럽게 이어지는 완결된 5문장의 작업 완료 후 후보 문구" },
-          { label: "유능감/수행 신뢰", frame: "Competence", message: "자연스럽게 이어지는 완결된 5문장의 작업 완료 후 후보 문구" },
-          { label: "자율성/선택 존중", frame: "Autonomy", message: "자연스럽게 이어지는 완결된 5문장의 작업 완료 후 후보 문구" }
+          { label: "감사/기여 인정", frame: "Appreciation", message: "자연스럽게 이어지는 완결된 4~5문장의 작업 완료 후 후보 문구" },
+          { label: "유능감/수행 신뢰", frame: "Competence", message: "자연스럽게 이어지는 완결된 4~5문장의 작업 완료 후 후보 문구" },
+          { label: "자율성/선택 존중", frame: "Autonomy", message: "자연스럽게 이어지는 완결된 4~5문장의 작업 완료 후 후보 문구" }
         ],
-        finalBeforeText: "최종 작업 시작 전 문구",
-        finalAfterText: "최종 작업 완료 후 문구",
+        finalBeforeText: "Core > Supporting 비중을 지키는 완결된 4~5문장의 최종 작업 시작 전 문구",
+        finalAfterText: "Core > Supporting + 시간·노력 감사 + Task Type별 기여 의미를 포함한 완결된 4~5문장 작업 완료 후 문구",
         structuredPromptSummary: "프롬프트 구조 요약"
       }, null, 2)
     ].join("\n")
@@ -189,7 +204,7 @@ const ensureBeforeOpening = (message, title) => {
 };
 
 const applyGenerationMetadata = (parsed, payload) => {
-  const { taskType, selectedFrames, coreStrategy, supportingStrategy } = resolveGenerationSelection(payload);
+  const { taskType, selectedFrames, coreStrategy, supportingStrategy, surveySelection } = resolveGenerationSelection(payload);
   parsed.selectedFrames = selectedFrames;
   parsed.psychologicalFactors = {
     ...(parsed.psychologicalFactors || {}),
@@ -198,7 +213,13 @@ const applyGenerationMetadata = (parsed, payload) => {
     taskTypeReason: taskType.mappingReason,
     coreStrategy,
     supportingStrategy,
-    selectedFrames
+    selectedFrames,
+    surveyEvidence: {
+      sampleSize: TaskTypeConfig.SURVEY_SAMPLE_SIZE,
+      corePercentage: surveySelection.corePercentage,
+      supportingPercentage: surveySelection.supportingPercentage,
+      messageLength: TaskTypeConfig.MESSAGE_LENGTH_EVIDENCE
+    }
   };
   return parsed;
 };

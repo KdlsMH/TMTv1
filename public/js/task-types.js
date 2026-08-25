@@ -13,6 +13,33 @@
     appreciation: "Appreciation"
   };
 
+  const SURVEY_SAMPLE_SIZE = 120;
+  const MESSAGE_LENGTH_EVIDENCE = {
+    operationalizedLength: "4–5 sentences",
+    preferredCategory: "Medium",
+    sampleSize: SURVEY_SAMPLE_SIZE,
+    responses: {
+      short: { count: 17, percentage: 14.2 },
+      medium: { count: 80, percentage: 66.7 },
+      long: { count: 23, percentage: 19.2 }
+    }
+  };
+
+  const FRAME_PHASE_KEYWORDS = {
+    Autonomy: {
+      before: "comfortable pace and choice",
+      after: "self-directed effort"
+    },
+    Competence: {
+      before: "careful judgment and accuracy",
+      after: "accuracy and careful judgment"
+    },
+    Appreciation: {
+      before: "time and contribution",
+      after: "time, effort, and contribution"
+    }
+  };
+
   const TASK_TYPES = {
     annotation_classification: {
       key: "annotation_classification",
@@ -27,6 +54,7 @@
         { key: "worker_discretion", label: "Worker discretion" }
       ],
       strategyOrder: ["autonomy", "competence", "appreciation"],
+      strategyEvidence: { autonomy: 58.3, competence: 54.2, appreciation: 41.7 },
       psychologicalType: "주석·분류 작업",
       burden: "반복 판단과 모호한 경계에서 생길 수 있는 집중 부담",
       purpose: "판단 방식과 속도를 존중하고 정확하게 분류할 수 있다는 신뢰를 보완적으로 전달",
@@ -50,6 +78,7 @@
         { key: "time_and_effort", label: "Time and effort" }
       ],
       strategyOrder: ["autonomy", "appreciation", "competence"],
+      strategyEvidence: { autonomy: 57.9, appreciation: 45.6, competence: 38.6 },
       psychologicalType: "데이터 수집·생성 작업",
       burden: "작성 방식 선택과 결과물을 완성하는 과정에서 생길 수 있는 부담",
       purpose: "자신의 방식으로 수행할 수 있음을 중심에 두고 시간과 노력을 인정",
@@ -73,6 +102,7 @@
         { key: "detail_review", label: "Detail review" }
       ],
       strategyOrder: ["competence", "appreciation", "autonomy"],
+      strategyEvidence: { competence: 70.3, appreciation: 48.6, autonomy: 37.8 },
       psychologicalType: "검색·검증 작업",
       burden: "여러 출처와 세부 정보를 대조하는 과정에서 생길 수 있는 정확도 부담",
       purpose: "근거를 확인하는 판단 능력을 중심에 두고 세심한 노력과 기여를 인정",
@@ -96,6 +126,7 @@
         { key: "reasoned_choice", label: "Reasoned choice" }
       ],
       strategyOrder: ["competence", "autonomy", "appreciation"],
+      strategyEvidence: { competence: 54.0, autonomy: 46.0, appreciation: 41.4 },
       psychologicalType: "평가·비교 작업",
       burden: "비슷한 대안을 같은 기준으로 비교하고 판단해야 하는 부담",
       purpose: "비교 판단 능력을 중심에 두고 Worker의 독립적인 선택을 존중",
@@ -119,6 +150,7 @@
         { key: "policy_judgment", label: "Policy judgment" }
       ],
       strategyOrder: ["appreciation", "autonomy", "competence"],
+      strategyEvidence: { appreciation: 59.1, autonomy: 45.5, competence: 36.4 },
       psychologicalType: "콘텐츠 모더레이션 작업",
       burden: "불편할 수 있는 콘텐츠 노출과 정책 기준 적용에서 생기는 정서적 부담",
       purpose: "부담이 있는 작업에 들인 시간과 노력을 인정하고 속도와 판단에 대한 통제감을 보완",
@@ -142,6 +174,7 @@
         { key: "research_contribution", label: "Research contribution" }
       ],
       strategyOrder: ["appreciation", "autonomy", "competence"],
+      strategyEvidence: { appreciation: 53.8, autonomy: 48.1, competence: 29.2 },
       psychologicalType: "설문·온라인 실험",
       burden: "개인 의견과 시간을 제공하지만 결과 활용 맥락이 바로 보이지 않을 수 있음",
       purpose: "참여자의 시간과 응답 가치를 인정하고 자신의 판단에 따라 응답할 수 있음을 보완",
@@ -165,6 +198,11 @@
 
   const getTaskType = (value) => TASK_TYPES[normalizeTaskTypeKey(value)] || null;
   const getStrategyLabel = (value) => STRATEGY_LABELS[String(value || "").toLowerCase()] || "";
+  const getFramePhaseKeyword = (frame, phase = "before") => {
+    const normalizedFrame = getStrategyLabel(frame) || String(frame || "");
+    const normalizedPhase = phase === "after" ? "after" : "before";
+    return FRAME_PHASE_KEYWORDS[normalizedFrame]?.[normalizedPhase] || "";
+  };
 
   const getStrategySelection = (taskTypeValue) => {
     const type = getTaskType(taskTypeValue) || TASK_TYPES[DEFAULT_TASK_TYPE];
@@ -175,6 +213,9 @@
       coreStrategy: getStrategyLabel(core),
       supportingStrategy: getStrategyLabel(supporting),
       thirdStrategy: getStrategyLabel(third),
+      corePercentage: type.strategyEvidence[core],
+      supportingPercentage: type.strategyEvidence[supporting],
+      thirdPercentage: type.strategyEvidence[third],
       selectedFrames: [getStrategyLabel(core), getStrategyLabel(supporting)]
     };
   };
@@ -198,9 +239,13 @@
     TASK_TYPES,
     DEFAULT_TASK_TYPE,
     STRATEGY_LABELS,
+    FRAME_PHASE_KEYWORDS,
+    SURVEY_SAMPLE_SIZE,
+    MESSAGE_LENGTH_EVIDENCE,
     normalizeTaskTypeKey,
     getTaskType,
     getStrategyLabel,
+    getFramePhaseKeyword,
     getStrategySelection,
     analyzeSDTNeeds
   };

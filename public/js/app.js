@@ -118,6 +118,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const taskTypeOptions = document.getElementById("task-type-options");
   const taskTypeCoreStrategy = document.getElementById("task-type-core-strategy");
   const taskTypeSupportingStrategy = document.getElementById("task-type-supporting-strategy");
+  const surveyEvidenceTableBody = document.getElementById("survey-evidence-table-body");
+  const workerBeforeFrameKeywords = document.getElementById("worker-before-frame-keywords");
+  const workerAfterFrameKeywords = document.getElementById("worker-after-frame-keywords");
   const exampleHelpButtons = [...document.querySelectorAll(".example-help-btn")];
   const exampleTaskPresets = document.getElementById("example-task-presets");
   const platformOverview = document.getElementById("platform-overview");
@@ -420,8 +423,48 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const renderTaskTypeStrategySummary = (taskTypeValue = selectedTaskType) => {
     const selection = TaskTypeConfig.getStrategySelection(taskTypeValue);
-    if (taskTypeCoreStrategy) taskTypeCoreStrategy.textContent = `핵심 · ${selection.coreStrategy}`;
-    if (taskTypeSupportingStrategy) taskTypeSupportingStrategy.textContent = `보조 · ${selection.supportingStrategy}`;
+    if (taskTypeCoreStrategy) taskTypeCoreStrategy.textContent = `핵심 · ${selection.coreStrategy} · ${selection.corePercentage.toFixed(1)}%`;
+    if (taskTypeSupportingStrategy) taskTypeSupportingStrategy.textContent = `보조 · ${selection.supportingStrategy} · ${selection.supportingPercentage.toFixed(1)}%`;
+  };
+
+  const renderWorkerFrameKeywords = (container, selectedFrames = [], phase = "before") => {
+    if (!container) return;
+    container.innerHTML = "";
+    selectedFrames.slice(0, 2).forEach((frame, index) => {
+      const item = document.createElement("span");
+      item.dataset.priority = index === 0 ? "core" : "supporting";
+      const label = document.createElement("b");
+      label.textContent = frame;
+      const keyword = TaskTypeConfig.getFramePhaseKeyword(frame, phase);
+      item.append(label, document.createTextNode(` — ${keyword}`));
+      container.appendChild(item);
+    });
+  };
+
+  const renderWorkerPreviewFrameKeywords = (taskTypeValue = selectedTaskType) => {
+    const selection = TaskTypeConfig.getStrategySelection(taskTypeValue);
+    renderWorkerFrameKeywords(workerBeforeFrameKeywords, selection.selectedFrames, "before");
+    renderWorkerFrameKeywords(workerAfterFrameKeywords, selection.selectedFrames, "after");
+  };
+
+  const renderSurveyEvidenceTable = () => {
+    if (!surveyEvidenceTableBody) return;
+    surveyEvidenceTableBody.innerHTML = "";
+    Object.values(TaskTypeConfig.TASK_TYPES).forEach(type => {
+      const selection = TaskTypeConfig.getStrategySelection(type.key);
+      const row = document.createElement("tr");
+      [
+        type.label,
+        `${selection.coreStrategy} (${selection.corePercentage.toFixed(1)}%)`,
+        `${selection.supportingStrategy} (${selection.supportingPercentage.toFixed(1)}%)`,
+        `${selection.thirdStrategy} (${selection.thirdPercentage.toFixed(1)}%)`
+      ].forEach(value => {
+        const cell = document.createElement("td");
+        cell.textContent = value;
+        row.appendChild(cell);
+      });
+      surveyEvidenceTableBody.appendChild(row);
+    });
   };
 
   const selectTaskType = (taskType, { sync = true } = {}) => {
@@ -437,6 +480,7 @@ document.addEventListener("DOMContentLoaded", () => {
       currentTask.taskTypeLabel = type?.label || "";
     }
     renderTaskTypeStrategySummary(normalized);
+    renderWorkerPreviewFrameKeywords(normalized);
     if (isGenerating) generationEditNotice?.classList.remove("hidden");
     if (sync && typeof syncFormToDraft === "function") syncFormToDraft();
   };
@@ -1342,9 +1386,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const fallbackFactors = fallbackResults.psychologicalFactors || {};
       addThoughtLog(`[Task Type] 확정: ${fallbackFactors.taskTypeLabel || payload.taskTypeLabel}`, "process");
       addThoughtLog(`[전략 매핑] Task Type에 연결된 핵심·보조 전략: ${(fallbackFactors.selectedFrames || fallbackResults.selectedFrames || []).join(" + ")}`, "process");
+      const surveySelection = TaskTypeConfig.getStrategySelection(fallbackFactors.taskType || payload.taskType);
+      addThoughtLog(`[Survey Evidence] N=120 선호 결과: 핵심 ${surveySelection.coreStrategy} ${surveySelection.corePercentage.toFixed(1)}% / 보조 ${surveySelection.supportingStrategy} ${surveySelection.supportingPercentage.toFixed(1)}%`, "meta");
+      addThoughtLog("[메시지 길이] Medium 선호 66.7%(80/120)를 4~5문장으로 적용합니다.", "meta");
       setGenerationStep("frames", "done");
       setGenerationStep("constraints", "active");
-      addThoughtLog("[제약조건] 후보 문구는 각각 자연스럽게 이어지는 한국어 5문장으로 만들고, 최종 Pre/Post 문구에는 핵심 전략을 중심으로, 보조 전략을 더 적은 비중으로 반영합니다.", "process");
+      addThoughtLog("[제약조건] Pre/Post 메시지를 각각 4~5개의 완전한 문장으로 구성하고, 핵심 전략을 중심으로 보조 전략을 더 적은 비중으로 반영합니다.", "process");
       setGenerationStep("constraints", "done");
 
       let rawResults;
@@ -1373,7 +1420,7 @@ document.addEventListener("DOMContentLoaded", () => {
         results = normalizeGenerationResult({ ...fallbackResults, provider: "local" }, fallbackResults, payload.title);
         addThoughtLog("[자동 수정] 핵심·보조 전략 반영 조건을 다시 확인하고 로컬 전략 문구로 최종 메시지를 재구성했습니다.", "warning");
       } else {
-        addThoughtLog("[메시지 검증] Task Type 일치, 핵심·보조 전략 반영, 역할 구분, 문장 길이 조건을 확인했습니다.", "success");
+        addThoughtLog("[메시지 검증] 4~5문장, 핵심·보조 우선순위, Post-task 완료 인지·시간/노력 감사·Task Type별 기여 의미·비과장 조건을 확인했습니다.", "success");
       }
       latestLLMProvider = results.provider;
       latestLLMModel = results.model;
@@ -2318,7 +2365,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   renderExampleTaskButtons();
   renderTaskTypeOptions();
+  renderSurveyEvidenceTable();
   renderTaskTypeStrategySummary();
+  renderWorkerPreviewFrameKeywords();
   updateFormCompletion();
   // Workspace is revealed only after the CTA is clicked in the current visit.
   setWorkspaceAvailability(false);

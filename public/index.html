@@ -7,7 +7,7 @@
   <meta name="description" content="Worker의 내재적 동기와 작업 경험을 고려해 작업 전후 메시지를 설계하는 SDT 기반 Crowd Task Message Design System입니다.">
   
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=20260826-survey6">
   
   <!-- Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css">
@@ -126,14 +126,14 @@
               <div class="worker-preview-image">
                 <img src="assets/worker-experience/worker-before-task.png?v=20260824" width="1418" height="1234" loading="lazy" alt="Virtual Receipt OCR Task의 실제 작업 시작 전 화면">
               </div>
-              <div class="message-annotations"><span><b>Competence</b> careful judgement</span><span><b>Relatedness</b> skills and contribution</span></div>
+              <div id="worker-before-frame-keywords" class="message-annotations" aria-live="polite"></div>
             </article>
             <article class="worker-flow-preview">
               <div class="preview-phase"><span>After-task</span><small>작업 완료 후</small></div>
               <div class="worker-preview-image">
                 <img src="assets/worker-experience/worker-after-task.png?v=20260824" width="1418" height="1156" loading="lazy" alt="Virtual Receipt OCR Task의 실제 작업 완료 후 화면">
               </div>
-              <div class="message-annotations"><span><b>Relatedness</b> time and contribution</span></div>
+              <div id="worker-after-frame-keywords" class="message-annotations" aria-live="polite"></div>
             </article>
           </div>
           <div class="worker-flow-line" aria-label="Requester에서 Worker까지의 메시지 흐름"><span>Requester</span><i class="lucide-arrow-right" aria-hidden="true"></i><span>Task Information</span><i class="lucide-arrow-right" aria-hidden="true"></i><span>SDT Analysis</span><i class="lucide-arrow-right" aria-hidden="true"></i><span>Before Message</span><i class="lucide-arrow-right" aria-hidden="true"></i><span>Task</span><i class="lucide-arrow-right" aria-hidden="true"></i><span>After Message</span></div>
@@ -274,6 +274,39 @@
                         <span id="task-type-core-strategy" class="strategy-badge strategy-badge-core"></span>
                         <span id="task-type-supporting-strategy" class="strategy-badge strategy-badge-supporting"></span>
                       </div>
+
+                      <section class="survey-evidence" aria-labelledby="survey-evidence-title">
+                        <div class="survey-evidence-heading">
+                          <div>
+                            <span class="survey-evidence-kicker">SURVEY EVIDENCE</span>
+                            <h4 id="survey-evidence-title">120 Crowdworker Survey</h4>
+                          </div>
+                          <span class="survey-evidence-sample">N=120</span>
+                        </div>
+                        <p class="survey-evidence-summary"><strong>Based on a survey of 120 crowdworkers.</strong> The Core and Supporting Frames are determined from workers' preferred motivational framing for each task type.</p>
+                        <div class="survey-evidence-table-wrap" tabindex="0" aria-label="Task Type별 Survey 기반 Frame 우선순위 표">
+                          <table class="survey-evidence-table">
+                            <thead>
+                              <tr><th scope="col">Task Type</th><th scope="col">Core</th><th scope="col">Supporting</th><th scope="col">3rd</th></tr>
+                            </thead>
+                            <tbody id="survey-evidence-table-body"></tbody>
+                          </table>
+                        </div>
+                        <p class="survey-evidence-note">1순위는 Core, 2순위는 Supporting으로 생성에 적용됩니다. 3순위는 참고용이며 메시지 생성에는 사용하지 않습니다.</p>
+                        <div class="message-length-evidence">
+                          <span class="message-length-label">Message Length</span>
+                          <div id="message-length-popover-anchor" class="message-length-popover-anchor">
+                            <button id="message-length-evidence-trigger" type="button" class="message-length-trigger" aria-label="4–5 sentences Survey 근거 보기" aria-describedby="message-length-survey-tooltip">
+                              <strong>4–5 sentences</strong><span aria-hidden="true">ⓘ</span>
+                            </button>
+                            <div id="message-length-survey-tooltip" class="message-length-tooltip" role="tooltip">
+                              <strong>Survey Evidence (N=120)</strong>
+                              <p>66.7% of participants (80/120) preferred the medium-length message, compared with 14.2% for the short message and 19.2% for the long message.</p>
+                              <p>Based on this result, the system uses a medium message length, operationalized as 4–5 sentences.</p>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
                     </fieldset>
 
                     <div class="form-grid-2 compact-field-row">
@@ -662,8 +695,8 @@
   </div>
 
   <!-- App Custom Logic Scripts -->
-  <script src="js/task-types.js"></script>
-  <script src="js/generator.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/task-types.js?v=20260826-frame-keywords"></script>
+  <script src="js/generator.js?v=20260826-frame-keywords"></script>
+  <script src="js/app.js?v=20260826-frame-keywords"></script>
 </body>
 </html>

@@ -191,12 +191,20 @@ ${rawText.trim()}
       taskTypeCharacteristics: confirmedTaskType.characteristics,
       coreStrategy: strategySelection.coreStrategy,
       supportingStrategy: strategySelection.supportingStrategy,
+      surveyEvidence: {
+        sampleSize: TaskTypeRegistry.SURVEY_SAMPLE_SIZE,
+        corePercentage: strategySelection.corePercentage,
+        supportingPercentage: strategySelection.supportingPercentage,
+        thirdStrategy: strategySelection.thirdStrategy,
+        thirdPercentage: strategySelection.thirdPercentage,
+        messageLength: TaskTypeRegistry.MESSAGE_LENGTH_EVIDENCE
+      },
       psychologicalBurden: burdens,
       motivationalOpportunity: opportunities,
       selectedFrames,
       frameSelectionReason: this.explainFrameSelection(selectedFrames, primaryTaskType),
       constraintsApplied: [
-        "후보별 한국어 5문장",
+        "작업 시작 전·완료 후 최종 메시지 각각 한국어 4~5문장",
         "죄책감 유발 표현 금지",
         "생산성 압박 또는 성과 강요 금지",
         "작업 목표 1회 이상 포함",
@@ -237,7 +245,8 @@ ${rawText.trim()}
 
   explainFrameSelection(selectedFrames, primaryTaskType = "") {
     const rule = this.getFrameRule(primaryTaskType);
-    return `${rule.taskTypeLabel}의 고정 매핑에 따라 ${selectedFrames[0]}를 핵심 전략으로, ${selectedFrames[1]}를 보조 전략으로 적용합니다.`;
+    const evidence = TaskTypeRegistry.getStrategySelection(rule.taskType);
+    return `120명 Crowdworker Survey 결과에 따라 ${selectedFrames[0]}(${evidence.corePercentage.toFixed(1)}%)를 핵심 전략으로, ${selectedFrames[1]}(${evidence.supportingPercentage.toFixed(1)}%)를 보조 전략으로 적용합니다.`;
   }
 
   getFrameNeed(frame = "") {
@@ -319,28 +328,30 @@ Input:
 - Primary psychological task type: ${this.getFrameRule(profile.primaryTaskType).psychologicalType}
 - Core strategy (message's central strategy): ${profile.selectedFrames[0] || "None"}
 - Supporting strategy (meaningfully complements Core): ${profile.selectedFrames[1] || "None"}
+- Strategy evidence: survey of ${profile.surveyEvidence?.sampleSize || 120} crowdworkers; Core ${profile.surveyEvidence?.corePercentage || "-"}%, Supporting ${profile.surveyEvidence?.supportingPercentage || "-"}%
+- Message length evidence: Medium was preferred by 66.7% (80/120); operationalized as 4–5 sentences
 - Generation phase: ${phase}
 
 Step 1. Preserve the fixed Task Type strategy priority.
 - Generate three candidates in this exact order: Appreciation, Competence, and Autonomy.
-- Each candidate must be exactly 5 complete, naturally connected sentences.
-- finalBeforeText has no sentence-count limit.
-- Both finalBeforeText and finalAfterText must naturally reflect Primary and Secondary.
-- Primary must remain the central message strategy; Secondary must complement it with less emphasis.
+	- Each candidate and each final message must contain 4 or 5 complete, naturally connected sentences.
+	- Never return 3 or fewer sentences or 6 or more sentences.
+	- Both finalBeforeText and finalAfterText must naturally reflect Core and Supporting.
+	- Core must remain the central message strategy; Supporting must complement it with less emphasis.
 - Apply each strategy's meaning to the whole message, not by inserting stock keywords.
 - finalBeforeText and finalAfterText must blend only the candidates matching the selected frames.
 - Do not mechanically add an unselected SDT frame to finalBeforeText.
 
 Step 2. Generate a before-task message under these constraints:
 - Korean
-- Exactly 5 complete sentences for each candidate
+	- Exactly 4 or 5 complete sentences for each candidate and finalBeforeText
 - Warm and human, as if a real requester wrote it directly
 - Avoid stiff institutional phrasing; do not overuse "-합니다"
 - Use natural Korean honorifics such as "-해 주세요", "-괜찮아요", "-도움이 됩니다"
 - Use natural connectors such as "그리고", "혹시", "괜찮습니다" where helpful
 - Avoid certificate-like phrases such as "핵심 데이터", "기술 발전의 토대", "직접 기여", "진심으로 감사"
 - Do not invent label-specific rules that are not in the task guidelines
-- The final before-task message must start with: 우선 저희 "${profile.title}" 작업에 참여해주셔서 진심으로 감사합니다.
+	- The final before-task message must start with: 안녕하세요, "${profile.title}" 작업에 참여해 주셔서 감사합니다.
 - No guilt-inducing language
 - No productivity pressure
 - Mention the concrete task goal once
@@ -353,9 +364,12 @@ Step 2. Generate a before-task message under these constraints:
 
 Step 3. Generate an after-task message candidate:
 - Korean
-- Exactly 5 complete, naturally connected sentences
-- Thank the worker specifically
-- Mention the completed contribution
+	- Exactly 4 or 5 complete, naturally connected sentences for each candidate and finalAfterText
+- Begin with a natural acknowledgment that the task is complete
+- Thank the worker for the time or effort they spent on the task
+- Explain what the worker's contribution means for the selected Task Type
+- Use this structure: Core + Supporting + common post-task appreciation and contribution
+- Keep the common appreciation restrained so it never replaces or outweighs Core and Supporting
 - Avoid excessive praise
 - Make the thanks, contribution, and reward feel connected in context
 - Close the current task only; do not invite the worker to the next task
@@ -377,7 +391,7 @@ Return JSON only:
    */
   synthesizeLocalMessage(profile, strategy, phase, reward = "1.50") {
     const objective = profile.objective;
-    const impact = profile.socialImpact;
+    const taskTypeContribution = this.getTaskTypeContributionStatement(profile.taskType);
     const fatiguePhrase = profile.fatigueLevel === "high"
       ? "집중이 꽤 필요한 작업일 수 있지만"
       : profile.fatigueLevel === "medium"
@@ -389,27 +403,40 @@ Return JSON only:
 
     if (phase === "before") {
       if (strategy === "appreciation") {
-        return `이번 작업에서는 ${objective}를 함께 확인하려고 합니다. 작업을 위해 시간을 내어 주신 점을 소중하게 받아들이고 있습니다. 남겨 주신 결과는 전체 자료를 정리하고 검토하는 데 신중히 참고하겠습니다. ${fatiguePhrase}, ${taskLengthPhrase}. 한 항목씩 살펴보는 데 들여 주시는 노력도 중요한 과정으로 기록하겠습니다.`;
+        return `이번 작업의 구체적인 목표는 “${objective}”로 안내되어 있습니다. 작업을 위해 시간을 내어 주신 점을 소중하게 받아들이고 있습니다. 남겨 주실 결과는 전체 자료를 정리하고 검토하는 데 신중히 참고하겠습니다. ${fatiguePhrase}, ${taskLengthPhrase}. 한 항목씩 살펴보는 데 들여 주시는 노력도 중요한 과정으로 기록하겠습니다.`;
       }
       if (strategy === "competence") {
-        return `이 작업은 빠르게 누르는 것보다 천천히 구분해 주시는 눈이 더 중요합니다. ${objective} 과정에서는 사람의 맥락 판단이 데이터 품질을 꽤 많이 좌우하거든요. 그리고 그 데이터는 ${impact}라는 목표에 맞춰 쓰이게 됩니다. ${taskLengthPhrase}이니, 확인 가능한 기준 안에서 편한 속도로 진행해 주세요. 애매한 항목은 안내 기준을 다시 살펴본 뒤 가장 적절하다고 생각하는 쪽을 선택해 주시면 됩니다.`;
+        return `이 작업은 빠르게 누르는 것보다 천천히 구분해 주시는 눈이 더 중요합니다. 안내된 목표인 “${objective}”를 수행하는 과정에서는 사람의 맥락 판단이 데이터 품질을 좌우합니다. 그리고 제출되는 결과는 전체 데이터의 품질과 일관성을 점검하는 데 활용됩니다. ${taskLengthPhrase}이니, 확인 가능한 기준 안에서 편한 속도로 진행해 주세요. 애매한 항목은 안내 기준을 다시 살펴본 뒤 가장 적절하다고 생각하는 쪽을 선택해 주시면 됩니다.`;
       }
       if (strategy === "autonomy") {
-        return `시작하기 전에 짧게 안내드릴게요. ${objective}를 하다 보면 애매한 항목이 있을 수 있는데, 그럴 때는 무리해서 추측하지 않아도 괜찮습니다. ${autonomyPhrase}. ${fatiguePhrase}, 본인에게 편한 속도로 진행하고 필요하면 잠시 쉬어도 괜찮습니다. 이렇게 모인 판단은 ${impact}에 필요한 데이터 품질을 높이는 데 쓰입니다.`;
+        return `시작하기 전에 짧게 안내드릴게요. “${objective}”라는 목표를 따라가다 보면 애매한 항목이 있을 수 있는데, 그럴 때는 무리해서 추측하지 않아도 괜찮습니다. ${autonomyPhrase}. ${fatiguePhrase}, 본인에게 편한 속도로 진행하고 필요하면 잠시 쉬어도 괜찮습니다. 이렇게 모인 판단은 전체 결과의 품질을 점검하는 데 쓰입니다.`;
       }
-      return `참여해 주셔서 감사합니다! ${objective} 작업은 ${impact}에 필요한 작은 판단들을 차곡차곡 모으는 과정입니다. ${fatiguePhrase}, ${taskLengthPhrase}. 너무 부담 갖지 마시고, 기준을 보면서 한 항목씩 편하게 선택해 주세요. 판단이 어려운 항목은 무리해서 단정하지 않고 안내된 범위 안에서 골라 주셔도 괜찮습니다.`;
+      return `참여해 주셔서 감사합니다! 이번 작업의 목표는 “${objective}”로 안내되어 있습니다. ${fatiguePhrase}, ${taskLengthPhrase}. 너무 부담 갖지 마시고, 기준을 보면서 한 항목씩 편하게 선택해 주세요. 판단이 어려운 항목은 무리해서 단정하지 않고 안내된 범위 안에서 골라 주셔도 괜찮습니다.`;
     }
 
     if (strategy === "competence") {
-      return `작업 마무리해 주셔서 감사합니다! 방금 제출해 주신 판단은 ${objective} 관련 데이터를 더 정리된 형태로 만드는 데 반영됩니다. 세심하게 기준을 적용해 주신 덕분에 결과를 안정적으로 검토할 수 있습니다. 그리고 이 데이터는 ${impact}라는 목표에 맞춰 조심스럽게 활용하겠습니다. 승인된 보상금 $${reward}이(가) 기록되었습니다.`;
+      return `작업을 끝까지 마무리하는 데 들인 시간과 노력에 감사드립니다. 안내 기준을 세심하게 적용해 주신 덕분에 제출된 결과를 안정적으로 검토할 수 있습니다. ${taskTypeContribution} 작업자의 판단은 요청자가 안내한 활용 목적에 맞춰 신중하게 참고하겠습니다. 승인된 보상금 $${reward}이(가) 기록되었습니다.`;
     }
     if (strategy === "appreciation") {
-      return `작업에 시간을 내어 끝까지 참여해 주셔서 감사합니다. 제출해 주신 응답은 ${objective} 관련 자료를 정리하는 데 반영됩니다. 여러 항목을 살펴보며 들여 주신 노력도 중요하게 받아들이고 있습니다. 남겨 주신 결과는 ${impact}라는 목적에 맞춰 신중하게 활용하겠습니다. 승인된 보상금 $${reward}이(가) 기록되었습니다.`;
+      return `작업을 마무리해 주시고 시간과 노력을 들여 주신 점에 감사드립니다. 여러 항목을 끝까지 살펴봐 주신 과정을 중요하게 받아들이고 있습니다. ${taskTypeContribution} 남겨 주신 결과는 요청자가 안내한 범위 안에서 신중하게 사용하겠습니다. 승인된 보상금 $${reward}이(가) 기록되었습니다.`;
     }
     if (strategy === "autonomy") {
-      return `작업을 마무리해 주셔서 감사합니다. 애매한 항목을 무리해서 추측하지 않고 안내 기준 안에서 살펴봐 주신 점이 데이터 정리에 도움이 됩니다. 제출해 주신 판단은 ${objective} 데이터의 안정성을 높이는 데 반영됩니다. 또한 ${impact}에 필요한 검토 자료로 차분히 참고하겠습니다. 참여해 주신 점 다시 한번 감사드립니다.`;
+      return `작업을 끝까지 진행하는 데 들인 시간과 노력에 감사드립니다. 애매한 항목을 무리해서 추측하지 않고 안내 기준 안에서 자신의 판단을 적용해 주셨습니다. ${taskTypeContribution} 남겨 주신 판단은 요청자가 안내한 범위 안에서 차분히 참고하겠습니다. 승인된 보상금 $${reward}이(가) 기록되었습니다.`;
     }
-    return `작업을 완료해 주셔서 감사합니다! ${objective}를 끝까지 차분히 살펴봐 주셨습니다. 제출해 주신 응답은 ${impact}에 필요한 데이터 구축 과정에 반영됩니다. 남겨주신 판단은 전체 결과를 점검하고 정리하는 데 도움이 됩니다. 참여해 주신 시간과 수고에 다시 한번 감사드립니다.`;
+    return `작업을 완료하는 데 들인 시간과 노력에 감사드립니다. 안내된 목표에 따라 끝까지 차분히 살펴봐 주셨습니다. ${taskTypeContribution} 남겨 주신 결과는 요청자가 안내한 범위 안에서 신중하게 사용하겠습니다. 승인된 보상금 $${reward}이(가) 기록되었습니다.`;
+  }
+
+  getTaskTypeContributionStatement(taskType = "") {
+    const statements = {
+      annotation_classification: "제출해 주신 분류 결과는 데이터의 정확성과 일관성을 점검하는 데 활용됩니다.",
+      data_collection_creation: "작성해 주신 결과는 향후 분석이나 콘텐츠 구성에 사용할 자료를 마련하는 데 도움이 됩니다.",
+      search_verification: "확인해 주신 내용은 정보의 정확성과 신뢰성을 점검하는 데 활용됩니다.",
+      evaluation_comparison: "남겨 주신 평가는 결과를 비교하고 더 나은 판단 기준을 마련하는 데 참고됩니다.",
+      content_moderation: "검토해 주신 결과는 더 안전하고 신뢰할 수 있는 환경을 유지하기 위한 점검에 활용됩니다.",
+      surveys_experiments: "응답해 주신 내용은 연구 결과를 해석하고 사용자 경험을 이해하는 데 참고됩니다."
+    };
+    return statements[TaskTypeRegistry.normalizeTaskTypeKey(taskType)]
+      || "제출해 주신 결과는 이번 작업의 자료를 정리하고 검토하는 데 참고됩니다.";
   }
 
   /**
@@ -459,6 +486,7 @@ Return JSON only:
         motivationalFactors: profile.motivationalOpportunity,
         sdtNeeds: this.framesToSdtNeeds(profile.selectedFrames),
         selectedFrames: profile.selectedFrames,
+        surveyEvidence: profile.surveyEvidence,
         reviewCriteria: this.buildReviewCriteria(profile),
         frameSelectionReason: profile.frameSelectionReason,
         constraintsApplied: profile.constraintsApplied
@@ -504,9 +532,10 @@ Return JSON only:
 
   stripBeforeOpening(message = "", title = "") {
     const safeTitle = this.cleanInput(title);
-    const opening = `우선 저희 "${safeTitle}" 작업에 참여해주셔서 진심으로 감사합니다.`;
+    const opening = `안녕하세요, "${safeTitle}" 작업에 참여해 주셔서 감사합니다.`;
     return String(message || "")
       .replace(opening, "")
+      .replace(`우선 저희 "${safeTitle}" 작업에 참여해주셔서 진심으로 감사합니다.`, "")
       .replace(/^참여해\s*주셔서\s*(?:진심으로\s*)?감사합니다[.!]?\s*/i, "")
       .replace(/^감사합니다[.!]?\s*/i, "")
       .replace(/^시작하기\s*전에\s*짧게\s*안내드릴게요[.!]?\s*/i, "")
@@ -520,6 +549,32 @@ Return JSON only:
       .split(/(?<=[.!?。！？])\s+/)
       .map(sentence => sentence.trim())
       .filter(Boolean);
+  }
+
+  normalizeSentenceKey(sentence = "") {
+    return String(sentence || "")
+      .toLowerCase()
+      .replace(/^(그리고|그래서|다만|혹시|이렇게|또한|이때)\s+/, "")
+      .replace(/[^0-9a-z가-힣]+/g, "")
+      .trim();
+  }
+
+  areSentencesSimilar(first = "", second = "") {
+    const a = this.normalizeSentenceKey(first);
+    const b = this.normalizeSentenceKey(second);
+    if (!a || !b) return false;
+    if (a === b) return true;
+    if (Math.min(a.length, b.length) >= 14 && (a.includes(b) || b.includes(a))) return true;
+    const firstTokens = new Set(String(first).replace(/[^0-9a-z가-힣\s]/gi, " ").split(/\s+/).filter(token => token.length > 1));
+    const secondTokens = new Set(String(second).replace(/[^0-9a-z가-힣\s]/gi, " ").split(/\s+/).filter(token => token.length > 1));
+    if (!firstTokens.size || !secondTokens.size) return false;
+    const overlap = [...firstTokens].filter(token => secondTokens.has(token)).length;
+    return overlap / Math.min(firstTokens.size, secondTokens.size) >= 0.8;
+  }
+
+  dedupeSentences(sentences = []) {
+    return sentences.filter((sentence, index, list) => sentence
+      && !list.slice(0, index).some(previous => this.areSentencesSimilar(previous, sentence)));
   }
 
   normalizeRequesterTone(sentence = "") {
@@ -560,105 +615,41 @@ Return JSON only:
 
   composeFinalBeforeFromCandidates(title, selectedFrames = [], beforeOptions = [], fallbackText = "") {
     const safeTitle = this.cleanInput(title);
-    const opening = `우선 저희 "${safeTitle}" 작업에 참여해주셔서 진심으로 감사합니다.`;
-    const selectedIndexes = this.getSelectedBeforeCandidateIndexes(selectedFrames);
-    const selectedBodies = selectedIndexes
-      .map(index => this.stripBeforeOpening(beforeOptions[index], safeTitle))
-      .filter(Boolean);
+    const opening = `안녕하세요, "${safeTitle}" 작업에 참여해 주셔서 감사합니다.`;
+    const selectedIndexes = this.getSelectedBeforeCandidateIndexes(selectedFrames).slice(0, 2);
+    const groups = selectedIndexes.map(index => this.getStrategyCandidateSentences(beforeOptions[index], "before", safeTitle));
+    const primary = this.dedupeSentences(groups[0] || []);
+    const supporting = this.dedupeSentences(groups[1] || [])
+      .filter(sentence => !primary.some(coreSentence => this.areSentencesSimilar(coreSentence, sentence)));
+    if (primary.length < 2 || supporting.length < 1) return fallbackText || opening;
 
-    if (selectedBodies.length === 0) {
-      return fallbackText || opening;
-    }
-
-    const seen = new Set();
-    const sentences = [];
-    selectedBodies.forEach(body => {
-      this.splitSentences(body).forEach(sentence => {
-        const normalized = this.normalizeRequesterTone(sentence);
-        if (!normalized || this.isBoilerplateFinalSentence(normalized) || seen.has(normalized)) return;
-        seen.add(normalized);
-        sentences.push(normalized);
-      });
-    });
-
-    const used = new Set();
-    const pick = (predicate) => {
-      const sentence = sentences.find(item => !used.has(item) && predicate(item));
-      if (sentence) used.add(sentence);
-      return sentence || "";
-    };
-
-    const intro = pick(item => /이번 작업|이 작업|작업은|작업에서는/.test(item))
-      || pick(item => /확인|분류/.test(item))
-      || sentences[0]
-      || "";
-    const impact = pick(item => /데이터|자율주행|도로|안전|커뮤니티|의료|접근성|품질/.test(item));
-    const guidance = pick(item => /애매|무리|기준|천천히|속도|괜찮|흐린|불편|가능한 만큼/.test(item));
-    const competence = pick(item => /세심|신중|차분|판단|살펴|다듬/.test(item));
-    const secondarySentences = selectedBodies[1]
-      ? this.splitSentences(selectedBodies[1])
-        .map(sentence => this.normalizeRequesterTone(sentence))
-        .filter(sentence => sentence && !this.isBoilerplateFinalSentence(sentence))
-      : [];
-    const secondarySupport = secondarySentences.find(sentence => !used.has(sentence)) || "";
-    if (secondarySupport) used.add(secondarySupport);
-
-    const finalSentences = [opening];
-    if (intro) finalSentences.push(intro);
-    if (impact) finalSentences.push(this.withConnector(impact, "그리고 "));
-    if (guidance) finalSentences.push(this.withConnector(guidance, /^(흐린|애매)/.test(guidance) ? "혹시 " : "다만 "));
-    if (competence) finalSentences.push(this.withConnector(competence, "이렇게 "));
-    if (secondarySupport && !finalSentences.some(sentence => sentence.includes(secondarySupport))) {
-      finalSentences.push(this.withConnector(secondarySupport, "또한 "));
-    }
-
-    sentences
-      .filter(sentence => !used.has(sentence))
-      .slice(0, Math.max(0, 5 - finalSentences.length))
-      .forEach((sentence) => {
-        finalSentences.push(this.withConnector(sentence, "그리고 "));
-      });
-
-    return finalSentences.join(" ").replace(/\s+/g, " ").trim();
+    const finalSentences = [opening, primary[0], primary[1], this.withConnector(supporting[0], "또한 ")];
+    const extraCore = primary.slice(2).find(sentence => !finalSentences.some(existing => this.areSentencesSimilar(existing, sentence)));
+    if (extraCore) finalSentences.push(this.withConnector(extraCore, "그리고 "));
+    return this.dedupeSentences(finalSentences).slice(0, 5).join(" ").replace(/\s+/g, " ").trim();
   }
 
   composeFinalAfterFromCandidates(selectedFrames = [], afterOptions = [], fallbackText = "") {
-    const selectedIndexes = this.getSelectedBeforeCandidateIndexes(selectedFrames);
+    const selectedIndexes = this.getSelectedBeforeCandidateIndexes(selectedFrames).slice(0, 2);
     const selectedGroups = selectedIndexes
       .map(index => this.splitSentences(afterOptions[index] || "")
         .map(sentence => this.normalizeRequesterTone(sentence))
         .filter(Boolean))
       .filter(group => group.length > 0);
 
-    if (selectedGroups.length === 0) return this.polishAfterMessage(fallbackText);
+    const primary = this.dedupeSentences(selectedGroups[0] || []);
+    const supporting = this.dedupeSentences(selectedGroups[1] || [])
+      .filter(sentence => !primary.some(coreSentence => this.areSentencesSimilar(coreSentence, sentence)));
+    if (primary.length < 3 || supporting.length < 1) return this.polishAfterMessage(fallbackText);
 
-    const seen = new Set();
-    const takeUnique = (sentences, limit, predicate = () => true) => sentences
-      .filter(sentence => predicate(sentence) && !seen.has(sentence))
-      .slice(0, limit)
-      .map(sentence => {
-        seen.add(sentence);
-        return sentence;
-      });
-
-    const primary = selectedGroups[0] || [];
-    const secondary = selectedGroups[1] || [];
-    const finalSentences = takeUnique(primary, 3);
-    const secondaryStrategy = takeUnique(
-      secondary,
-      1,
-      sentence => !/^(작업을|끝까지|참여해).*감사/.test(sentence)
-    );
-    finalSentences.push(...(secondaryStrategy.length ? secondaryStrategy : takeUnique(secondary, 1)));
-
-    const rewardSentence = takeUnique(
-      [...primary, ...secondary],
-      1,
-      sentence => /보상|정산|기록/.test(sentence)
-    );
-    finalSentences.push(...rewardSentence);
-
-    return this.polishAfterMessage(finalSentences.join(" ") || fallbackText);
+    const coreSentences = [primary[0], primary[1], primary[2]];
+    const coreIncludesThanks = coreSentences.some(sentence => /감사/.test(sentence));
+    const supportingSentence = supporting.find(sentence => !(coreIncludesThanks && /감사/.test(sentence))) || supporting[0];
+    const finalSentences = [...coreSentences, this.withConnector(supportingSentence, "또한 ")];
+    const extraCore = primary.slice(3).find(sentence => /보상|정산|기록/.test(sentence)
+      && !finalSentences.some(existing => this.areSentencesSimilar(existing, sentence)));
+    if (extraCore) finalSentences.push(extraCore);
+    return this.polishAfterMessage(this.dedupeSentences(finalSentences).slice(0, 5).join(" ") || fallbackText);
   }
 
   polishAfterMessage(message = "") {
@@ -707,16 +698,71 @@ Return JSON only:
     });
   }
 
+  countStrategyContributions(message = "", candidate = "", phase = "after", title = "") {
+    const normalizedMessage = this.normalizeRequesterTone(message);
+    return this.getStrategyCandidateSentences(candidate, phase, title).filter(sentence => {
+      const fragment = sentence.replace(/^(그리고|그래서|다만|혹시|이렇게|또한)\s+/, "").slice(0, 18);
+      return fragment.length >= 8 && normalizedMessage.includes(fragment);
+    }).length;
+  }
+
+  hasValidSentenceCount(message = "") {
+    const sentences = this.splitSentences(message);
+    return sentences.length >= 4
+      && sentences.length <= 5
+      && sentences.every(sentence => /[.!?。！？]$/.test(sentence));
+  }
+
+  hasRepeatedSentences(message = "") {
+    const sentences = this.splitSentences(message);
+    return sentences.some((sentence, index) => sentences
+      .slice(0, index)
+      .some(previous => this.areSentencesSimilar(previous, sentence)));
+  }
+
+  isPhaseAppropriate(message = "", phase = "after") {
+    if (phase === "before") {
+      return !/(?:작업을\s*(?:완료|마무리)|제출해\s*주신|끝까지\s*진행해\s*주신|살펴봐\s*주셨)/.test(message);
+    }
+    const hasCompletionContext = /(?:완료|마무리|끝까지|제출해\s*주신|진행해\s*주신|살펴봐\s*주신|남겨\s*주신)/.test(message);
+    const hasFutureInstruction = /(?:진행해\s*주세요|선택해\s*주세요|살펴봐\s*주세요|쉬어도\s*괜찮|시작하기\s*전에)/.test(message);
+    return hasCompletionContext && !hasFutureInstruction;
+  }
+
+  hasPostCompletionAcknowledgment(message = "") {
+    return /(?:작업을\s*(?:완료|마무리)|끝까지\s*(?:진행|마무리)|제출해\s*주신|응답해\s*주신|검토해\s*주신)/.test(message);
+  }
+
+  hasPostEffortThanks(message = "") {
+    return /(?:(?:시간|노력|수고).{0,35}감사|감사.{0,35}(?:시간|노력|수고))/.test(message);
+  }
+
+  hasTaskTypeContribution(message = "", taskType = "") {
+    const checks = {
+      annotation_classification: value => /(?:분류|주석|라벨)/.test(value) && /(?:정확|품질|일관|신뢰)/.test(value),
+      data_collection_creation: value => /(?:작성|생성|수집|결과)/.test(value) && /(?:분석|콘텐츠|자료|데이터)/.test(value),
+      search_verification: value => /(?:정보|내용|출처)/.test(value) && /(?:정확|신뢰|확인|검증)/.test(value),
+      evaluation_comparison: value => /(?:평가|비교)/.test(value) && /(?:판단|의사결정|기준|결과)/.test(value),
+      content_moderation: value => /(?:안전|신뢰)/.test(value) && /(?:환경|점검|콘텐츠)/.test(value),
+      surveys_experiments: value => /(?:연구|사용자|응답)/.test(value) && /(?:결과|이해|해석)/.test(value)
+    };
+    const normalizedTaskType = TaskTypeRegistry.normalizeTaskTypeKey(taskType) || TaskTypeRegistry.DEFAULT_TASK_TYPE;
+    return Boolean(checks[normalizedTaskType]?.(String(message || "")));
+  }
+
+  hasPostContributionMeaning(message = "") {
+    return /(?:활용|참고|도움|반영|점검|마련|해석|이해)/.test(message);
+  }
+
+  hasModestContributionClaim(message = "") {
+    return !/(?:생명을\s*(?:구|살리|보호)|세상을\s*(?:바꾸|변화)|혁명|필수불가결|결정적인\s*영향|전적으로|반드시.{0,20}(?:향상|개선)|직접.{0,15}(?:향상|개선|구원))/.test(message);
+  }
+
   ensureStrategyCoverage(message = "", selectedFrames = [], options = [], phase = "after", title = "") {
-    let repaired = String(message || "").trim();
-    this.getSelectedBeforeCandidateIndexes(selectedFrames).slice(0, 2).forEach((index, roleIndex) => {
-      const candidate = options[index] || "";
-      if (this.includesStrategyContribution(repaired, candidate, phase, title)) return;
-      const addition = this.getStrategyCandidateSentences(candidate, phase, title)[0];
-      if (!addition) return;
-      repaired = `${repaired} ${this.withConnector(addition, roleIndex === 0 ? "그리고 " : "또한 ")}`.trim();
-    });
-    return phase === "after" ? this.polishAfterMessage(repaired) : repaired.replace(/\s+/g, " ").trim();
+    if (phase === "before") {
+      return this.composeFinalBeforeFromCandidates(title, selectedFrames, options, message);
+    }
+    return this.composeFinalAfterFromCandidates(selectedFrames, options, message);
   }
 
   validateFinalMessages(profile, beforeOptions, afterOptions, finalBeforeText, finalAfterText) {
@@ -725,14 +771,37 @@ Return JSON only:
     const selectedIndexes = this.getSelectedBeforeCandidateIndexes(selectedFrames).slice(0, 2);
     const beforeCoverage = selectedIndexes.map(index => this.includesStrategyContribution(finalBeforeText, beforeOptions[index], "before", profile.title));
     const afterCoverage = selectedIndexes.map(index => this.includesStrategyContribution(finalAfterText, afterOptions[index], "after", profile.title));
-    const leakedStrategyTerms = /\b(?:Autonomy|Competence|Appreciation|SDT)\b/i.test(`${finalBeforeText} ${finalAfterText}`);
+    const beforeContributionCounts = selectedIndexes.map(index => this.countStrategyContributions(finalBeforeText, beforeOptions[index], "before", profile.title));
+    const afterContributionCounts = selectedIndexes.map(index => this.countStrategyContributions(finalAfterText, afterOptions[index], "after", profile.title));
+    const leakedStrategyTerms = /\b(?:Autonomy|Competence|Appreciation|SDT|Core(?:\s+Strategy)?|Supporting(?:\s+Strategy)?)\b/i.test(`${finalBeforeText} ${finalAfterText}`);
+    const beforeSentences = this.splitSentences(finalBeforeText);
+    const afterSentences = this.splitSentences(finalAfterText);
+    const crossPhaseOverlap = afterSentences.filter(afterSentence => beforeSentences
+      .some(beforeSentence => this.areSentencesSimilar(beforeSentence, afterSentence))).length;
+    const postThanksSentenceCount = afterSentences.filter(sentence => /감사/.test(sentence)).length;
     return {
       taskTypeMatches: Boolean(TaskTypeRegistry.getTaskType(profile.taskType)),
       mappingMatches: expected.length === 2 && expected.every((frame, index) => frame === selectedFrames[index]),
+      beforeSentenceCountValid: this.hasValidSentenceCount(finalBeforeText),
+      afterSentenceCountValid: this.hasValidSentenceCount(finalAfterText),
       coreReflected: Boolean(beforeCoverage[0] && afterCoverage[0]),
       supportingReflected: Boolean(beforeCoverage[1] && afterCoverage[1]),
+      coreMoreProminent: beforeContributionCounts[0] > beforeContributionCounts[1]
+        && afterContributionCounts[0] > afterContributionCounts[1],
       distinctRoles: selectedFrames.length >= 2 && selectedFrames[0] !== selectedFrames[1],
-      conciseAndNatural: finalBeforeText.length <= 1200 && finalAfterText.length <= 1200 && !leakedStrategyTerms
+      noRepeatedSentences: !this.hasRepeatedSentences(finalBeforeText) && !this.hasRepeatedSentences(finalAfterText),
+      strategyNamesHidden: !leakedStrategyTerms,
+      phaseAppropriate: this.isPhaseAppropriate(finalBeforeText, "before") && this.isPhaseAppropriate(finalAfterText, "after"),
+      postCompletionAcknowledged: this.hasPostCompletionAcknowledgment(finalAfterText),
+      postEffortThanksIncluded: this.hasPostEffortThanks(finalAfterText),
+      postContributionExplained: this.hasPostContributionMeaning(finalAfterText),
+      postContributionMatchesTaskType: this.hasTaskTypeContribution(finalAfterText, profile.taskType),
+      postAppreciationBalanced: postThanksSentenceCount >= 1
+        && postThanksSentenceCount <= 2
+        && afterContributionCounts[0] > afterContributionCounts[1],
+      postContributionClaimModest: this.hasModestContributionClaim(finalAfterText),
+      phaseMessagesDistinct: crossPhaseOverlap < Math.ceil(Math.min(beforeSentences.length, afterSentences.length) / 2),
+      conciseAndNatural: [...beforeSentences, ...afterSentences].every(sentence => sentence.length <= 180)
     };
   }
 
@@ -744,7 +813,7 @@ Return JSON only:
       profile.title,
       profile.selectedFrames,
       beforeOptions,
-      `우선 저희 "${profile.title}" 작업에 참여해주셔서 진심으로 감사합니다. ${fallbackBeforeText}`
+      `안녕하세요, "${profile.title}" 작업에 참여해 주셔서 감사합니다. ${fallbackBeforeText}`
     );
     const composedAfter = this.composeFinalAfterFromCandidates(
       profile.selectedFrames,
@@ -790,7 +859,7 @@ Return JSON only:
     callback(`[4단계: 전략 매핑] ${profile.selectedFrames[0]}를 핵심으로, ${profile.selectedFrames[1]}를 보조로 적용합니다.`, "process");
     await sleep(300);
 
-    callback(`[5단계: 생성 제약조건 적용] 후보별 5문장, 비과장, 비죄책감, 비압박, 구체 목표 1회, 사회적 가치 1회, 완료 가능성 포함 조건을 적용합니다.`, "process");
+    callback(`[5단계: 생성 제약조건 적용] Pre/Post 각각 4~5문장, Core > Supporting, 비반복, 내부 전략명 비노출 조건을 적용합니다.`, "process");
     await sleep(300);
 
     callback(`[완료] 작업 전/후 메시지 후보와 LLM 연동용 구조화 프롬프트가 생성되었습니다.`, "success");
