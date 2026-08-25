@@ -144,21 +144,14 @@ ${rawText.trim()}
     const safeObjective = this.cleanInput(objective) || this.inferObjective(title, description, activeProfile);
     const safeImpact = this.cleanInput(socialImpact) || activeProfile.socialImpact;
     const safeContext = this.cleanInput(workerContext) || "짧은 시간 안에 여러 항목을 연속적으로 판단해야 하는 온라인 마이크로태스크 환경";
-    const taskTypeInput = { title, category, description, riskLevel, fatigueLevel, objective: safeObjective, socialImpact: safeImpact, workerContext: safeContext };
-    const taskTypeRecommendation = TaskTypeRegistry.recommendTaskType(taskTypeInput);
-    const confirmedTaskTypeKey = TaskTypeRegistry.normalizeTaskTypeKey(taskType) || taskTypeRecommendation.key;
+    const confirmedTaskTypeKey = TaskTypeRegistry.normalizeTaskTypeKey(taskType) || TaskTypeRegistry.DEFAULT_TASK_TYPE;
     const confirmedTaskType = TaskTypeRegistry.getTaskType(confirmedTaskTypeKey);
-    const inferredTaskTypes = taskTypeRecommendation.ranked
-      .filter(item => item.score > 0)
-      .slice(0, 3)
-      .map((item, index) => ({
-        type: item.label,
-        evidence: index === 0 ? taskTypeRecommendation.reason : `${item.label} 관련 보조 신호가 작업 정보에서 함께 감지되었습니다.`,
-        confidence: index === 0 ? taskTypeRecommendation.confidence : Math.max(0.5, taskTypeRecommendation.confidence - (index * 0.12))
-      }));
-    if (inferredTaskTypes.length === 0) {
-      inferredTaskTypes.push({ type: confirmedTaskType.label, evidence: confirmedTaskType.recommendationReason, confidence: 0.58 });
-    }
+    const strategySelection = TaskTypeRegistry.getStrategySelection(confirmedTaskTypeKey);
+    const inferredTaskTypes = [{
+      type: confirmedTaskType.label,
+      evidence: "Requester가 직접 선택한 Task Type",
+      confidence: 1
+    }];
     const primaryTaskType = confirmedTaskType.label;
     const primaryFrameRule = this.getFrameRule(primaryTaskType);
     const burdens = [];
@@ -177,11 +170,8 @@ ${rawText.trim()}
     if (riskLevel !== "low") opportunities.push("작업자의 판단 역량을 과장 없이 인정");
     opportunities.push("안내 기준 안에서 Worker의 판단과 속도를 존중하는 표현 사용");
 
-    const sdtAnalysis = TaskTypeRegistry.analyzeSDTNeeds({ ...taskTypeInput, taskType: confirmedTaskTypeKey });
-    const selectedFrames = sdtAnalysis.frames;
-    const taskTypeReason = confirmedTaskTypeKey === taskTypeRecommendation.key
-      ? taskTypeRecommendation.reason
-      : `Requester가 ${confirmedTaskType.label}를 최종 Task Type으로 선택했습니다. ${confirmedTaskType.description}이라는 작업 경험 특성을 기준으로 분석합니다.`;
+    const selectedFrames = [...strategySelection.selectedFrames];
+    const taskTypeReason = confirmedTaskType.mappingReason;
 
     return {
       title: this.cleanInput(title),
@@ -199,53 +189,38 @@ ${rawText.trim()}
       taskTypeLabel: confirmedTaskType.label,
       taskTypeReason,
       taskTypeCharacteristics: confirmedTaskType.characteristics,
-      taskTypeRecommendation,
+      coreStrategy: strategySelection.coreStrategy,
+      supportingStrategy: strategySelection.supportingStrategy,
       psychologicalBurden: burdens,
       motivationalOpportunity: opportunities,
       selectedFrames,
-      frameSelectionReason: this.explainFrameSelection(inferredTaskTypes, selectedFrames, primaryTaskType, sdtAnalysis),
+      frameSelectionReason: this.explainFrameSelection(selectedFrames, primaryTaskType),
       constraintsApplied: [
         "후보별 한국어 5문장",
         "죄책감 유발 표현 금지",
         "생산성 압박 또는 성과 강요 금지",
         "작업 목표 1회 이상 포함",
-        "확정된 Task Type과 risk·fatigue·context를 함께 분석하여 핵심 SDT 프레임 2개 선택",
-        "선택되지 않은 SDT 프레임을 최종 문구에 기계적으로 추가하지 않음",
-        "극단값을 임의로 평균화하지 않고 조건 충돌 시 경고와 대안 제시"
+        "Task Type 고정 매핑의 핵심 전략을 중심으로 사용",
+        "Task Type 고정 매핑의 보조 전략을 더 적은 비중으로 자연스럽게 반영",
+        "선택되지 않은 3순위 전략을 최종 문구에 기계적으로 추가하지 않음"
       ]
     };
-  }
-
-  inferTaskTypes(title, category, description, riskLevel, fatigueLevel, socialImpact = "") {
-    const recommendation = TaskTypeRegistry.recommendTaskType({ title, category, description, riskLevel, fatigueLevel, socialImpact });
-    return recommendation.ranked
-      .filter(item => item.score > 0)
-      .slice(0, 3)
-      .map((item, index) => ({
-        type: item.label,
-        evidence: index === 0 ? recommendation.reason : `${item.label} 관련 보조 신호가 함께 감지되었습니다.`,
-        confidence: index === 0 ? recommendation.confidence : Math.max(0.5, recommendation.confidence - index * 0.12)
-      }));
-  }
-
-  selectMotivationalFrames(riskLevel, fatigueLevel, category, inferredTaskTypes = []) {
-    const primaryTaskType = this.selectPrimaryTaskType(inferredTaskTypes);
-    return [...this.getFrameRule(primaryTaskType).frames];
   }
 
   selectPrimaryTaskType(inferredTaskTypes = []) {
     const types = inferredTaskTypes.map(item => item.type);
     const configuredLabels = Object.values(TaskTypeRegistry.TASK_TYPES).map(type => type.label);
-    return configuredLabels.find(type => types.includes(type)) || TaskTypeRegistry.TASK_TYPES.general_low_risk.label;
+    return configuredLabels.find(type => types.includes(type)) || TaskTypeRegistry.TASK_TYPES[TaskTypeRegistry.DEFAULT_TASK_TYPE].label;
   }
 
   getFrameRule(taskType) {
-    const type = TaskTypeRegistry.getTaskType(taskType) || TaskTypeRegistry.TASK_TYPES.general_low_risk;
+    const type = TaskTypeRegistry.getTaskType(taskType) || TaskTypeRegistry.TASK_TYPES[TaskTypeRegistry.DEFAULT_TASK_TYPE];
+    const selection = TaskTypeRegistry.getStrategySelection(type.key);
     return {
       psychologicalType: type.psychologicalType,
       burden: type.burden,
-      frames: [...type.preferredFrames],
-      frameLabel: type.preferredFrames.map(frame => this.toFrameLabel(frame)).join(" + "),
+      frames: [...selection.selectedFrames],
+      frameLabel: selection.selectedFrames.join(" + "),
       purpose: type.purpose,
       taskType: type.key,
       taskTypeLabel: type.label,
@@ -254,17 +229,15 @@ ${rawText.trim()}
   }
 
   toFrameLabel(frame = "") {
-    if (/Autonomy/.test(frame)) return "자율성";
-    if (/Competence/.test(frame)) return "유능감";
-    if (/Appreciation/.test(frame)) return "관계성(감사)";
-    return "관계성(의미감)";
+    if (/Autonomy/.test(frame)) return "Autonomy";
+    if (/Competence/.test(frame)) return "Competence";
+    if (/Appreciation/.test(frame)) return "Appreciation";
+    return frame;
   }
 
-  explainFrameSelection(inferredTaskTypes, selectedFrames, primaryTaskType = "", sdtAnalysis = {}) {
-    const detectedTypes = inferredTaskTypes.map(item => item.type).join(", ");
-    const rule = this.getFrameRule(primaryTaskType || this.selectPrimaryTaskType(inferredTaskTypes));
-    const selectedLabel = selectedFrames.map(frame => this.toFrameLabel(frame)).join(" + ");
-    return `확정된 Task Type은 ${rule.taskTypeLabel}이며, 함께 감지된 작업 신호는 ${detectedTypes || rule.taskTypeLabel}입니다. Task Type과 정서적 부담, 반복·집중 부담, 작업 맥락을 함께 분석해 ${selectedLabel || rule.frameLabel}을 추천했습니다.`;
+  explainFrameSelection(selectedFrames, primaryTaskType = "") {
+    const rule = this.getFrameRule(primaryTaskType);
+    return `${rule.taskTypeLabel}의 고정 매핑에 따라 ${selectedFrames[0]}를 핵심 전략으로, ${selectedFrames[1]}를 보조 전략으로 적용합니다.`;
   }
 
   getFrameNeed(frame = "") {
@@ -274,27 +247,19 @@ ${rawText.trim()}
   }
 
   buildReviewCriteria(profile = {}) {
-    const primaryTaskType = profile.primaryTaskType || TaskTypeRegistry.TASK_TYPES.general_low_risk.label;
+    const primaryTaskType = profile.primaryTaskType || TaskTypeRegistry.TASK_TYPES[TaskTypeRegistry.DEFAULT_TASK_TYPE].label;
     const selectedFrames = Array.isArray(profile.selectedFrames) ? profile.selectedFrames : [];
-    const allFrames = ["Autonomy support", "Competence", "Meaningfulness/Relatedness"];
-    const orderedFrames = [...selectedFrames, ...allFrames]
-      .filter((frame, index, frames) => frames.findIndex(item => this.getFrameNeed(item) === this.getFrameNeed(frame)) === index);
-    const shouldIncludeOptional = profile.riskLevel !== "low"
-      || profile.fatigueLevel !== "low"
-      || (profile.inferredTaskTypes || []).length > 1;
-    const visibleFrames = shouldIncludeOptional ? orderedFrames.slice(0, 3) : orderedFrames.slice(0, 2);
+    const visibleFrames = selectedFrames.slice(0, 2);
 
     const checks = {
       autonomy: "판단을 재촉하지 않고, 애매한 항목을 무리해 단정하지 않아도 된다고 안내하는지 확인합니다.",
       competence: "작업자의 판단 능력과 구체적인 기여를 신뢰하되 정답이나 성과를 과장하지 않는지 확인합니다.",
-      relatedness: "참여에 대한 감사와 사회적 의미를 구체적으로 전달하되 죄책감이나 과도한 책임을 유발하지 않는지 확인합니다."
+      relatedness: "Worker의 시간, 노력, 기여를 구체적으로 인정하되 과장하거나 의무감을 유발하지 않는지 확인합니다."
     };
     const labels = {
-      autonomy: "자율성",
-      competence: "유능감",
-      relatedness: /Appreciation/.test(selectedFrames.find(frame => this.getFrameNeed(frame) === "relatedness") || "")
-        ? "관계성 · 감사"
-        : "관계성 · 의미감"
+      autonomy: "Autonomy",
+      competence: "Competence",
+      relatedness: "Appreciation"
     };
     const icons = { autonomy: "lucide-sliders-horizontal", competence: "lucide-badge-check", relatedness: "lucide-heart-handshake" };
     const reasons = this.getFrameRule(primaryTaskType).reviewReasons;
@@ -306,8 +271,8 @@ ${rawText.trim()}
         frame,
         label: labels[need],
         icon: icons[need],
-        priority: index === 0 ? "core" : index === 1 ? "support" : "optional",
-        priorityLabel: index === 0 ? "핵심" : index === 1 ? "보조" : "선택",
+        priority: index === 0 ? "core" : "support",
+        priorityLabel: index === 0 ? "핵심" : "보조",
         whyNeeded: reasons[need],
         messageCheck: checks[need],
         selected: selectedFrames.some(selected => this.getFrameNeed(selected) === need)
@@ -352,17 +317,17 @@ Input:
 - Single task time limit: ${profile.singleTaskLimitMinutes || 15} minutes
 - Additional task-experience signals: ${profile.inferredTaskTypes.map(item => item.type).join(", ")}
 - Primary psychological task type: ${this.getFrameRule(profile.primaryTaskType).psychologicalType}
-- Primary SDT support (message's central strategy): ${profile.selectedFrames[0] || "None"}
-- Secondary SDT support (strategy that meaningfully complements Primary): ${profile.selectedFrames[1] || "None"}
+- Core strategy (message's central strategy): ${profile.selectedFrames[0] || "None"}
+- Supporting strategy (meaningfully complements Core): ${profile.selectedFrames[1] || "None"}
 - Generation phase: ${phase}
 
-Step 1. Preserve the task-specific selected frame priority.
-- Still generate three before-task candidates: Meaningfulness, Competence, and Autonomy support.
+Step 1. Preserve the fixed Task Type strategy priority.
+- Generate three candidates in this exact order: Appreciation, Competence, and Autonomy.
 - Each candidate must be exactly 5 complete, naturally connected sentences.
 - finalBeforeText has no sentence-count limit.
 - Both finalBeforeText and finalAfterText must naturally reflect Primary and Secondary.
 - Primary must remain the central message strategy; Secondary must complement it with less emphasis.
-- Apply the meaning of each SDT dimension to the message strategy, not by inserting stock keywords.
+- Apply each strategy's meaning to the whole message, not by inserting stock keywords.
 - finalBeforeText and finalAfterText must blend only the candidates matching the selected frames.
 - Do not mechanically add an unselected SDT frame to finalBeforeText.
 
@@ -379,7 +344,7 @@ Step 2. Generate a before-task message under these constraints:
 - No guilt-inducing language
 - No productivity pressure
 - Mention the concrete task goal once
-- Mention social impact only when Meaningfulness / Relatedness is selected
+- Mention contribution context when Appreciation is selected, without exaggerating impact
 - Acknowledge fatigue or emotional burden only when it matches the selected frames
 - Write as one coherent short paragraph, not as disconnected constraint-satisfying sentences
 - Do not mention SDT, frame names, category rules, or internal system rules in worker-facing messages
@@ -423,8 +388,8 @@ Return JSON only:
     const autonomyPhrase = "안내 기준 안에서 자신의 판단과 속도에 따라 진행할 수 있습니다";
 
     if (phase === "before") {
-      if (strategy === "meaningfulness") {
-        return `참여해 주셔서 감사합니다! 이번 작업에서는 ${objective}를 함께 확인하려고 합니다. 작아 보이는 판단도 모이면 ${impact}에 필요한 데이터를 더 믿을 수 있게 만드는 데 도움이 됩니다. ${fatiguePhrase}, ${taskLengthPhrase}. 그리고 혹시 애매한 항목이 있으면 무리해서 맞히려 하기보다 안내 기준에 맞춰 천천히 골라 주세요.`;
+      if (strategy === "appreciation") {
+        return `이번 작업에서는 ${objective}를 함께 확인하려고 합니다. 작업을 위해 시간을 내어 주신 점을 소중하게 받아들이고 있습니다. 남겨 주신 결과는 전체 자료를 정리하고 검토하는 데 신중히 참고하겠습니다. ${fatiguePhrase}, ${taskLengthPhrase}. 한 항목씩 살펴보는 데 들여 주시는 노력도 중요한 과정으로 기록하겠습니다.`;
       }
       if (strategy === "competence") {
         return `이 작업은 빠르게 누르는 것보다 천천히 구분해 주시는 눈이 더 중요합니다. ${objective} 과정에서는 사람의 맥락 판단이 데이터 품질을 꽤 많이 좌우하거든요. 그리고 그 데이터는 ${impact}라는 목표에 맞춰 쓰이게 됩니다. ${taskLengthPhrase}이니, 확인 가능한 기준 안에서 편한 속도로 진행해 주세요. 애매한 항목은 안내 기준을 다시 살펴본 뒤 가장 적절하다고 생각하는 쪽을 선택해 주시면 됩니다.`;
@@ -435,11 +400,11 @@ Return JSON only:
       return `참여해 주셔서 감사합니다! ${objective} 작업은 ${impact}에 필요한 작은 판단들을 차곡차곡 모으는 과정입니다. ${fatiguePhrase}, ${taskLengthPhrase}. 너무 부담 갖지 마시고, 기준을 보면서 한 항목씩 편하게 선택해 주세요. 판단이 어려운 항목은 무리해서 단정하지 않고 안내된 범위 안에서 골라 주셔도 괜찮습니다.`;
     }
 
-    if (strategy === "quality") {
+    if (strategy === "competence") {
       return `작업 마무리해 주셔서 감사합니다! 방금 제출해 주신 판단은 ${objective} 관련 데이터를 더 정리된 형태로 만드는 데 반영됩니다. 세심하게 기준을 적용해 주신 덕분에 결과를 안정적으로 검토할 수 있습니다. 그리고 이 데이터는 ${impact}라는 목표에 맞춰 조심스럽게 활용하겠습니다. 승인된 보상금 $${reward}이(가) 기록되었습니다.`;
     }
-    if (strategy === "effort") {
-      return `끝까지 함께해 주셔서 감사합니다. 반복해서 봐야 하는 항목들을 차분히 살펴봐 주셨습니다. 제출해 주신 응답은 ${objective} 데이터 구성에 반영됩니다. 오늘 남겨주신 판단이 ${impact}에 필요한 데이터 품질로 이어질 수 있도록 잘 활용하겠습니다. 작업은 여기에서 마무리되며 참여해 주신 시간에 다시 한번 감사드립니다.`;
+    if (strategy === "appreciation") {
+      return `작업에 시간을 내어 끝까지 참여해 주셔서 감사합니다. 제출해 주신 응답은 ${objective} 관련 자료를 정리하는 데 반영됩니다. 여러 항목을 살펴보며 들여 주신 노력도 중요하게 받아들이고 있습니다. 남겨 주신 결과는 ${impact}라는 목적에 맞춰 신중하게 활용하겠습니다. 승인된 보상금 $${reward}이(가) 기록되었습니다.`;
     }
     if (strategy === "autonomy") {
       return `작업을 마무리해 주셔서 감사합니다. 애매한 항목을 무리해서 추측하지 않고 안내 기준 안에서 살펴봐 주신 점이 데이터 정리에 도움이 됩니다. 제출해 주신 판단은 ${objective} 데이터의 안정성을 높이는 데 반영됩니다. 또한 ${impact}에 필요한 검토 자료로 차분히 참고하겠습니다. 참여해 주신 점 다시 한번 감사드립니다.`;
@@ -465,8 +430,8 @@ Return JSON only:
       taskType
     );
 
-    const beforeStrategies = ["meaningfulness", "competence", "autonomy"];
-    const afterStrategies = ["appreciation", "quality", "autonomy"];
+    const beforeStrategies = ["appreciation", "competence", "autonomy"];
+    const afterStrategies = ["appreciation", "competence", "autonomy"];
 
     const beforeOptions = beforeStrategies.map(strategy =>
       this.synthesizeLocalMessage(profile, strategy, "before", reward)
@@ -479,8 +444,8 @@ Return JSON only:
     return {
       beforeOptions,
       afterOptions,
-      beforeLabels: ["의미감/사회적 가치", "유능감/판단 신뢰", "자율성/부담 완화"],
-      afterLabels: ["감사/관계성", "기여/유능감", "자율적 마무리"],
+      beforeLabels: ["감사/기여 인정", "유능감/수행 신뢰", "자율성/선택 존중"],
+      afterLabels: ["감사/기여 인정", "유능감/수행 신뢰", "자율성/선택 존중"],
       psychologicalFactors: {
         inferredTaskTypes: profile.inferredTaskTypes,
         primaryTaskType: profile.primaryTaskType,
@@ -503,22 +468,23 @@ Return JSON only:
       taskTypeLabel: profile.taskTypeLabel,
       taskTypeReason: profile.taskTypeReason,
       reviewCriteria: this.buildReviewCriteria(profile),
-      beforeCandidateFrames: ["Meaningfulness/Relatedness", "Competence", "Autonomy support"],
-      afterCandidateFrames: ["Relatedness/Appreciation", "Competence", "Autonomy support"],
+      beforeCandidateFrames: ["Appreciation", "Competence", "Autonomy"],
+      afterCandidateFrames: ["Appreciation", "Competence", "Autonomy"],
       primaryTaskType: profile.primaryTaskType,
       psychologicalBurden: profile.psychologicalBurden,
       motivationalOpportunity: profile.motivationalOpportunity,
       structuredPrompt: this.buildStructuredPrompt(profile, "both"),
       theme: profile.theme,
       finalBeforeText: finalMessages.finalBeforeText,
-      finalAfterText: finalMessages.finalAfterText
+      finalAfterText: finalMessages.finalAfterText,
+      generationValidation: finalMessages.generationValidation
     };
   }
 
   framesToSdtNeeds(frames = []) {
     const needs = [];
     frames.forEach(frame => {
-      if (/Meaningfulness|Relatedness|Appreciation/.test(frame)) needs.push("relatedness");
+      if (/Appreciation/.test(frame)) needs.push("relatedness");
       if (/Competence/.test(frame)) needs.push("competence");
       if (/Autonomy/.test(frame)) needs.push("autonomy");
     });
@@ -726,35 +692,71 @@ Return JSON only:
     return polished || "작업을 끝까지 진행해 주셔서 감사합니다. 제출해 주신 판단은 결과를 정리하는 데 잘 참고하겠습니다.";
   }
 
+  getStrategyCandidateSentences(candidate = "", phase = "after", title = "") {
+    const source = phase === "before" ? this.stripBeforeOpening(candidate, title) : candidate;
+    return this.splitSentences(source)
+      .map(sentence => this.normalizeRequesterTone(sentence))
+      .filter(sentence => sentence && !this.isBoilerplateFinalSentence(sentence));
+  }
+
+  includesStrategyContribution(message = "", candidate = "", phase = "after", title = "") {
+    const normalizedMessage = this.normalizeRequesterTone(message);
+    return this.getStrategyCandidateSentences(candidate, phase, title).some(sentence => {
+      const fragment = sentence.replace(/^(그리고|그래서|다만|혹시|이렇게|또한)\s+/, "").slice(0, 18);
+      return fragment.length >= 8 && normalizedMessage.includes(fragment);
+    });
+  }
+
+  ensureStrategyCoverage(message = "", selectedFrames = [], options = [], phase = "after", title = "") {
+    let repaired = String(message || "").trim();
+    this.getSelectedBeforeCandidateIndexes(selectedFrames).slice(0, 2).forEach((index, roleIndex) => {
+      const candidate = options[index] || "";
+      if (this.includesStrategyContribution(repaired, candidate, phase, title)) return;
+      const addition = this.getStrategyCandidateSentences(candidate, phase, title)[0];
+      if (!addition) return;
+      repaired = `${repaired} ${this.withConnector(addition, roleIndex === 0 ? "그리고 " : "또한 ")}`.trim();
+    });
+    return phase === "after" ? this.polishAfterMessage(repaired) : repaired.replace(/\s+/g, " ").trim();
+  }
+
+  validateFinalMessages(profile, beforeOptions, afterOptions, finalBeforeText, finalAfterText) {
+    const expected = TaskTypeRegistry.getStrategySelection(profile.taskType).selectedFrames;
+    const selectedFrames = profile.selectedFrames || [];
+    const selectedIndexes = this.getSelectedBeforeCandidateIndexes(selectedFrames).slice(0, 2);
+    const beforeCoverage = selectedIndexes.map(index => this.includesStrategyContribution(finalBeforeText, beforeOptions[index], "before", profile.title));
+    const afterCoverage = selectedIndexes.map(index => this.includesStrategyContribution(finalAfterText, afterOptions[index], "after", profile.title));
+    const leakedStrategyTerms = /\b(?:Autonomy|Competence|Appreciation|SDT)\b/i.test(`${finalBeforeText} ${finalAfterText}`);
+    return {
+      taskTypeMatches: Boolean(TaskTypeRegistry.getTaskType(profile.taskType)),
+      mappingMatches: expected.length === 2 && expected.every((frame, index) => frame === selectedFrames[index]),
+      coreReflected: Boolean(beforeCoverage[0] && afterCoverage[0]),
+      supportingReflected: Boolean(beforeCoverage[1] && afterCoverage[1]),
+      distinctRoles: selectedFrames.length >= 2 && selectedFrames[0] !== selectedFrames[1],
+      conciseAndNatural: finalBeforeText.length <= 1200 && finalAfterText.length <= 1200 && !leakedStrategyTerms
+    };
+  }
+
   synthesizeFinalMessages(profile, beforeOptions = [], afterOptions = [], reward = "1.50") {
     const objective = profile.objective;
     const impact = profile.socialImpact;
-    let fallbackBeforeText = "";
-
-    if (profile.taskType === "emotionally_demanding") {
-      fallbackBeforeText = `이번 작업은 ${objective}를 안내 기준에 맞춰 확인하는 일입니다. 다루는 내용이 불편하게 느껴질 수 있으니, 잠시 호흡을 두고 본인의 속도에 맞춰 진행해 주세요. 애매한 항목은 무리해서 맞히려 하기보다 안내 기준 안에서 가능한 만큼만 판단해 주셔도 괜찮습니다.`;
-    } else if (profile.taskType === "high_responsibility") {
-      fallbackBeforeText = `이번 작업은 ${objective}를 차분하고 정확하게 살펴보는 일입니다. 이런 판단은 ${impact}에 맞닿아 있어, 기준을 세심하게 적용하는 능력이 특히 중요합니다. 빠르게 처리하기보다 확인 가능한 근거를 중심으로 안정적으로 판단해 주세요.`;
-    } else if (profile.taskType === "repetitive_cognitive") {
-      fallbackBeforeText = `이번 작업은 ${objective}를 같은 기준으로 반복해서 확인하는 일입니다. 항목이 비슷하게 이어져 지루함이나 피로가 생길 수 있으니, 본인의 속도에 맞춰 차분히 진행해 주세요. 한 항목씩 기준을 꾸준히 적용해 주시는 판단이 결과를 안정적으로 만드는 데 도움이 됩니다.`;
-    } else if (profile.taskType === "socially_meaningful") {
-      fallbackBeforeText = `이번 작업은 ${objective}를 통해 ${impact}에 필요한 판단을 정리하는 일입니다. 작게 보이는 선택도 사회적으로 필요한 데이터를 더 분명하게 만드는 과정에 포함됩니다. 기준을 세심하게 적용해 주시는 판단이 참여의 가치를 잘 살려 줍니다.`;
-    } else {
-      fallbackBeforeText = `이번 작업은 ${objective}를 가볍게 확인해 주시면 되는 일입니다. 부담을 크게 느끼실 필요 없이, 본인의 속도에 맞춰 안내 기준대로 골라 주세요. 참여해 주신 시간과 응답은 전체 결과를 정리하는 데 차분히 반영하겠습니다.`;
-    }
-
+    const fallbackBeforeText = `이번 작업은 ${objective}를 안내 기준에 맞춰 진행하는 일입니다. Worker의 판단과 작업 방식을 존중하며, 남겨 주신 결과와 들여 주신 시간은 ${impact}라는 목적에 맞춰 신중하게 활용하겠습니다.`;
+    const composedBefore = this.composeFinalBeforeFromCandidates(
+      profile.title,
+      profile.selectedFrames,
+      beforeOptions,
+      `우선 저희 "${profile.title}" 작업에 참여해주셔서 진심으로 감사합니다. ${fallbackBeforeText}`
+    );
+    const composedAfter = this.composeFinalAfterFromCandidates(
+      profile.selectedFrames,
+      afterOptions,
+      `작업을 끝까지 진행해 주셔서 감사합니다. 제출해 주신 판단은 ${objective} 관련 데이터를 정리할 때 차분히 참고하겠습니다. 승인된 보상금 $${reward}이(가) 기록되었습니다.`
+    );
+    const finalBeforeText = this.ensureStrategyCoverage(composedBefore, profile.selectedFrames, beforeOptions, "before", profile.title);
+    const finalAfterText = this.ensureStrategyCoverage(composedAfter, profile.selectedFrames, afterOptions, "after", profile.title);
     return {
-      finalBeforeText: this.composeFinalBeforeFromCandidates(
-        profile.title,
-        profile.selectedFrames,
-        beforeOptions,
-        `우선 저희 "${profile.title}" 작업에 참여해주셔서 진심으로 감사합니다. ${fallbackBeforeText}`
-      ),
-      finalAfterText: this.composeFinalAfterFromCandidates(
-        profile.selectedFrames,
-        afterOptions,
-        `작업을 끝까지 진행해 주셔서 감사합니다. 제출해 주신 판단은 ${objective} 관련 데이터를 정리할 때 차분히 참고하겠습니다. 덕분에 ${impact}라는 목표에 맞춰 결과를 조금 더 안정적으로 점검할 수 있습니다. 승인된 보상금 $${reward}이(가) 기록되었습니다. 참여해 주신 점 다시 한번 감사드립니다.`
-      )
+      finalBeforeText,
+      finalAfterText,
+      generationValidation: this.validateFinalMessages(profile, beforeOptions, afterOptions, finalBeforeText, finalAfterText)
     };
   }
 
@@ -785,7 +787,7 @@ Return JSON only:
     profile.motivationalOpportunity.forEach(item => callback(`  - ${item}`, "process"));
     await sleep(300);
 
-    callback(`[4단계: 균형 프레임 구성] 자율성 + 유능감 + 관계성 관점을 각각 포함합니다.`, "process");
+    callback(`[4단계: 전략 매핑] ${profile.selectedFrames[0]}를 핵심으로, ${profile.selectedFrames[1]}를 보조로 적용합니다.`, "process");
     await sleep(300);
 
     callback(`[5단계: 생성 제약조건 적용] 후보별 5문장, 비과장, 비죄책감, 비압박, 구체 목표 1회, 사회적 가치 1회, 완료 가능성 포함 조건을 적용합니다.`, "process");

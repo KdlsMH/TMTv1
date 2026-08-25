@@ -146,9 +146,9 @@
           </div>
           <ol class="how-preview-steps">
             <li><div class="how-step-copy"><span>STEP 1</span><h3>작업 정보 입력</h3><p>작업 목적, Task Type, Worker가 수행할 내용과 메시지 참고 정보를 입력합니다.</p></div><div class="mini-ui-preview"><label>작업 제목</label><div class="mini-form-control">도로 장면 객체 분류</div><label>작업자가 할 일</label><div class="mini-form-control muted">보행자·차량·장애물 분류</div></div></li>
-            <li><div class="how-step-copy"><span>STEP 2</span><h3>작업 특성 분석</h3><p>Task 특성과 Worker 경험을 분석하고 적합한 SDT 요소를 추천합니다.</p></div><div class="mini-ui-preview"><small>Recommended Motivation Support</small><div class="mini-support-row"><b>Competence</b><span>Primary</span></div><div class="mini-support-row"><b>Relatedness</b><span>Secondary</span></div><p>정확한 판단 책임과 사회적 영향을 반영한 우선순위입니다.</p></div></li>
-            <li><div class="how-step-copy"><span>STEP 3</span><h3>SDT 기반 메시지 생성</h3><p>분석 결과를 바탕으로 Before / After 후보 메시지를 생성합니다.</p></div><div class="mini-ui-preview mini-candidates"><div><span class="candidate-frame-tag">유능감</span><p>세심한 판단이 데이터 품질을…</p></div><div><span class="candidate-frame-tag">관계성</span><p>제출한 결과는 안전 검토에…</p></div></div></li>
-            <li><div class="how-step-copy"><span>STEP 4</span><h3>메시지 검토 및 수정</h3><p>선택된 SDT 요소와 이유를 확인하고 메시지를 선택·수정합니다.</p></div><div class="mini-ui-preview"><div class="mini-review-title"><i class="lucide-badge-check"></i><b>유능감</b><span>핵심</span></div><p>신중한 판단이 중요한 작업이므로 Worker의 판단 능력을 인정하는 표현을 확인합니다.</p><div class="mini-textarea">최종 메시지를 직접 수정할 수 있습니다.</div></div></li>
+            <li><div class="how-step-copy"><span>STEP 2</span><h3>작업 특성 분석</h3><p>선택한 Task Type에 연결된 핵심·보조 메시지 전략을 확인합니다.</p></div><div class="mini-ui-preview"><small>Applied Message Strategy</small><div class="mini-support-row"><b>Competence</b><span>Core</span></div><div class="mini-support-row"><b>Appreciation</b><span>Supporting</span></div><p>Task Type별 고정 매핑을 메시지 설계 기준으로 사용합니다.</p></div></li>
+            <li><div class="how-step-copy"><span>STEP 3</span><h3>전략 기반 메시지 생성</h3><p>핵심·보조 전략을 바탕으로 Before / After 후보 메시지를 생성합니다.</p></div><div class="mini-ui-preview mini-candidates"><div><span class="candidate-frame-tag">Competence</span><p>세심한 판단이 데이터 품질을…</p></div><div><span class="candidate-frame-tag">Appreciation</span><p>들여 주신 시간과 노력은…</p></div></div></li>
+            <li><div class="how-step-copy"><span>STEP 4</span><h3>메시지 검토 및 수정</h3><p>적용된 핵심·보조 전략을 확인하고 메시지를 선택·수정합니다.</p></div><div class="mini-ui-preview"><div class="mini-review-title"><i class="lucide-badge-check"></i><b>Competence</b><span>핵심</span></div><p>신중한 판단이 중요한 작업이므로 Worker의 판단 능력을 인정하는 표현을 확인합니다.</p><div class="mini-textarea">최종 메시지를 직접 수정할 수 있습니다.</div></div></li>
             <li><div class="how-step-copy"><span>STEP 5</span><h3>Worker에게 배포</h3><p>Worker Link를 생성합니다. Worker는 작업 전과 완료 후 메시지를 경험합니다.</p></div><div class="mini-ui-preview"><small>작업자 접속 URL</small><div class="mini-share-link">https://…/#worker?taskId=… <i class="lucide-copy"></i></div><div class="mini-worker-flow"><span>Before</span><i class="lucide-arrow-right"></i><span>Task</span><i class="lucide-arrow-right"></i><span>After</span></div></div></li>
           </ol>
         </section>
@@ -160,7 +160,7 @@
         <div id="workspace-shell" class="workspace-shell hidden" aria-hidden="true">
         <section id="requester-workspace" class="workspace-entry" aria-labelledby="workspace-title-heading">
           <div class="workspace-entry-copy"><span>Requester Workspace</span><h2 id="workspace-title-heading">먼저 작업에 대해 알려주세요.</h2><p>입력한 내용을 바탕으로 작업 특성과 작업자에게 필요한 동기부여 전략을 분석합니다.</p></div>
-          <div class="workspace-sdt-context"><div><strong>SDT-based Message Design</strong><span>Task 특성을 분석하여 Autonomy · Competence · Relatedness 중 적합한 Motivation Support를 추천합니다.</span></div><button id="btn-workspace-sdt" type="button" class="btn btn-secondary-quiet">Why SDT?</button></div>
+          <div class="workspace-sdt-context"><div><strong>Strategy-based Message Design</strong><span>선택한 Task Type에 따라 Autonomy · Competence · Appreciation의 핵심·보조 전략을 적용합니다.</span></div><button id="btn-workspace-sdt" type="button" class="btn btn-secondary-quiet">Why SDT?</button></div>
           <ol id="requester-progress" class="requester-progress" aria-label="메시지 설계 진행 상태">
             <li class="active" data-workflow-step="input" aria-current="step"><span>1</span><strong>작업 정보</strong></li>
             <li data-workflow-step="generate"><span>2</span><strong>메시지 생성</strong></li>
@@ -268,11 +268,11 @@
 
                     <fieldset class="task-type-fieldset">
                       <legend>Task Type</legend>
-                      <p class="field-help">Worker가 무엇을 클릭하는지가 아니라, 이 작업에서 어떤 심리적 작업 경험을 할 수 있는지 분류합니다.</p>
+                      <p class="field-help">작업 내용에 맞는 분류를 직접 선택하세요. 선택한 유형의 핵심·보조 전략이 메시지 생성에 적용됩니다.</p>
                       <div id="task-type-options" class="task-type-card-grid" role="radiogroup" aria-label="Task Type 선택"></div>
-                      <div id="task-type-recommendation" class="task-type-recommendation" aria-live="polite">
-                        <div><span>AI recommendation</span><strong id="recommended-task-type-label">분석 대기</strong><p id="recommended-task-type-reason">작업 설명을 입력하면 적합한 Task Type과 이유를 추천합니다.</p></div>
-                        <button id="btn-apply-task-type-recommendation" type="button" class="btn btn-secondary-quiet">추천 적용</button>
+                      <div id="task-type-strategy-summary" class="task-type-strategy-summary" aria-live="polite">
+                        <span id="task-type-core-strategy" class="strategy-badge strategy-badge-core"></span>
+                        <span id="task-type-supporting-strategy" class="strategy-badge strategy-badge-supporting"></span>
                       </div>
                     </fieldset>
 
@@ -372,7 +372,7 @@
                     에이전트가 작업 특성과 선택 프레임을 확인한 뒤 후보 문구를 만들었습니다. 필요하면 아래 후보를 선택하고 최종 메시지를 직접 수정할 수 있습니다.
                   </p>
                   <div class="factor-analysis-path" aria-label="분석 경로">
-                    <span id="factor-primary-task">Task Type</span><i class="lucide-arrow-right"></i><span>Psychological Analysis</span><i class="lucide-arrow-right"></i><span id="factor-frame-summary">Recommended SDT</span><i class="lucide-arrow-right"></i><span>Message</span>
+                    <span id="factor-primary-task">Task Type</span><i class="lucide-arrow-right"></i><span>Strategy Mapping</span><i class="lucide-arrow-right"></i><span id="factor-frame-summary">Applied Strategies</span><i class="lucide-arrow-right"></i><span>Message</span>
                   </div>
                   <div class="message-context-summary" aria-label="Message Context">
                     <div class="message-context-heading"><span>MESSAGE CONTEXT</span><p>Task Type은 Worker의 작업 경험을 설명하며 Task Category를 대체하지 않습니다.</p></div>
@@ -380,7 +380,7 @@
                       <div><dt>Task Type</dt><dd><strong id="factor-task-type-label">—</strong><span id="factor-task-type-reason">—</span></dd></div>
                       <div><dt>Task Context</dt><dd id="factor-task-context">—</dd></div>
                       <div><dt>Task Characteristics</dt><dd id="factor-task-characteristics">—</dd></div>
-                      <div><dt>Recommended SDT Support</dt><dd id="factor-recommended-sdt">—</dd></div>
+                      <div><dt>Applied Message Strategies</dt><dd id="factor-applied-strategies">—</dd></div>
                       <div><dt>Emotional Load</dt><dd id="factor-context-risk">—</dd></div>
                       <div><dt>Focus Load</dt><dd id="factor-context-fatigue">—</dd></div>
                       <div><dt>Single Task Time</dt><dd id="factor-context-time">—</dd></div>
@@ -426,9 +426,9 @@
                 <div class="intervention-item final-message-item">
                   <div class="final-message-heading">
                     <span class="intervention-badge badge-final">3. 최종 작업자 메시지</span>
-                    <div id="final-sdt-badges" class="final-sdt-metadata hidden" aria-label="메시지 생성에 적용된 SDT 기준">
-                      <span id="final-sdt-primary" class="final-sdt-badge final-sdt-primary"></span>
-                      <span id="final-sdt-secondary" class="final-sdt-badge final-sdt-secondary"></span>
+                    <div id="final-strategy-badges" class="final-strategy-metadata hidden" aria-label="메시지 생성에 적용된 핵심 및 보조 전략">
+                      <span id="final-strategy-primary" class="final-strategy-badge final-strategy-primary"></span>
+                      <span id="final-strategy-secondary" class="final-strategy-badge final-strategy-secondary"></span>
                     </div>
                   </div>
                   <div class="final-message-stack">

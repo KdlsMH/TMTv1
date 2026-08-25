@@ -116,9 +116,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const taskSocialImpactBox = document.getElementById("task-social-impact");
   const taskWorkerContextBox = document.getElementById("task-worker-context");
   const taskTypeOptions = document.getElementById("task-type-options");
-  const recommendedTaskTypeLabel = document.getElementById("recommended-task-type-label");
-  const recommendedTaskTypeReason = document.getElementById("recommended-task-type-reason");
-  const btnApplyTaskTypeRecommendation = document.getElementById("btn-apply-task-type-recommendation");
+  const taskTypeCoreStrategy = document.getElementById("task-type-core-strategy");
+  const taskTypeSupportingStrategy = document.getElementById("task-type-supporting-strategy");
   const exampleHelpButtons = [...document.querySelectorAll(".example-help-btn")];
   const exampleTaskPresets = document.getElementById("example-task-presets");
   const platformOverview = document.getElementById("platform-overview");
@@ -144,9 +143,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const afterTextBox = document.getElementById("after-text");
   const finalBeforeTextBox = document.getElementById("final-before-text");
   const finalAfterTextBox = document.getElementById("final-after-text");
-  const finalSdtBadges = document.getElementById("final-sdt-badges");
-  const finalSdtPrimary = document.getElementById("final-sdt-primary");
-  const finalSdtSecondary = document.getElementById("final-sdt-secondary");
+  const finalStrategyBadges = document.getElementById("final-strategy-badges");
+  const finalStrategyPrimary = document.getElementById("final-strategy-primary");
+  const finalStrategySecondary = document.getElementById("final-strategy-secondary");
 
   const psychologyFactorPanel = document.getElementById("psychology-factor-panel");
   const llmProviderBadge = document.getElementById("llm-provider-badge");
@@ -162,7 +161,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const factorTaskTypeReason = document.getElementById("factor-task-type-reason");
   const factorTaskContext = document.getElementById("factor-task-context");
   const factorTaskCharacteristics = document.getElementById("factor-task-characteristics");
-  const factorRecommendedSdt = document.getElementById("factor-recommended-sdt");
+  const factorAppliedStrategies = document.getElementById("factor-applied-strategies");
   const factorContextRisk = document.getElementById("factor-context-risk");
   const factorContextFatigue = document.getElementById("factor-context-fatigue");
   const factorContextTime = document.getElementById("factor-context-time");
@@ -246,14 +245,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // State variables
   let selectedCategory = "general";
-  let selectedTaskType = "general_low_risk";
-  let recommendedTaskType = "general_low_risk";
+  let selectedTaskType = TaskTypeConfig.DEFAULT_TASK_TYPE;
   let synthesizedBeforeOptions = [];
   let synthesizedAfterOptions = [];
-  let synthesizedBeforeLabels = ["의미감/사회적 가치", "유능감/판단 신뢰", "자율성/부담 완화"];
-  let synthesizedAfterLabels = ["감사/관계성", "기여/유능감", "자율적 마무리"];
-  let synthesizedBeforeFrames = ["Meaningfulness/Relatedness", "Competence", "Autonomy support"];
-  let synthesizedAfterFrames = ["Relatedness/Appreciation", "Competence", "Autonomy support"];
+  let synthesizedBeforeLabels = ["감사/기여 인정", "유능감/수행 신뢰", "자율성/선택 존중"];
+  let synthesizedAfterLabels = ["감사/기여 인정", "유능감/수행 신뢰", "자율성/선택 존중"];
+  let synthesizedBeforeFrames = ["Appreciation", "Competence", "Autonomy"];
+  let synthesizedAfterFrames = ["Appreciation", "Competence", "Autonomy"];
   let selectedBeforeOptionIndex = 0;
   let selectedAfterOptionIndex = 0;
   let latestPsychologicalFactors = null;
@@ -266,7 +264,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const testCasePresets = {
     annotation_classification: {
-      taskType: "repetitive_cognitive",
+      taskType: "annotation_classification",
       category: "general",
       groupLabel: "Annotation and Classification",
       groupExamples: "(e.g., image/text/audio/video labeling, object detection, or information categorization)",
@@ -286,8 +284,8 @@ document.addEventListener("DOMContentLoaded", () => {
 - Pedestrian
 - Traffic sign`
     },
-    data_collection_creation_processing: {
-      taskType: "general_low_risk",
+    data_collection_creation: {
+      taskType: "data_collection_creation",
       category: "general",
       groupLabel: "Data Collection, Creation, and Processing",
       groupExamples: "(e.g., audio/video recording, data entry, transcription, translation, writing, or generating/editing content using AI)",
@@ -307,8 +305,8 @@ document.addEventListener("DOMContentLoaded", () => {
 - Check facts
 - Edit final copy`
     },
-    search_verification_cleanup: {
-      taskType: "high_responsibility",
+    search_verification: {
+      taskType: "search_verification",
       category: "general",
       groupLabel: "Search, Verification, and Data Clean-up",
       groupExamples: "(e.g., information search, fact-checking, removing duplicates, verifying details, or formatting data)",
@@ -329,7 +327,7 @@ document.addEventListener("DOMContentLoaded", () => {
 - Remove duplicates or correct formatting`
     },
     evaluation_comparison: {
-      taskType: "high_responsibility",
+      taskType: "evaluation_comparison",
       category: "preference",
       groupLabel: "Evaluation and Comparison",
       groupExamples: "(e.g., evaluating AI-generated responses, rating search results, or evaluating products and services)",
@@ -349,8 +347,8 @@ document.addEventListener("DOMContentLoaded", () => {
 - Response B is better
 - Similar quality`
     },
-    content_moderation_safety: {
-      taskType: "emotionally_demanding",
+    content_moderation: {
+      taskType: "content_moderation",
       category: "moderation",
       groupLabel: "Content Moderation and Safety Review",
       groupExamples: "(e.g., reviewing or classifying harmful, offensive, or inappropriate content)",
@@ -369,8 +367,8 @@ document.addEventListener("DOMContentLoaded", () => {
 - Safe
 - Harmful`
     },
-    surveys_online_experiments: {
-      taskType: "general_low_risk",
+    surveys_experiments: {
+      taskType: "surveys_experiments",
       category: "preference",
       groupLabel: "Surveys and Online Experiments",
       groupExamples: "(e.g., academic surveys, market research, behavioral studies, or usability studies)",
@@ -420,19 +418,14 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
 
-  const getTaskTypeAnalysisInput = () => ({
-    title: taskTitleBox?.value || "",
-    description: taskDescBox?.value || "",
-    objective: taskObjectiveBox?.value || "",
-    socialImpact: taskSocialImpactBox?.value || "",
-    workerContext: taskWorkerContextBox?.value || "",
-    category: selectedCategory,
-    riskLevel: taskRiskLevelSelect?.value || "medium",
-    fatigueLevel: taskFatigueLevelSelect?.value || "medium"
-  });
+  const renderTaskTypeStrategySummary = (taskTypeValue = selectedTaskType) => {
+    const selection = TaskTypeConfig.getStrategySelection(taskTypeValue);
+    if (taskTypeCoreStrategy) taskTypeCoreStrategy.textContent = `핵심 · ${selection.coreStrategy}`;
+    if (taskTypeSupportingStrategy) taskTypeSupportingStrategy.textContent = `보조 · ${selection.supportingStrategy}`;
+  };
 
   const selectTaskType = (taskType, { sync = true } = {}) => {
-    const normalized = TaskTypeConfig.normalizeTaskTypeKey(taskType) || "general_low_risk";
+    const normalized = TaskTypeConfig.normalizeTaskTypeKey(taskType) || TaskTypeConfig.DEFAULT_TASK_TYPE;
     selectedTaskType = normalized;
     taskTypeOptions?.querySelectorAll('input[name="task-type"]').forEach(input => {
       input.checked = input.value === normalized;
@@ -443,6 +436,7 @@ document.addEventListener("DOMContentLoaded", () => {
       currentTask.taskType = normalized;
       currentTask.taskTypeLabel = type?.label || "";
     }
+    renderTaskTypeStrategySummary(normalized);
     if (isGenerating) generationEditNotice?.classList.remove("hidden");
     if (sync && typeof syncFormToDraft === "function") syncFormToDraft();
   };
@@ -468,29 +462,10 @@ document.addEventListener("DOMContentLoaded", () => {
       card.classList.toggle("selected", input.checked);
       input.addEventListener("change", () => {
         selectTaskType(type.key);
-        refreshTaskTypeRecommendation();
       });
       taskTypeOptions.appendChild(card);
     });
   };
-
-  const refreshTaskTypeRecommendation = () => {
-    const recommendation = TaskTypeConfig.recommendTaskType(getTaskTypeAnalysisInput());
-    recommendedTaskType = recommendation.key;
-    if (recommendedTaskTypeLabel) recommendedTaskTypeLabel.textContent = recommendation.label;
-    if (recommendedTaskTypeReason) recommendedTaskTypeReason.textContent = recommendation.reason;
-    if (btnApplyTaskTypeRecommendation) {
-      btnApplyTaskTypeRecommendation.disabled = recommendedTaskType === selectedTaskType;
-      btnApplyTaskTypeRecommendation.textContent = recommendedTaskType === selectedTaskType ? "적용됨" : "추천 적용";
-    }
-    return recommendation;
-  };
-
-  btnApplyTaskTypeRecommendation?.addEventListener("click", () => {
-    selectTaskType(recommendedTaskType);
-    refreshTaskTypeRecommendation();
-    showToast(`${TaskTypeConfig.getTaskType(recommendedTaskType)?.label || "Task Type"}을 적용했습니다.`);
-  });
 
   const postJSON = async (url, payload, timeoutMs = 130000, externalController = null) => {
     const controller = new AbortController();
@@ -679,8 +654,8 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const getTaskPayloadFromForm = () => {
-    const taskType = TaskTypeConfig.getTaskType(selectedTaskType) || TaskTypeConfig.TASK_TYPES.general_low_risk;
-    const recommendation = TaskTypeConfig.recommendTaskType(getTaskTypeAnalysisInput());
+    const taskType = TaskTypeConfig.getTaskType(selectedTaskType) || TaskTypeConfig.TASK_TYPES[TaskTypeConfig.DEFAULT_TASK_TYPE];
+    const strategySelection = TaskTypeConfig.getStrategySelection(taskType.key);
     return {
     title: taskTitleBox.value.trim(),
     reward: taskRewardBox.value.trim() || "1.50",
@@ -690,10 +665,10 @@ document.addEventListener("DOMContentLoaded", () => {
     taskCategory: selectedCategory,
     taskType: taskType.key,
     taskTypeLabel: taskType.label,
-    taskTypeReason: taskType.key === recommendation.key
-      ? recommendation.reason
-      : `Requester가 자동 추천(${recommendation.label})을 검토한 뒤 ${taskType.label}를 최종 선택했습니다.`,
+    taskTypeReason: taskType.mappingReason,
     taskTypeCharacteristics: taskType.characteristics,
+    coreStrategy: strategySelection.coreStrategy,
+    supportingStrategy: strategySelection.supportingStrategy,
     riskLevel: taskRiskLevelSelect.value,
     fatigueLevel: taskFatigueLevelSelect.value,
     objective: taskObjectiveBox.value.trim(),
@@ -731,11 +706,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const afterLabels = ensureThree(extractOptionLabels(raw.afterOptions, fallback.afterLabels), fallback.afterLabels);
     const beforeFrames = ensureThree(
       extractOptionFrames(raw.beforeOptions, fallback.beforeCandidateFrames),
-      fallback.beforeCandidateFrames || ["Meaningfulness/Relatedness", "Competence", "Autonomy support"]
+      fallback.beforeCandidateFrames || ["Appreciation", "Competence", "Autonomy"]
     );
     const afterFrames = ensureThree(
       extractOptionFrames(raw.afterOptions, fallback.afterCandidateFrames),
-      fallback.afterCandidateFrames || ["Relatedness/Appreciation", "Competence", "Autonomy support"]
+      fallback.afterCandidateFrames || ["Appreciation", "Competence", "Autonomy"]
     );
     const psychologicalFactors = raw.psychologicalFactors || {
       inferredTaskTypes: [],
@@ -756,8 +731,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     psychologicalFactors.primaryTaskType = psychologicalFactors.primaryTaskType || fallback.psychologicalFactors?.primaryTaskType || fallback.primaryTaskType || "";
     psychologicalFactors.primaryPsychologicalType = psychologicalFactors.primaryPsychologicalType || fallback.psychologicalFactors?.primaryPsychologicalType || "";
-    psychologicalFactors.taskType = fallback.psychologicalFactors?.taskType || fallback.taskType || psychologicalFactors.taskType || raw.taskType || "general_low_risk";
-    psychologicalFactors.taskTypeLabel = fallback.psychologicalFactors?.taskTypeLabel || fallback.taskTypeLabel || psychologicalFactors.taskTypeLabel || raw.taskTypeLabel || TaskTypeConfig.getTaskType(psychologicalFactors.taskType)?.label || TaskTypeConfig.TASK_TYPES.general_low_risk.label;
+    psychologicalFactors.taskType = fallback.psychologicalFactors?.taskType || fallback.taskType || psychologicalFactors.taskType || raw.taskType || TaskTypeConfig.DEFAULT_TASK_TYPE;
+    psychologicalFactors.taskTypeLabel = fallback.psychologicalFactors?.taskTypeLabel || fallback.taskTypeLabel || psychologicalFactors.taskTypeLabel || raw.taskTypeLabel || TaskTypeConfig.getTaskType(psychologicalFactors.taskType)?.label || TaskTypeConfig.TASK_TYPES[TaskTypeConfig.DEFAULT_TASK_TYPE].label;
     psychologicalFactors.taskTypeReason = fallback.psychologicalFactors?.taskTypeReason || fallback.taskTypeReason || psychologicalFactors.taskTypeReason || raw.taskTypeReason || "";
     psychologicalFactors.taskTypeCharacteristics = fallback.psychologicalFactors?.taskTypeCharacteristics || psychologicalFactors.taskTypeCharacteristics || raw.taskTypeCharacteristics || [];
     psychologicalFactors.taskContext = fallback.psychologicalFactors?.taskContext || psychologicalFactors.taskContext || raw.taskContext || "";
@@ -771,6 +746,25 @@ document.addEventListener("DOMContentLoaded", () => {
       selectedFrames,
       beforeMessages,
       fallback.finalBeforeText || raw.finalBeforeText || beforeMessages[0]
+    );
+    const composedFinalAfterText = aiGenerator.composeFinalAfterFromCandidates(
+      selectedFrames,
+      afterMessages,
+      raw.finalAfterText || fallback.finalAfterText || afterMessages[0]
+    );
+    const finalBeforeText = aiGenerator.ensureStrategyCoverage(
+      composedFinalBeforeText,
+      selectedFrames,
+      beforeMessages,
+      "before",
+      title
+    );
+    const finalAfterText = aiGenerator.ensureStrategyCoverage(
+      composedFinalAfterText,
+      selectedFrames,
+      afterMessages,
+      "after",
+      title
     );
 
     return {
@@ -786,11 +780,14 @@ document.addEventListener("DOMContentLoaded", () => {
       motivationalOpportunity: psychologicalFactors.motivationalFactors || [],
       structuredPrompt: raw.structuredPrompt || fallback.structuredPrompt || raw.structuredPromptSummary || "",
       theme: raw.theme || fallback.theme || "",
-      finalBeforeText: composedFinalBeforeText,
-      finalAfterText: aiGenerator.composeFinalAfterFromCandidates(
-        selectedFrames,
+      finalBeforeText,
+      finalAfterText,
+      generationValidation: aiGenerator.validateFinalMessages(
+        { taskType: psychologicalFactors.taskType, selectedFrames, title },
+        beforeMessages,
         afterMessages,
-        raw.finalAfterText || fallback.finalAfterText || afterMessages[0]
+        finalBeforeText,
+        finalAfterText
       ),
       provider: raw.provider || "local",
       model: raw.model || ""
@@ -800,31 +797,28 @@ document.addEventListener("DOMContentLoaded", () => {
   const toDisplayFactorLabel = value => {
     const label = String(value || "").trim();
     const labelMap = {
-      "Autonomy support": "자율성 지지",
+      "Autonomy": "자율성 지지",
       "Competence": "유능감",
-      "Meaningfulness/Relatedness": "의미감(관계성)",
-      "Meaningfulness / Relatedness": "의미감(관계성)",
-      "Relatedness/Appreciation": "관계성(감사·공감)",
-      "Relatedness / Appreciation": "관계성(감사·공감)"
+      "Appreciation": "감사·기여 인정"
     };
     return labelMap[label] || label;
   };
 
-  const toSdtBadgeLabel = value => {
+  const toStrategyBadgeLabel = value => {
     const frame = String(value || "");
-    if (/Autonomy|자율/.test(frame)) return "자율성";
-    if (/Competence|유능/.test(frame)) return "유능감";
-    if (/Relatedness|Meaningfulness|Appreciation|관계/.test(frame)) return "관계성";
+    if (/Autonomy|자율/.test(frame)) return "Autonomy";
+    if (/Competence|유능/.test(frame)) return "Competence";
+    if (/Appreciation|감사/.test(frame)) return "Appreciation";
     return "";
   };
 
-  const renderFinalSdtBadges = (selectedFrames = []) => {
-    const primaryLabel = toSdtBadgeLabel(selectedFrames[0]);
-    const secondaryLabel = toSdtBadgeLabel(selectedFrames[1]);
+  const renderFinalStrategyBadges = (selectedFrames = []) => {
+    const primaryLabel = toStrategyBadgeLabel(selectedFrames[0]);
+    const secondaryLabel = toStrategyBadgeLabel(selectedFrames[1]);
     const hasMetadata = Boolean(primaryLabel && secondaryLabel);
-    finalSdtBadges?.classList.toggle("hidden", !hasMetadata);
-    if (finalSdtPrimary) finalSdtPrimary.textContent = primaryLabel ? `핵심 · ${primaryLabel}` : "";
-    if (finalSdtSecondary) finalSdtSecondary.textContent = secondaryLabel ? `보조 · ${secondaryLabel}` : "";
+    finalStrategyBadges?.classList.toggle("hidden", !hasMetadata);
+    if (finalStrategyPrimary) finalStrategyPrimary.textContent = primaryLabel ? `핵심 · ${primaryLabel}` : "";
+    if (finalStrategySecondary) finalStrategySecondary.textContent = secondaryLabel ? `보조 · ${secondaryLabel}` : "";
   };
 
   const renderPills = (container, items = []) => {
@@ -868,10 +862,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const fatigueLabels = { low: "낮음", medium: "중간", high: "높음" };
 
     if (factorTaskTypeLabel) factorTaskTypeLabel.textContent = factors.taskTypeLabel || taskTypeDefinition?.label || factors.primaryTaskType || "—";
-    if (factorTaskTypeReason) factorTaskTypeReason.textContent = factors.taskTypeReason || taskTypeDefinition?.recommendationReason || "—";
+    if (factorTaskTypeReason) factorTaskTypeReason.textContent = factors.taskTypeReason || taskTypeDefinition?.mappingReason || "—";
     if (factorTaskContext) factorTaskContext.textContent = TASK_CONTEXT_LABELS[selectedCategory] || factors.taskContext || "General Crowd Task";
     if (factorTaskCharacteristics) factorTaskCharacteristics.textContent = characteristicLabels.join(" · ") || "—";
-    if (factorRecommendedSdt) factorRecommendedSdt.textContent = (factors.selectedFrames || []).map(toDisplayFactorLabel).join(" · ") || "—";
+    if (factorAppliedStrategies) factorAppliedStrategies.textContent = (factors.selectedFrames || []).map(toDisplayFactorLabel).join(" · ") || "—";
     if (factorContextRisk) factorContextRisk.textContent = riskLabels[taskRiskLevelSelect?.value] || "—";
     if (factorContextFatigue) factorContextFatigue.textContent = fatigueLabels[taskFatigueLevelSelect?.value] || "—";
     if (factorContextTime) factorContextTime.textContent = taskTimeLimitBox?.value ? `${taskTimeLimitBox.value} min` : "—";
@@ -1169,7 +1163,6 @@ document.addEventListener("DOMContentLoaded", () => {
     previewContainer?.classList.add("hidden");
     reviewEmptyState?.classList.remove("hidden");
     shareCard?.classList.add("hidden");
-    refreshTaskTypeRecommendation();
     showToast(`${preset.groupLabel} 예시가 입력되었습니다.`);
   };
 
@@ -1261,11 +1254,11 @@ document.addEventListener("DOMContentLoaded", () => {
     taskForm?.reset();
     currentTask = null;
     selectedCategory = "general";
-    selectTaskType("general_low_risk", { sync: false });
+    selectTaskType(TaskTypeConfig.DEFAULT_TASK_TYPE, { sync: false });
     synthesizedBeforeOptions = [];
     synthesizedAfterOptions = [];
     latestPsychologicalFactors = null;
-    renderFinalSdtBadges([]);
+    renderFinalStrategyBadges([]);
     previewContainer?.classList.add("hidden");
     reviewEmptyState?.classList.remove("hidden");
     shareCard?.classList.add("hidden");
@@ -1278,7 +1271,6 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem("agentic_tasks", JSON.stringify(tasks));
     requiredFormFields.forEach(item => item.el?.classList.remove("is-invalid"));
     updateFormCompletion();
-    refreshTaskTypeRecommendation();
     setWorkflowStep("input");
     showToast("입력값이 초기화되었습니다.");
   });
@@ -1349,10 +1341,10 @@ document.addEventListener("DOMContentLoaded", () => {
       );
       const fallbackFactors = fallbackResults.psychologicalFactors || {};
       addThoughtLog(`[Task Type] 확정: ${fallbackFactors.taskTypeLabel || payload.taskTypeLabel}`, "process");
-      addThoughtLog(`[SDT 분석] Task Type과 정서적 부담, 반복·집중 부담, 작업 맥락을 함께 반영한 선택 프레임: ${(fallbackFactors.selectedFrames || fallbackResults.selectedFrames || []).join(" + ")}`, "process");
+      addThoughtLog(`[전략 매핑] Task Type에 연결된 핵심·보조 전략: ${(fallbackFactors.selectedFrames || fallbackResults.selectedFrames || []).join(" + ")}`, "process");
       setGenerationStep("frames", "done");
       setGenerationStep("constraints", "active");
-      addThoughtLog("[제약조건] 후보 문구는 각각 자연스럽게 이어지는 한국어 5문장으로 만들고, 최종 Pre/Post 문구에는 핵심 SDT를 중심 전략으로, 보조 SDT를 보완 전략으로 함께 반영합니다.", "process");
+      addThoughtLog("[제약조건] 후보 문구는 각각 자연스럽게 이어지는 한국어 5문장으로 만들고, 최종 Pre/Post 문구에는 핵심 전략을 중심으로, 보조 전략을 더 적은 비중으로 반영합니다.", "process");
       setGenerationStep("constraints", "done");
 
       let rawResults;
@@ -1375,7 +1367,14 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       setGenerationStep("render", "active");
-      const results = normalizeGenerationResult(rawResults, fallbackResults, payload.title);
+      let results = normalizeGenerationResult(rawResults, fallbackResults, payload.title);
+      const validationPassed = Object.values(results.generationValidation || {}).every(Boolean);
+      if (!validationPassed) {
+        results = normalizeGenerationResult({ ...fallbackResults, provider: "local" }, fallbackResults, payload.title);
+        addThoughtLog("[자동 수정] 핵심·보조 전략 반영 조건을 다시 확인하고 로컬 전략 문구로 최종 메시지를 재구성했습니다.", "warning");
+      } else {
+        addThoughtLog("[메시지 검증] Task Type 일치, 핵심·보조 전략 반영, 역할 구분, 문장 길이 조건을 확인했습니다.", "success");
+      }
       latestLLMProvider = results.provider;
       latestLLMModel = results.model;
       latestStructuredPrompt = results.structuredPrompt || "";
@@ -1431,7 +1430,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       renderOptionSelectors();
       renderPsychologicalFactors(results.psychologicalFactors, latestLLMProvider, latestLLMModel);
-      renderFinalSdtBadges(results.selectedFrames);
+      renderFinalStrategyBadges(results.selectedFrames);
 
       beforeTextBox.value = synthesizedBeforeOptions[0];
       afterTextBox.value = synthesizedAfterOptions[0];
@@ -1613,7 +1612,7 @@ document.addEventListener("DOMContentLoaded", () => {
         category: selectedCategory,
         taskCategory: selectedCategory,
         taskType: selectedTaskType,
-        taskTypeLabel: TaskTypeConfig.getTaskType(selectedTaskType)?.label || TaskTypeConfig.TASK_TYPES.general_low_risk.label,
+        taskTypeLabel: TaskTypeConfig.getTaskType(selectedTaskType)?.label || TaskTypeConfig.TASK_TYPES[TaskTypeConfig.DEFAULT_TASK_TYPE].label,
         reward: "1.50",
         timeLimitMinutes: "15",
         description: "",
@@ -1650,17 +1649,6 @@ document.addEventListener("DOMContentLoaded", () => {
   taskObjectiveBox.addEventListener("input", syncFormToDraft);
   taskSocialImpactBox.addEventListener("input", syncFormToDraft);
   taskWorkerContextBox.addEventListener("input", syncFormToDraft);
-
-  let taskTypeRecommendationTimer = null;
-  [taskTitleBox, taskDescBox, taskObjectiveBox, taskSocialImpactBox, taskWorkerContextBox, taskRiskLevelSelect, taskFatigueLevelSelect]
-    .filter(Boolean)
-    .forEach(element => {
-      const eventName = element.tagName === "SELECT" ? "change" : "input";
-      element.addEventListener(eventName, () => {
-        clearTimeout(taskTypeRecommendationTimer);
-        taskTypeRecommendationTimer = setTimeout(refreshTaskTypeRecommendation, 180);
-      });
-    });
 
   // Real-time synchronization of manual edits to the textareas
   beforeTextBox.addEventListener("input", () => {
@@ -2330,7 +2318,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   renderExampleTaskButtons();
   renderTaskTypeOptions();
-  refreshTaskTypeRecommendation();
+  renderTaskTypeStrategySummary();
   updateFormCompletion();
   // Workspace is revealed only after the CTA is clicked in the current visit.
   setWorkspaceAvailability(false);

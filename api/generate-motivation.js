@@ -64,47 +64,46 @@ const extractOpenAIText = (transport) => {
 };
 
 const resolveGenerationSelection = (payload) => {
-  const recommendation = TaskTypeConfig.recommendTaskType(payload);
-  const taskType = TaskTypeConfig.getTaskType(payload.taskType) || TaskTypeConfig.getTaskType(recommendation.key);
+  const taskType = TaskTypeConfig.getTaskType(payload.taskType)
+    || TaskTypeConfig.TASK_TYPES[TaskTypeConfig.DEFAULT_TASK_TYPE];
   const sdtAnalysis = TaskTypeConfig.analyzeSDTNeeds({ ...payload, taskType: taskType.key });
   const selectedFrames = sdtAnalysis.frames.slice(0, 2);
   return {
-    recommendation,
     taskType,
     sdtAnalysis,
     selectedFrames,
-    primaryFrame: selectedFrames[0] || "",
-    secondaryFrame: selectedFrames[1] || ""
+    coreStrategy: selectedFrames[0] || "",
+    supportingStrategy: selectedFrames[1] || ""
   };
 };
 
 const buildMessages = (payload) => {
   const {
-    recommendation,
     taskType,
-    sdtAnalysis,
     selectedFrames,
-    primaryFrame,
-    secondaryFrame
+    coreStrategy,
+    supportingStrategy
   } = resolveGenerationSelection(payload);
   return [
   {
     role: "system",
     content: [
       "당신은 크라우드소싱 작업자에게 전달할 한국어 안내 메시지를 작성하는 UX 라이터입니다.",
-      "자기결정성이론(SDT)의 관계성, 유능감, 자율성을 참고하되 화면에는 이론 용어를 직접 드러내지 마세요.",
+      "Task Type에 고정 매핑된 Autonomy, Competence, Appreciation 전략을 사용하되 Worker용 문장에는 전략 이름을 직접 드러내지 마세요.",
       "작업 시작 전 후보 3개, 작업 완료 후 후보 3개, 최종 작업 전/후 문구를 JSON으로만 반환하세요.",
       "beforeOptions와 afterOptions의 각 후보 message는 반드시 서로 자연스럽게 이어지는 완결된 한국어 5문장으로 작성하세요. 짧은 구절을 마침표로 나누어 문장 수만 맞추지 마세요.",
       "문구는 과장, 압박, 죄책감, 홍보성 표현 없이 차분하고 구체적으로 작성하세요.",
-      "후보군에는 자율성, 유능감, 관계성 관점을 각각 포함하세요.",
-      "finalBeforeText와 finalAfterText에는 아래 Primary와 Secondary를 모두 자연스럽게 반영하세요.",
-      "Primary는 두 최종 메시지의 중심 전략이며, Secondary는 Primary를 보완하는 전략입니다. 두 요소를 같은 비중으로 나열하지 마세요.",
-      "SDT별 고정 키워드를 끼워 넣지 말고, 각 요소의 의미가 문장 전체의 메시지 전략에 드러나게 하세요.",
-      `Primary SDT support (중심 전략): ${primaryFrame}`,
-      `Secondary SDT support (보완 전략): ${secondaryFrame}`,
+      "후보군에는 Appreciation, Competence, Autonomy 관점을 각각 포함하세요.",
+      "finalBeforeText와 finalAfterText에는 아래 Core와 Supporting을 모두 자연스럽게 반영하세요.",
+      "Core는 두 최종 메시지의 중심 전략이며, Supporting은 Core를 보완하는 전략입니다. 두 요소를 같은 비중으로 나열하지 마세요.",
+      "전략별 고정 키워드를 끼워 넣지 말고, 각 요소의 의미가 문장 전체의 메시지 전략에 드러나게 하세요.",
+      `Core strategy (중심 전략): ${coreStrategy}`,
+      `Supporting strategy (보완 전략): ${supportingStrategy}`,
       "selectedFrames는 위 두 값을 같은 순서로 정확히 반환하고 다른 프레임으로 바꾸지 마세요.",
       `확정된 Task Type은 ${taskType.label}입니다. 이는 Worker의 작업 경험 분류이며 인터페이스 종류를 뜻하지 않습니다.`,
-      `Task Type, 정서적 부담, 반복·집중 부담, 작업 맥락을 함께 분석한 핵심 프레임 우선순위는 ${selectedFrames.join(" + ")}입니다.`,
+      `Figure 기반 고정 전략 우선순위는 ${selectedFrames.join(" + ")}입니다.`,
+      "JSON을 반환하기 전에 Pre-task와 Post-task 각각을 자체 점검하세요: Task Type 일치, Core 중심성, Supporting 보완성, 두 역할의 구분, 간결하고 자연스러운 문체.",
+      "어느 조건이라도 맞지 않으면 내부적으로 문장을 수정한 뒤, 수정이 끝난 JSON만 반환하세요.",
       "finalBeforeText는 반드시 다음 문장으로 시작하세요: 안녕하세요, \"" + clean(payload.title) + "\" 작업에 참여해 주셔서 감사합니다."
     ].join("\n")
   },
@@ -116,7 +115,7 @@ const buildMessages = (payload) => {
       `Task Type: ${taskType.label} (${taskType.key})`,
       `Task Type 설명: ${taskType.description}`,
       `Task Type 특성: ${taskType.characteristics.map(item => item.label).join(" · ")}`,
-      `Task Type 선택 이유: ${clean(payload.taskTypeReason) || recommendation.reason}`,
+      `Task Type 선택 기준: ${taskType.mappingReason}`,
       `완료 보상: ${clean(payload.reward)}`,
       `작업 지침: ${clean(payload.description)}`,
       `정서적 부담: ${clean(payload.riskLevel)}`,
@@ -126,37 +125,37 @@ const buildMessages = (payload) => {
       `작업자가 겪을 수 있는 상황: ${clean(payload.workerContext)}`,
       `단일 작업 제한 시간: ${clean(payload.timeLimitMinutes)}분`,
       "",
-      "[최종 메시지 SDT 설계 기준]",
-      `Primary SDT support: ${primaryFrame}`,
-      `Secondary SDT support: ${secondaryFrame}`,
-      "Pre-task와 Post-task 최종 메시지 모두 Primary를 중심으로 전개하고 Secondary를 보완적으로 반영하세요.",
+      "[최종 메시지 설계 기준]",
+      `Core strategy: ${coreStrategy}`,
+      `Supporting strategy: ${supportingStrategy}`,
+      "Pre-task와 Post-task 최종 메시지 모두 Core를 중심으로 전개하고 Supporting을 보완적으로 반영하세요.",
       "",
       "[반환 JSON 스키마]",
       JSON.stringify({
         psychologicalFactors: {
           taskType: taskType.key,
           taskTypeLabel: taskType.label,
-          taskTypeReason: clean(payload.taskTypeReason) || recommendation.reason,
+          taskTypeReason: taskType.mappingReason,
           taskTypeCharacteristics: taskType.characteristics,
           inferredTaskTypes: [{ type: taskType.label, evidence: "metadata evidence", confidence: 0.7 }],
           primaryTaskType: taskType.label,
           primaryPsychologicalType: taskType.psychologicalType,
           psychologicalBurdens: ["작업자가 느낄 수 있는 부담"],
           motivationalFactors: ["동기 부여에 활용할 수 있는 요인"],
-          sdtNeeds: ["competence", "relatedness"],
+          sdtNeeds: selectedFrames.map(frame => frame === "Appreciation" ? "relatedness" : frame.toLowerCase()),
           selectedFrames,
-          frameSelectionReason: "작업 특성을 고려한 선택 이유",
+          frameSelectionReason: taskType.mappingReason,
           constraintsApplied: ["비압박", "비과장", "구체적 기준 유지"]
         },
         beforeOptions: [
-          { label: "의미감/관계성", frame: "Meaningfulness / Relatedness", message: "자연스럽게 이어지는 완결된 5문장의 작업 시작 전 후보 문구" },
+          { label: "감사/기여 인정", frame: "Appreciation", message: "자연스럽게 이어지는 완결된 5문장의 작업 시작 전 후보 문구" },
           { label: "유능감/판단 신뢰", frame: "Competence", message: "자연스럽게 이어지는 완결된 5문장의 작업 시작 전 후보 문구" },
-          { label: "자율성/부담 완화", frame: "Autonomy support", message: "자연스럽게 이어지는 완결된 5문장의 작업 시작 전 후보 문구" }
+          { label: "자율성/선택 존중", frame: "Autonomy", message: "자연스럽게 이어지는 완결된 5문장의 작업 시작 전 후보 문구" }
         ],
         afterOptions: [
-          { label: "감사/관계성", frame: "Relatedness / Appreciation", message: "자연스럽게 이어지는 완결된 5문장의 작업 완료 후 후보 문구" },
-          { label: "기여/유능감", frame: "Competence", message: "자연스럽게 이어지는 완결된 5문장의 작업 완료 후 후보 문구" },
-          { label: "자율적 마무리", frame: "Autonomy support", message: "자연스럽게 이어지는 완결된 5문장의 작업 완료 후 후보 문구" }
+          { label: "감사/기여 인정", frame: "Appreciation", message: "자연스럽게 이어지는 완결된 5문장의 작업 완료 후 후보 문구" },
+          { label: "유능감/수행 신뢰", frame: "Competence", message: "자연스럽게 이어지는 완결된 5문장의 작업 완료 후 후보 문구" },
+          { label: "자율성/선택 존중", frame: "Autonomy", message: "자연스럽게 이어지는 완결된 5문장의 작업 완료 후 후보 문구" }
         ],
         finalBeforeText: "최종 작업 시작 전 문구",
         finalAfterText: "최종 작업 완료 후 문구",
@@ -190,10 +189,15 @@ const ensureBeforeOpening = (message, title) => {
 };
 
 const applyGenerationMetadata = (parsed, payload) => {
-  const { selectedFrames } = resolveGenerationSelection(payload);
+  const { taskType, selectedFrames, coreStrategy, supportingStrategy } = resolveGenerationSelection(payload);
   parsed.selectedFrames = selectedFrames;
   parsed.psychologicalFactors = {
     ...(parsed.psychologicalFactors || {}),
+    taskType: taskType.key,
+    taskTypeLabel: taskType.label,
+    taskTypeReason: taskType.mappingReason,
+    coreStrategy,
+    supportingStrategy,
     selectedFrames
   };
   return parsed;

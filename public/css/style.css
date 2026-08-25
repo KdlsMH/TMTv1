@@ -3389,14 +3389,14 @@ textarea.form-control,
   line-height: 1.4 !important;
 }
 
-.final-sdt-metadata {
+.final-strategy-metadata {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 0.4rem;
 }
 
-.final-sdt-badge {
+.final-strategy-badge {
   display: inline-flex;
   align-items: center;
   min-height: 1.75rem;
@@ -3411,7 +3411,7 @@ textarea.form-control,
   white-space: nowrap;
 }
 
-.final-sdt-secondary {
+.final-strategy-secondary {
   border-color: #dbe4f0;
   background: #f8fafc;
   color: #475569;
@@ -4581,7 +4581,7 @@ body.worker-mode .app-container {
   header { padding: 0.75rem; align-items: flex-start; gap: 0.65rem; }
   .logo-text { font-size: 0.98rem; }
   .final-message-heading { align-items: flex-start; flex-direction: column; }
-  .final-sdt-metadata { justify-content: flex-start; }
+  .final-strategy-metadata { justify-content: flex-start; }
   .overview-nav { max-width: 64%; overflow-x: auto; justify-content: flex-start; }
   .overview-nav .nav-tab-btn { flex: 0 0 auto; font-size: 0.68rem; padding: 0.42rem 0.52rem; }
   .purpose-hero { min-height: auto; padding-block: 4rem; }
@@ -4686,7 +4686,6 @@ body.worker-mode .app-container {
 }
 
 .task-type-card-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem; margin-top: 0.8rem; }
-.task-type-card-grid .task-type-card:last-child { grid-column: 1 / -1; }
 
 .task-type-card {
   display: flex;
@@ -4708,23 +4707,33 @@ body.worker-mode .app-container {
 .task-type-card strong { color: #0f172a; font-size: 0.7rem; line-height: 1.35; }
 .task-type-card small { color: #64748b; font-size: 0.58rem; line-height: 1.4; overflow-wrap: anywhere; }
 
-.task-type-recommendation {
+.task-type-strategy-summary {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.8rem;
+  flex-wrap: wrap;
+  gap: 0.45rem;
   margin-top: 0.75rem;
   padding: 0.8rem;
-  border-left: 3px solid #4f46e5;
+  border: 1px solid #dbe4f0;
   border-radius: 8px;
   background: #f8fafc;
 }
 
-.task-type-recommendation > div { display: grid; gap: 0.18rem; }
-.task-type-recommendation span { color: #4f46e5; font-size: 0.58rem; font-weight: 850; letter-spacing: 0.08em; text-transform: uppercase; }
-.task-type-recommendation strong { color: #0f172a; font-size: 0.75rem; }
-.task-type-recommendation p { color: #64748b; font-size: 0.65rem; line-height: 1.5; }
-.task-type-recommendation .btn { flex: 0 0 auto; min-height: 34px; padding: 0.4rem 0.65rem; font-size: 0.65rem; }
+.strategy-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
+  padding: 0.3rem 0.6rem;
+  border: 1px solid #c7d2fe;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #3730a3;
+  font-size: 0.66rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.strategy-badge-supporting { border-color: #dbe4f0; background: #fff; color: #475569; }
 
 .message-context-summary {
   margin: 1rem 0;
@@ -4750,9 +4759,6 @@ body.worker-mode .app-container {
   .example-task-section .test-case-presets,
   .task-type-card-grid,
   .message-context-summary dl { grid-template-columns: 1fr !important; }
-  .task-type-card-grid .task-type-card:last-child { grid-column: auto; }
-  .task-type-recommendation { align-items: stretch; flex-direction: column; }
-  .task-type-recommendation .btn { width: 100%; }
   .message-context-summary dl > div,
   .message-context-summary dl > div:nth-child(2n),
   .message-context-summary dl > div:nth-last-child(-n+2) { border-right: 0; border-bottom: 1px solid #e2e8f0; }
