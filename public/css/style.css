@@ -4667,8 +4667,8 @@ body.worker-mode .app-container {
   transition: border-color 150ms ease, background 150ms ease, transform 150ms ease;
 }
 
-.example-task-section .test-case-btn span { color: #4f46e5; font-size: 0.68rem; font-weight: 800; line-height: 1.35; }
-.example-task-section .test-case-btn strong { color: #475569; font-size: 0.62rem; font-weight: 600; line-height: 1.5; }
+.example-task-section .test-case-btn span { color: #4f46e5; font-size: 0.72rem; font-weight: 800; line-height: 1.35; }
+.example-task-section .test-case-btn strong { color: #475569; font-size: 0.66rem; font-weight: 600; line-height: 1.5; }
 .example-task-section .test-case-btn:hover { border-color: #a5b4fc; background: #eef2ff; transform: translateY(-1px); }
 .example-task-section .test-case-btn:focus-visible { outline: 3px solid rgba(79,70,229,.25); outline-offset: 2px; }
 
