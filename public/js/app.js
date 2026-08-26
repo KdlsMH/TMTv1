@@ -939,12 +939,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const card = document.createElement("article");
         card.className = "review-criterion-card";
 
-        const icon = document.createElement("div");
-        icon.className = "review-criterion-icon";
-        const iconGlyph = document.createElement("i");
-        iconGlyph.className = criterion.icon || "lucide-circle-check";
-        icon.appendChild(iconGlyph);
-
         const copy = document.createElement("div");
         const title = document.createElement("h5");
         title.textContent = `${index + 1}. ${criterion.label || toDisplayFactorLabel(criterion.frame)}`;
@@ -961,7 +955,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const priority = document.createElement("span");
         priority.className = `criterion-priority ${criterion.priority || "support"}`;
         priority.textContent = criterion.priorityLabel || (criterion.selected ? "선택" : "참고");
-        card.append(icon, copy, priority);
+        card.append(copy, priority);
         reviewCriteriaList.appendChild(card);
       });
     }
