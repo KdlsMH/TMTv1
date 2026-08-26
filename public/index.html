@@ -7,7 +7,7 @@
   <meta name="description" content="Worker의 내재적 동기와 작업 경험을 고려해 작업 전후 메시지를 설계하는 SDT 기반 Crowd Task Message Design System입니다.">
   
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="css/style.css?v=20260826-survey-title-example-text">
+  <link rel="stylesheet" href="css/style.css?v=20260826-no-number-steppers">
   
   <!-- Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css">
@@ -43,9 +43,9 @@
            ==================================================================== -->
       <section id="requester-view" class="requester-container">
         <section id="platform-overview" class="landing-hero purpose-hero" aria-labelledby="landing-title">
-          <h2 id="landing-title"><span class="hero-line hero-line-primary">더 나은 작업 메시지를 넘어,</span><span class="hero-line hero-line-accent">더 나은 크라우드워크를 설계하세요.</span></h2>
-          <p class="hero-lead">Worker의 내재적 동기와 작업 경험까지 고려하는 Crowd Task Message Design System</p>
-          <p class="hero-support">Task Message Studio는 Worker가 작업의 의미와 자신의 기여를 이해할 수 있도록, Task 특성에 맞는 작업 전후 커뮤니케이션을 설계합니다.</p>
+          <h2 id="landing-title">작업 메시지는 Worker의 경험에 어떤 차이를 만들까요?</h2>
+          <p class="hero-lead">Crowd Worker의 내재적 동기와 작업 경험까지 고려하는 Crowd Task Message Design System</p>
+          <p class="hero-support">Task Message Studio는 Worker가 작업의 의미와 자신의 기여를 이해할 수 있도록 Task 특성에 맞는 작업 전후 커뮤니케이션을 설계합니다.</p>
         </section>
 
         <section id="why-motivation" class="overview-section motivation-section" aria-labelledby="motivation-title">
@@ -81,11 +81,10 @@
           <div class="crowd-work-meaning" aria-labelledby="crowd-meaning-title">
             <div><span>What does this mean for crowd work?</span><h3 id="crowd-meaning-title">그렇다면 Crowd Work에서는 어떨까요?</h3></div>
             <div class="crowd-work-copy"><p><strong>금전적 보상은 Crowd Work에서 중요합니다.</strong> Task Message Studio는 보상의 중요성을 부정하거나 대체하려는 시스템이 아닙니다.</p><p>대신 Worker가 작업을 단지 “보상을 받기 위해 해야 하는 일”로만 경험하지 않고, 자신의 판단과 작업의 의미, 기여를 이해할 수 있도록 작업 커뮤니케이션을 지원합니다.</p></div>
-            <ol class="motivation-logic" aria-label="Crowd Work에서 SDT로 이어지는 배경"><li>공정한 보상</li><li>다양한 동기</li><li>더 자율적인 작업 경험</li><li>SDT</li></ol>
           </div>
 
           <a class="motivation-to-sdt" href="#why-sdt" aria-label="Self-Determination Theory 설명으로 이동">
-            <span>그렇다면 Worker가 작업을 보다 자율적으로 경험하도록 어떻게 지원할 수 있을까요?</span>
+            <span>Worker에게 더 좋은 작업 경험을 제공하려면 무엇이 달라져야 할까요?</span>
             <strong>Self-Determination Theory</strong><i class="lucide-arrow-down" aria-hidden="true"></i>
           </a>
         </section>
@@ -106,7 +105,7 @@
         <section id="why-task-messages" class="overview-section message-bridge-section" aria-labelledby="message-bridge-title">
           <div class="message-bridge-copy">
             <span>Why apply SDT to task messages?</span>
-            <h2 id="message-bridge-title">메시지는 Requester와 Worker가 만나는 첫 번째 작업 경험입니다.</h2>
+            <h2 id="message-bridge-title">메시지는 Requester와 Worker가 만나는 첫 번째 접점입니다.</h2>
             <p>같은 작업이라도 어떻게 전달하는지에 따라 Worker가 경험하는 의미와 동기는 달라질 수 있습니다. Task Message Studio는 Task 특성을 먼저 분석하고, 필요한 SDT 요소를 선택하거나 우선순위를 조정한 뒤 Worker 메시지에 반영합니다.</p>
           </div>
           <ol class="system-pipeline" aria-label="SDT 기반 메시지 설계 과정">
@@ -160,7 +159,7 @@
             <article class="worker-flow-preview">
               <div class="preview-phase"><span>After-task</span><small>작업 완료 후</small></div>
               <div class="worker-preview-image">
-                <img src="assets/worker-experience/worker-after-task.png?v=20260824" width="1418" height="1156" loading="lazy" alt="Virtual Receipt OCR Task의 실제 작업 완료 후 화면">
+                <img src="assets/worker-experience/worker-after-task.png?v=20260826-mw2-post" width="759" height="632" loading="lazy" alt="Receipt review complete 작업 완료 후 메시지 화면">
               </div>
               <div id="worker-after-frame-keywords" class="message-annotations" aria-live="polite"></div>
             </article>
@@ -175,21 +174,21 @@
           </div>
           <ol class="how-preview-steps">
             <li><div class="how-step-copy"><span>STEP 1</span><h3>작업 정보 입력</h3><p>작업 목적, Task Type, Worker가 수행할 내용과 메시지 참고 정보를 입력합니다.</p></div><div class="mini-ui-preview"><label>작업 제목</label><div class="mini-form-control">도로 장면 객체 분류</div><label>작업자가 할 일</label><div class="mini-form-control muted">보행자·차량·장애물 분류</div></div></li>
-            <li><div class="how-step-copy"><span>STEP 2</span><h3>작업 특성 분석</h3><p>선택한 Task Type에 연결된 핵심·보조 메시지 전략을 확인합니다.</p></div><div class="mini-ui-preview"><small>Applied Message Strategy</small><div class="mini-support-row"><b>Competence</b><span>Core</span></div><div class="mini-support-row"><b>Appreciation</b><span>Supporting</span></div><p>Task Type별 고정 매핑을 메시지 설계 기준으로 사용합니다.</p></div></li>
-            <li><div class="how-step-copy"><span>STEP 3</span><h3>전략 기반 메시지 생성</h3><p>핵심·보조 전략을 바탕으로 Before / After 후보 메시지를 생성합니다.</p></div><div class="mini-ui-preview mini-candidates"><div><span class="candidate-frame-tag">Competence</span><p>세심한 판단이 데이터 품질을…</p></div><div><span class="candidate-frame-tag">Appreciation</span><p>들여 주신 시간과 노력은…</p></div></div></li>
+            <li><div class="how-step-copy"><span>STEP 2</span><h3>작업 특성 분석</h3><p>선택한 Task Type에 연결된 핵심·보조 메시지 전략을 확인합니다.</p></div><div class="mini-ui-preview"><small>Applied Message Strategy</small><div class="mini-support-row"><b>Competence</b><span>Core</span></div><div class="mini-support-row"><b>Relatedness</b><span>Supporting</span></div><p>Task Type별 고정 매핑을 메시지 설계 기준으로 사용합니다.</p></div></li>
+            <li><div class="how-step-copy"><span>STEP 3</span><h3>전략 기반 메시지 생성</h3><p>핵심·보조 전략을 바탕으로 Before / After 후보 메시지를 생성합니다.</p></div><div class="mini-ui-preview mini-candidates"><div><span class="candidate-frame-tag">Competence</span><p>세심한 판단이 데이터 품질을…</p></div><div><span class="candidate-frame-tag">Relatedness</span><p>들여 주신 시간과 노력은…</p></div></div></li>
             <li><div class="how-step-copy"><span>STEP 4</span><h3>메시지 검토 및 수정</h3><p>적용된 핵심·보조 전략을 확인하고 메시지를 선택·수정합니다.</p></div><div class="mini-ui-preview"><div class="mini-review-title"><i class="lucide-badge-check"></i><b>Competence</b><span>핵심</span></div><p>신중한 판단이 중요한 작업이므로 Worker의 판단 능력을 인정하는 표현을 확인합니다.</p><div class="mini-textarea">최종 메시지를 직접 수정할 수 있습니다.</div></div></li>
             <li><div class="how-step-copy"><span>STEP 5</span><h3>Worker에게 배포</h3><p>Worker Link를 생성합니다. Worker는 작업 전과 완료 후 메시지를 경험합니다.</p></div><div class="mini-ui-preview"><small>작업자 접속 URL</small><div class="mini-share-link">https://…/#worker?taskId=… <i class="lucide-copy"></i></div><div class="mini-worker-flow"><span>Before</span><i class="lucide-arrow-right"></i><span>Task</span><i class="lucide-arrow-right"></i><span>After</span></div></div></li>
           </ol>
         </section>
 
-        <section id="onboarding-ready" class="start-design-section" aria-labelledby="start-design-title">
-          <span>설계 준비 완료</span><h2 id="start-design-title">첫 번째 작업 메시지를 설계해 보세요.</h2><p>Task 분석과 SDT 선택이 실제 Worker 메시지로 이어지는 방식을 확인했습니다.</p><button id="btn-start-designing" type="button" class="btn btn-primary"><i class="lucide-clipboard-edit"></i>메시지 설계 시작</button>
+        <section id="onboarding-ready" class="start-design-section" aria-label="메시지 설계 시작">
+          <button id="btn-start-designing" type="button" class="btn btn-primary"><i class="lucide-clipboard-edit"></i>메시지 설계 시작</button>
         </section>
 
         <div id="workspace-shell" class="workspace-shell hidden" aria-hidden="true">
         <section id="requester-workspace" class="workspace-entry" aria-labelledby="workspace-title-heading">
           <div class="workspace-entry-copy"><span>Requester Workspace</span><h2 id="workspace-title-heading">먼저 작업에 대해 알려주세요.</h2><p>입력한 내용을 바탕으로 작업 특성과 작업자에게 필요한 동기부여 전략을 분석합니다.</p></div>
-          <div class="workspace-sdt-context"><div><strong>Strategy-based Message Design</strong><span>선택한 Task Type에 따라 Autonomy · Competence · Appreciation의 핵심·보조 전략을 적용합니다.</span></div><button id="btn-workspace-sdt" type="button" class="btn btn-secondary-quiet">Why SDT?</button></div>
+          <div class="workspace-sdt-context"><div><strong>Strategy-based Message Design</strong><span>선택한 Task Type에 따라 Autonomy · Competence · Relatedness의 핵심·보조 전략을 적용합니다.</span></div><button id="btn-workspace-sdt" type="button" class="btn btn-secondary-quiet">Why SDT?</button></div>
           <ol id="requester-progress" class="requester-progress" aria-label="메시지 설계 진행 상태">
             <li class="active" data-workflow-step="input" aria-current="step"><span>1</span><strong>작업 정보</strong></li>
             <li data-workflow-step="generate"><span>2</span><strong>메시지 생성</strong></li>
@@ -345,7 +344,7 @@
                       </div>
                     </div>
                     <div class="form-group time-limit-field" style="margin-top: 1rem;">
-                      <label for="task-time-limit">단일 작업 제한 시간</label>
+                      <label for="task-time-limit">작업 제한 시간</label>
                       <div class="input-with-suffix">
                         <input type="number" id="task-time-limit" class="form-control" step="1" min="1" max="180" value="" placeholder="15">
                         <span class="input-suffix">분</span>
@@ -401,9 +400,6 @@
                   <p class="factor-panel-desc">
                     에이전트가 작업 특성과 선택 프레임을 확인한 뒤 후보 문구를 만들었습니다. 필요하면 아래 후보를 선택하고 최종 메시지를 직접 수정할 수 있습니다.
                   </p>
-                  <div class="factor-analysis-path" aria-label="분석 경로">
-                    <span id="factor-primary-task">Task Type</span><i class="lucide-arrow-right"></i><span>Strategy Mapping</span><i class="lucide-arrow-right"></i><span id="factor-frame-summary">Applied Strategies</span><i class="lucide-arrow-right"></i><span>Message</span>
-                  </div>
                   <div class="message-context-summary" aria-label="Message Context">
                     <div class="message-context-heading"><span>MESSAGE CONTEXT</span><p>Task Type은 Worker의 작업 경험을 설명하며 Task Category를 대체하지 않습니다.</p></div>
                     <dl>
@@ -575,7 +571,7 @@
                 <span id="worker-spec-reward" class="spec-value" style="color: var(--color-teal); font-size:1.1rem;"></span>
               </div>
               <div class="spec-item">
-                <span class="spec-label">단일 작업 제한 시간</span>
+                <span class="spec-label">작업 제한 시간</span>
                 <span id="worker-spec-time-limit" class="spec-value">15 분</span>
               </div>
               <div class="spec-item">
@@ -660,7 +656,7 @@
 
 
 
-        <!-- Worker Phase 3: Post-Task Appreciation Celebration Screen -->
+        <!-- Worker Phase 3: Post-Task completion screen -->
         <div id="worker-post-task" class="glass-card hidden" style="text-align: center; padding: 3rem 2rem;">
           <div class="success-header-circle">
             <i class="lucide-award"></i>
@@ -669,8 +665,8 @@
           <h2 class="gradient-title" style="font-size: 1.8rem; margin-bottom: 0.5rem;">작업 완료!</h2>
           <p class="subtitle" style="margin-bottom: 1.5rem;">제출해 주신 소중한 데이터가 연구 데이터베이스에 안전하게 기록되었습니다.</p>
           
-          <!-- Appreciation Quote generated by AI -->
-          <div id="post-task-appreciation-text" class="post-task-appreciation"></div>
+          <!-- Post-task message generated by AI -->
+          <div id="post-task-message-text" class="post-task-message"></div>
 
           <div class="worker-metrics-summary">
             <div class="metric-box">
@@ -692,8 +688,8 @@
   </div>
 
   <!-- App Custom Logic Scripts -->
-  <script src="js/task-types.js?v=20260826-frame-keywords"></script>
-  <script src="js/generator.js?v=20260826-frame-keywords"></script>
-  <script src="js/app.js?v=20260826-survey-section"></script>
+  <script src="js/task-types.js?v=20260826-relatedness-labels"></script>
+  <script src="js/generator.js?v=20260826-relatedness-labels"></script>
+  <script src="js/app.js?v=20260826-relatedness-labels"></script>
 </body>
 </html>

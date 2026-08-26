@@ -10,6 +10,14 @@
   const STRATEGY_LABELS = {
     autonomy: "Autonomy",
     competence: "Competence",
+    appreciation: "Relatedness"
+  };
+
+  // Keep the terminology reported by the survey separate from the labels used
+  // by the message-design system. The evidence table preserves the source data.
+  const SURVEY_STRATEGY_LABELS = {
+    autonomy: "Autonomy",
+    competence: "Competence",
     appreciation: "Appreciation"
   };
 
@@ -34,9 +42,9 @@
       before: "careful judgment and accuracy",
       after: "accuracy and careful judgment"
     },
-    Appreciation: {
-      before: "time and contribution",
-      after: "time, effort, and contribution"
+    Relatedness: {
+      before: "connection and contribution",
+      after: "contribution and shared purpose"
     }
   };
 
@@ -82,7 +90,7 @@
       psychologicalType: "데이터 수집·생성 작업",
       burden: "작성 방식 선택과 결과물을 완성하는 과정에서 생길 수 있는 부담",
       purpose: "자신의 방식으로 수행할 수 있음을 중심에 두고 시간과 노력을 인정",
-      mappingReason: "Data Collection / Creation에는 Autonomy를 핵심으로, Appreciation을 보조로 적용합니다.",
+      mappingReason: "Data Collection / Creation에는 Autonomy를 핵심으로, Relatedness를 보조로 적용합니다.",
       reviewReasons: {
         autonomy: "요구 범위 안에서 Worker가 편한 방식과 순서로 결과물을 만들 수 있음을 안내합니다.",
         competence: "필요한 자료를 만들고 다듬을 수 있는 수행 능력을 차분하게 신뢰합니다.",
@@ -106,7 +114,7 @@
       psychologicalType: "검색·검증 작업",
       burden: "여러 출처와 세부 정보를 대조하는 과정에서 생길 수 있는 정확도 부담",
       purpose: "근거를 확인하는 판단 능력을 중심에 두고 세심한 노력과 기여를 인정",
-      mappingReason: "Search / Verification에는 Competence를 핵심으로, Appreciation을 보조로 적용합니다.",
+      mappingReason: "Search / Verification에는 Competence를 핵심으로, Relatedness를 보조로 적용합니다.",
       reviewReasons: {
         autonomy: "확인 가능한 근거 안에서 Worker가 판단 순서와 방식을 조절할 수 있게 합니다.",
         competence: "출처를 대조하고 세부 정보를 확인하는 Worker의 수행 능력을 신뢰합니다.",
@@ -154,7 +162,7 @@
       psychologicalType: "콘텐츠 모더레이션 작업",
       burden: "불편할 수 있는 콘텐츠 노출과 정책 기준 적용에서 생기는 정서적 부담",
       purpose: "부담이 있는 작업에 들인 시간과 노력을 인정하고 속도와 판단에 대한 통제감을 보완",
-      mappingReason: "Content Moderation에는 Appreciation을 핵심으로, Autonomy를 보조로 적용합니다.",
+      mappingReason: "Content Moderation에는 Relatedness를 핵심으로, Autonomy를 보조로 적용합니다.",
       reviewReasons: {
         autonomy: "불편할 때 잠시 멈추거나 안내 기준 안에서 자신의 속도로 판단할 수 있음을 알립니다.",
         competence: "정책 기준을 적용하는 Worker의 판단 능력을 과장 없이 신뢰합니다.",
@@ -178,7 +186,7 @@
       psychologicalType: "설문·온라인 실험",
       burden: "개인 의견과 시간을 제공하지만 결과 활용 맥락이 바로 보이지 않을 수 있음",
       purpose: "참여자의 시간과 응답 가치를 인정하고 자신의 판단에 따라 응답할 수 있음을 보완",
-      mappingReason: "Surveys / Experiments에는 Appreciation을 핵심으로, Autonomy를 보조로 적용합니다.",
+      mappingReason: "Surveys / Experiments에는 Relatedness를 핵심으로, Autonomy를 보조로 적용합니다.",
       reviewReasons: {
         autonomy: "정답을 유도하지 않고 Worker가 자신의 판단과 경험에 따라 응답할 수 있게 합니다.",
         competence: "질문을 읽고 자신의 경험을 바탕으로 응답할 수 있음을 명확하게 안내합니다.",
@@ -239,6 +247,7 @@
     TASK_TYPES,
     DEFAULT_TASK_TYPE,
     STRATEGY_LABELS,
+    SURVEY_STRATEGY_LABELS,
     FRAME_PHASE_KEYWORDS,
     SURVEY_SAMPLE_SIZE,
     MESSAGE_LENGTH_EVIDENCE,

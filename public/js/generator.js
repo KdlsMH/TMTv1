@@ -239,7 +239,7 @@ ${rawText.trim()}
   toFrameLabel(frame = "") {
     if (/Autonomy/.test(frame)) return "Autonomy";
     if (/Competence/.test(frame)) return "Competence";
-    if (/Appreciation/.test(frame)) return "Appreciation";
+    if (/Relatedness/.test(frame)) return "Relatedness";
     return frame;
   }
 
@@ -268,7 +268,7 @@ ${rawText.trim()}
     const labels = {
       autonomy: "Autonomy",
       competence: "Competence",
-      relatedness: "Appreciation"
+      relatedness: "Relatedness"
     };
     const icons = { autonomy: "lucide-sliders-horizontal", competence: "lucide-badge-check", relatedness: "lucide-heart-handshake" };
     const reasons = this.getFrameRule(primaryTaskType).reviewReasons;
@@ -333,7 +333,7 @@ Input:
 - Generation phase: ${phase}
 
 Step 1. Preserve the fixed Task Type strategy priority.
-- Generate three candidates in this exact order: Appreciation, Competence, and Autonomy.
+- Generate three candidates in this exact order: Relatedness, Competence, and Autonomy.
 	- Each candidate and each final message must contain 4 or 5 complete, naturally connected sentences.
 	- Never return 3 or fewer sentences or 6 or more sentences.
 	- Both finalBeforeText and finalAfterText must naturally reflect Core and Supporting.
@@ -355,7 +355,7 @@ Step 2. Generate a before-task message under these constraints:
 - No guilt-inducing language
 - No productivity pressure
 - Mention the concrete task goal once
-- Mention contribution context when Appreciation is selected, without exaggerating impact
+- When Relatedness is selected, connect the worker's contribution to the shared task purpose without exaggerating impact
 - Acknowledge fatigue or emotional burden only when it matches the selected frames
 - Write as one coherent short paragraph, not as disconnected constraint-satisfying sentences
 - Do not mention SDT, frame names, category rules, or internal system rules in worker-facing messages
@@ -368,8 +368,8 @@ Step 3. Generate an after-task message candidate:
 - Begin with a natural acknowledgment that the task is complete
 - Thank the worker for the time or effort they spent on the task
 - Explain what the worker's contribution means for the selected Task Type
-- Use this structure: Core + Supporting + common post-task appreciation and contribution
-- Keep the common appreciation restrained so it never replaces or outweighs Core and Supporting
+- Use this structure: Core + Supporting + common post-task thanks and contribution
+- Keep the common thanks restrained so it never replaces or outweighs Core and Supporting
 - Avoid excessive praise
 - Make the thanks, contribution, and reward feel connected in context
 - Close the current task only; do not invite the worker to the next task
@@ -398,11 +398,11 @@ Return JSON only:
         ? "반복되는 판단으로 약간의 피로가 있을 수 있지만"
         : "짧고 명확한 흐름으로 진행되는 작업입니다";
 
-    const taskLengthPhrase = `단일 작업 제한 시간은 ${profile.singleTaskLimitMinutes || 15}분입니다`;
+    const taskLengthPhrase = `작업 제한 시간은 ${profile.singleTaskLimitMinutes || 15}분입니다`;
     const autonomyPhrase = "안내 기준 안에서 자신의 판단과 속도에 따라 진행할 수 있습니다";
 
     if (phase === "before") {
-      if (strategy === "appreciation") {
+      if (strategy === "relatedness") {
         return `이번 작업의 구체적인 목표는 “${objective}”로 안내되어 있습니다. 작업을 위해 시간을 내어 주신 점을 소중하게 받아들이고 있습니다. 남겨 주실 결과는 전체 자료를 정리하고 검토하는 데 신중히 참고하겠습니다. ${fatiguePhrase}, ${taskLengthPhrase}. 한 항목씩 살펴보는 데 들여 주시는 노력도 중요한 과정으로 기록하겠습니다.`;
       }
       if (strategy === "competence") {
@@ -417,7 +417,7 @@ Return JSON only:
     if (strategy === "competence") {
       return `작업을 끝까지 마무리하는 데 들인 시간과 노력에 감사드립니다. 안내 기준을 세심하게 적용해 주신 덕분에 제출된 결과를 안정적으로 검토할 수 있습니다. ${taskTypeContribution} 작업자의 판단은 요청자가 안내한 활용 목적에 맞춰 신중하게 참고하겠습니다. 승인된 보상금 $${reward}이(가) 기록되었습니다.`;
     }
-    if (strategy === "appreciation") {
+    if (strategy === "relatedness") {
       return `작업을 마무리해 주시고 시간과 노력을 들여 주신 점에 감사드립니다. 여러 항목을 끝까지 살펴봐 주신 과정을 중요하게 받아들이고 있습니다. ${taskTypeContribution} 남겨 주신 결과는 요청자가 안내한 범위 안에서 신중하게 사용하겠습니다. 승인된 보상금 $${reward}이(가) 기록되었습니다.`;
     }
     if (strategy === "autonomy") {
@@ -457,8 +457,8 @@ Return JSON only:
       taskType
     );
 
-    const beforeStrategies = ["appreciation", "competence", "autonomy"];
-    const afterStrategies = ["appreciation", "competence", "autonomy"];
+    const beforeStrategies = ["relatedness", "competence", "autonomy"];
+    const afterStrategies = ["relatedness", "competence", "autonomy"];
 
     const beforeOptions = beforeStrategies.map(strategy =>
       this.synthesizeLocalMessage(profile, strategy, "before", reward)
@@ -471,8 +471,8 @@ Return JSON only:
     return {
       beforeOptions,
       afterOptions,
-      beforeLabels: ["감사/기여 인정", "유능감/수행 신뢰", "자율성/선택 존중"],
-      afterLabels: ["감사/기여 인정", "유능감/수행 신뢰", "자율성/선택 존중"],
+      beforeLabels: ["관계성/기여 연결", "유능감/수행 신뢰", "자율성/선택 존중"],
+      afterLabels: ["관계성/기여 연결", "유능감/수행 신뢰", "자율성/선택 존중"],
       psychologicalFactors: {
         inferredTaskTypes: profile.inferredTaskTypes,
         primaryTaskType: profile.primaryTaskType,
@@ -496,8 +496,8 @@ Return JSON only:
       taskTypeLabel: profile.taskTypeLabel,
       taskTypeReason: profile.taskTypeReason,
       reviewCriteria: this.buildReviewCriteria(profile),
-      beforeCandidateFrames: ["Appreciation", "Competence", "Autonomy"],
-      afterCandidateFrames: ["Appreciation", "Competence", "Autonomy"],
+      beforeCandidateFrames: ["Relatedness", "Competence", "Autonomy"],
+      afterCandidateFrames: ["Relatedness", "Competence", "Autonomy"],
       primaryTaskType: profile.primaryTaskType,
       psychologicalBurden: profile.psychologicalBurden,
       motivationalOpportunity: profile.motivationalOpportunity,
@@ -512,7 +512,7 @@ Return JSON only:
   framesToSdtNeeds(frames = []) {
     const needs = [];
     frames.forEach(frame => {
-      if (/Appreciation/.test(frame)) needs.push("relatedness");
+      if (/Relatedness/.test(frame)) needs.push("relatedness");
       if (/Competence/.test(frame)) needs.push("competence");
       if (/Autonomy/.test(frame)) needs.push("autonomy");
     });
@@ -773,7 +773,7 @@ Return JSON only:
     const afterCoverage = selectedIndexes.map(index => this.includesStrategyContribution(finalAfterText, afterOptions[index], "after", profile.title));
     const beforeContributionCounts = selectedIndexes.map(index => this.countStrategyContributions(finalBeforeText, beforeOptions[index], "before", profile.title));
     const afterContributionCounts = selectedIndexes.map(index => this.countStrategyContributions(finalAfterText, afterOptions[index], "after", profile.title));
-    const leakedStrategyTerms = /\b(?:Autonomy|Competence|Appreciation|SDT|Core(?:\s+Strategy)?|Supporting(?:\s+Strategy)?)\b/i.test(`${finalBeforeText} ${finalAfterText}`);
+    const leakedStrategyTerms = /\b(?:Autonomy|Competence|Relatedness|SDT|Core(?:\s+Strategy)?|Supporting(?:\s+Strategy)?)\b/i.test(`${finalBeforeText} ${finalAfterText}`);
     const beforeSentences = this.splitSentences(finalBeforeText);
     const afterSentences = this.splitSentences(finalAfterText);
     const crossPhaseOverlap = afterSentences.filter(afterSentence => beforeSentences
@@ -796,7 +796,7 @@ Return JSON only:
       postEffortThanksIncluded: this.hasPostEffortThanks(finalAfterText),
       postContributionExplained: this.hasPostContributionMeaning(finalAfterText),
       postContributionMatchesTaskType: this.hasTaskTypeContribution(finalAfterText, profile.taskType),
-      postAppreciationBalanced: postThanksSentenceCount >= 1
+      postThanksBalanced: postThanksSentenceCount >= 1
         && postThanksSentenceCount <= 2
         && afterContributionCounts[0] > afterContributionCounts[1],
       postContributionClaimModest: this.hasModestContributionClaim(finalAfterText),

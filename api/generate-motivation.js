@@ -92,12 +92,12 @@ const buildMessages = (payload) => {
     role: "system",
     content: [
       "당신은 크라우드소싱 작업자에게 전달할 한국어 안내 메시지를 작성하는 UX 라이터입니다.",
-      "Task Type에 고정 매핑된 Autonomy, Competence, Appreciation 전략을 사용하되 Worker용 문장에는 전략 이름을 직접 드러내지 마세요.",
+      "Task Type에 고정 매핑된 Autonomy, Competence, Relatedness 전략을 사용하되 Worker용 문장에는 전략 이름을 직접 드러내지 마세요.",
       "작업 시작 전 후보 3개, 작업 완료 후 후보 3개, 최종 작업 전/후 문구를 JSON으로만 반환하세요.",
       "beforeOptions와 afterOptions의 각 후보 및 finalBeforeText와 finalAfterText는 반드시 서로 자연스럽게 이어지는 완결된 한국어 4~5문장으로 작성하세요.",
       "3문장 이하 또는 6문장 이상은 허용하지 않으며, 짧은 구절을 마침표로 나누거나 같은 의미를 반복해 문장 수만 맞추지 마세요.",
       "문구는 과장, 압박, 죄책감, 홍보성 표현 없이 차분하고 구체적으로 작성하세요.",
-      "후보군에는 Appreciation, Competence, Autonomy 관점을 각각 포함하세요.",
+      "후보군에는 Relatedness, Competence, Autonomy 관점을 각각 포함하세요.",
       "finalBeforeText와 finalAfterText에는 아래 Core와 Supporting을 모두 자연스럽게 반영하세요.",
       "Core는 두 최종 메시지의 중심 전략이며, Supporting은 Core를 보완하는 전략입니다. 두 요소를 같은 비중으로 나열하지 마세요.",
       "전략별 고정 키워드를 끼워 넣지 말고, 각 요소의 의미가 문장 전체의 메시지 전략에 드러나게 하세요.",
@@ -151,7 +151,7 @@ const buildMessages = (payload) => {
           primaryPsychologicalType: taskType.psychologicalType,
           psychologicalBurdens: ["작업자가 느낄 수 있는 부담"],
           motivationalFactors: ["동기 부여에 활용할 수 있는 요인"],
-          sdtNeeds: selectedFrames.map(frame => frame === "Appreciation" ? "relatedness" : frame.toLowerCase()),
+          sdtNeeds: selectedFrames.map(frame => frame === "Relatedness" ? "relatedness" : frame.toLowerCase()),
           selectedFrames,
           frameSelectionReason: taskType.mappingReason,
           surveyEvidence: {
@@ -163,12 +163,12 @@ const buildMessages = (payload) => {
           constraintsApplied: ["비압박", "비과장", "구체적 기준 유지"]
         },
         beforeOptions: [
-          { label: "감사/기여 인정", frame: "Appreciation", message: "자연스럽게 이어지는 완결된 4~5문장의 작업 시작 전 후보 문구" },
+          { label: "관계성/기여 연결", frame: "Relatedness", message: "자연스럽게 이어지는 완결된 4~5문장의 작업 시작 전 후보 문구" },
           { label: "유능감/판단 신뢰", frame: "Competence", message: "자연스럽게 이어지는 완결된 4~5문장의 작업 시작 전 후보 문구" },
           { label: "자율성/선택 존중", frame: "Autonomy", message: "자연스럽게 이어지는 완결된 4~5문장의 작업 시작 전 후보 문구" }
         ],
         afterOptions: [
-          { label: "감사/기여 인정", frame: "Appreciation", message: "자연스럽게 이어지는 완결된 4~5문장의 작업 완료 후 후보 문구" },
+          { label: "관계성/기여 연결", frame: "Relatedness", message: "자연스럽게 이어지는 완결된 4~5문장의 작업 완료 후 후보 문구" },
           { label: "유능감/수행 신뢰", frame: "Competence", message: "자연스럽게 이어지는 완결된 4~5문장의 작업 완료 후 후보 문구" },
           { label: "자율성/선택 존중", frame: "Autonomy", message: "자연스럽게 이어지는 완결된 4~5문장의 작업 완료 후 후보 문구" }
         ],

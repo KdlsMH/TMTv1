@@ -158,8 +158,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const factorMotivators = document.getElementById("factor-motivators");
   const factorSelectionReason = document.getElementById("factor-selection-reason");
   const reviewCriteriaList = document.getElementById("review-criteria-list");
-  const factorPrimaryTask = document.getElementById("factor-primary-task");
-  const factorFrameSummary = document.getElementById("factor-frame-summary");
   const factorTaskTypeLabel = document.getElementById("factor-task-type-label");
   const factorTaskTypeReason = document.getElementById("factor-task-type-reason");
   const factorTaskContext = document.getElementById("factor-task-context");
@@ -205,7 +203,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnSubmitAnnotation = document.getElementById("btn-submit-annotation");
 
   // DOM Elements - Worker Post-Task Completed
-  const postTaskAppreciationText = document.getElementById("post-task-appreciation-text");
+  const postTaskMessageText = document.getElementById("post-task-message-text");
   const postMetricReward = document.getElementById("post-metric-reward");
   const btnWorkerExport = document.getElementById("btn-worker-export");
   const btnBackToRequester = document.getElementById("btn-back-to-requester");
@@ -251,10 +249,10 @@ document.addEventListener("DOMContentLoaded", () => {
   let selectedTaskType = TaskTypeConfig.DEFAULT_TASK_TYPE;
   let synthesizedBeforeOptions = [];
   let synthesizedAfterOptions = [];
-  let synthesizedBeforeLabels = ["감사/기여 인정", "유능감/수행 신뢰", "자율성/선택 존중"];
-  let synthesizedAfterLabels = ["감사/기여 인정", "유능감/수행 신뢰", "자율성/선택 존중"];
-  let synthesizedBeforeFrames = ["Appreciation", "Competence", "Autonomy"];
-  let synthesizedAfterFrames = ["Appreciation", "Competence", "Autonomy"];
+  let synthesizedBeforeLabels = ["관계성/기여 연결", "유능감/수행 신뢰", "자율성/선택 존중"];
+  let synthesizedAfterLabels = ["관계성/기여 연결", "유능감/수행 신뢰", "자율성/선택 존중"];
+  let synthesizedBeforeFrames = ["Relatedness", "Competence", "Autonomy"];
+  let synthesizedAfterFrames = ["Relatedness", "Competence", "Autonomy"];
   let selectedBeforeOptionIndex = 0;
   let selectedAfterOptionIndex = 0;
   let latestPsychologicalFactors = null;
@@ -423,8 +421,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const renderTaskTypeStrategySummary = (taskTypeValue = selectedTaskType) => {
     const selection = TaskTypeConfig.getStrategySelection(taskTypeValue);
-    if (taskTypeCoreStrategy) taskTypeCoreStrategy.textContent = `핵심 · ${selection.coreStrategy} · ${selection.corePercentage.toFixed(1)}%`;
-    if (taskTypeSupportingStrategy) taskTypeSupportingStrategy.textContent = `보조 · ${selection.supportingStrategy} · ${selection.supportingPercentage.toFixed(1)}%`;
+    if (taskTypeCoreStrategy) taskTypeCoreStrategy.textContent = `핵심 · ${selection.coreStrategy}`;
+    if (taskTypeSupportingStrategy) taskTypeSupportingStrategy.textContent = `보조 · ${selection.supportingStrategy}`;
   };
 
   const renderWorkerFrameKeywords = (container, selectedFrames = [], phase = "before") => {
@@ -452,12 +450,14 @@ document.addEventListener("DOMContentLoaded", () => {
     surveyEvidenceTableBody.innerHTML = "";
     Object.values(TaskTypeConfig.TASK_TYPES).forEach(type => {
       const selection = TaskTypeConfig.getStrategySelection(type.key);
+      const [coreKey, supportingKey, thirdKey] = type.strategyOrder;
+      const surveyLabels = TaskTypeConfig.SURVEY_STRATEGY_LABELS;
       const row = document.createElement("tr");
       [
         type.label,
-        `${selection.coreStrategy} (${selection.corePercentage.toFixed(1)}%)`,
-        `${selection.supportingStrategy} (${selection.supportingPercentage.toFixed(1)}%)`,
-        `${selection.thirdStrategy} (${selection.thirdPercentage.toFixed(1)}%)`
+        `${surveyLabels[coreKey]} (${selection.corePercentage.toFixed(1)}%)`,
+        `${surveyLabels[supportingKey]} (${selection.supportingPercentage.toFixed(1)}%)`,
+        `${surveyLabels[thirdKey]} (${selection.thirdPercentage.toFixed(1)}%)`
       ].forEach(value => {
         const cell = document.createElement("td");
         cell.textContent = value;
@@ -750,11 +750,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const afterLabels = ensureThree(extractOptionLabels(raw.afterOptions, fallback.afterLabels), fallback.afterLabels);
     const beforeFrames = ensureThree(
       extractOptionFrames(raw.beforeOptions, fallback.beforeCandidateFrames),
-      fallback.beforeCandidateFrames || ["Appreciation", "Competence", "Autonomy"]
+      fallback.beforeCandidateFrames || ["Relatedness", "Competence", "Autonomy"]
     );
     const afterFrames = ensureThree(
       extractOptionFrames(raw.afterOptions, fallback.afterCandidateFrames),
-      fallback.afterCandidateFrames || ["Appreciation", "Competence", "Autonomy"]
+      fallback.afterCandidateFrames || ["Relatedness", "Competence", "Autonomy"]
     );
     const psychologicalFactors = raw.psychologicalFactors || {
       inferredTaskTypes: [],
@@ -843,7 +843,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const labelMap = {
       "Autonomy": "자율성 지지",
       "Competence": "유능감",
-      "Appreciation": "감사·기여 인정"
+      "Relatedness": "관계성"
     };
     return labelMap[label] || label;
   };
@@ -852,7 +852,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const frame = String(value || "");
     if (/Autonomy|자율/.test(frame)) return "Autonomy";
     if (/Competence|유능/.test(frame)) return "Competence";
-    if (/Appreciation|감사/.test(frame)) return "Appreciation";
+    if (/Relatedness|관계/.test(frame)) return "Relatedness";
     return "";
   };
 
@@ -913,13 +913,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (factorContextRisk) factorContextRisk.textContent = riskLabels[taskRiskLevelSelect?.value] || "—";
     if (factorContextFatigue) factorContextFatigue.textContent = fatigueLabels[taskFatigueLevelSelect?.value] || "—";
     if (factorContextTime) factorContextTime.textContent = taskTimeLimitBox?.value ? `${taskTimeLimitBox.value} min` : "—";
-
-    if (factorPrimaryTask) {
-      factorPrimaryTask.textContent = factors.taskTypeLabel || factors.primaryTaskType || "Task Type";
-    }
-    if (factorFrameSummary) {
-      factorFrameSummary.textContent = (factors.selectedFrames || []).map(toDisplayFactorLabel).join(" → ") || "선택 프레임";
-    }
 
     if (factorSelectionReason) {
       factorSelectionReason.textContent = factors.frameSelectionReason || "새 카테고리 규칙에 따라 작업 특성과 심리 프레임을 연결했습니다.";
@@ -2334,7 +2327,7 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem("agentic_results", JSON.stringify(results));
     saveResultToServer(sessionRecord);
 
-    postTaskAppreciationText.textContent = task.afterText || "성공적으로 어노테이션 임무가 완수되었습니다. 감사합니다!";
+    postTaskMessageText.textContent = task.afterText || "성공적으로 어노테이션 임무가 완수되었습니다. 감사합니다!";
 
     // Bind final UI stats (Only approved reward is shown since accuracy and warnings are removed)
     postMetricReward.textContent = `$${task.reward || "1.50"}`;
