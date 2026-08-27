@@ -104,6 +104,7 @@ const buildMessages = (payload) => {
       "한국어 화자가 실제 requester에게서 받을 법한 자연스러운 안내문처럼 작성하고, 번역투나 지나치게 형식적인 표현을 피하세요.",
       'beforeOptions, afterOptions, finalBeforeText, finalAfterText의 메시지 내용에는 큰따옴표(")를 사용하지 마세요. JSON 구문에 필요한 큰따옴표는 예외입니다.',
       "작업 제목에도 따옴표, 괄호, 굵은 표시 등 불필요한 강조 기호를 추가하지 마세요.",
+      "절대 큰 따옴표를 사용하지 마세요.",
 
       // --------------------------------------------------
       // Pre-task strategy
