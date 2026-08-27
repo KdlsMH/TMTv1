@@ -780,31 +780,12 @@ document.addEventListener("DOMContentLoaded", () => {
     psychologicalFactors.psychologicalBurdens = psychologicalFactors.psychologicalBurdens || raw.psychologicalBurden || [];
     psychologicalFactors.motivationalFactors = psychologicalFactors.motivationalFactors || raw.motivationalOpportunity || [];
 
-    const composedFinalBeforeText = aiGenerator.composeFinalBeforeFromCandidates(
-      title,
-      selectedFrames,
-      beforeMessages,
-      fallback.finalBeforeText || raw.finalBeforeText || beforeMessages[0]
-    );
-    const composedFinalAfterText = aiGenerator.composeFinalAfterFromCandidates(
-      selectedFrames,
-      afterMessages,
-      raw.finalAfterText || fallback.finalAfterText || afterMessages[0]
-    );
-    const finalBeforeText = aiGenerator.ensureStrategyCoverage(
-      composedFinalBeforeText,
-      selectedFrames,
-      beforeMessages,
-      "before",
-      title
-    );
-    const finalAfterText = aiGenerator.ensureStrategyCoverage(
-      composedFinalAfterText,
-      selectedFrames,
-      afterMessages,
-      "after",
-      title
-    );
+    // Use the API's own naturally-written final text directly. Do not let the
+    // local rule-based generator (aiGenerator) recompose or substitute it —
+    // that produced mechanically spliced sentences instead of the model's
+    // natural output.
+    const finalBeforeText = raw.finalBeforeText || beforeMessages[0] || "";
+    const finalAfterText = raw.finalAfterText || afterMessages[0] || "";
 
     return {
       beforeOptions: beforeMessages,
@@ -1359,19 +1340,20 @@ document.addEventListener("DOMContentLoaded", () => {
         setGenerationStep("llm", "done");
       } catch (error) {
         if (waitLogInterval) clearInterval(waitLogInterval);
-        rawResults = { ...fallbackResults, provider: "local" };
         setGenerationStep("llm", "warn");
-        addThoughtLog(`[로컬 생성] 외부 생성 실패: ${error.message}`, "warning");
-        addThoughtLog("[로컬 생성] 저장된 카테고리 규칙으로 후보/최종 문구를 구성합니다.", "process");
-        showToast("외부 생성에 실패해 로컬 규칙 기반 후보를 생성했습니다.");
+        addThoughtLog(`[생성 실패] AI 메시지 생성에 실패했습니다: ${error.message}`, "warning");
+        showToast(`메시지 생성에 실패했습니다: ${error.message}`);
+        previewContainer?.classList.add("hidden");
+        reviewEmptyState?.classList.remove("hidden");
+        setWorkflowStep("input");
+        return;
       }
 
       setGenerationStep("render", "active");
-      let results = normalizeGenerationResult(rawResults, fallbackResults, payload.title);
+      const results = normalizeGenerationResult(rawResults, fallbackResults, payload.title);
       const validationPassed = Object.values(results.generationValidation || {}).every(Boolean);
       if (!validationPassed) {
-        results = normalizeGenerationResult({ ...fallbackResults, provider: "local" }, fallbackResults, payload.title);
-        addThoughtLog("[자동 수정] 핵심·보조 전략 반영 조건을 다시 확인하고 로컬 전략 문구로 최종 메시지를 재구성했습니다.", "warning");
+        addThoughtLog("[메시지 검증] 일부 세부 규칙과 다를 수 있으나, API가 생성한 원문 그대로 사용합니다.", "warning");
       } else {
         addThoughtLog("[메시지 검증] 4~5문장, 핵심·보조 우선순위, Post-task 완료 인지·시간/노력 감사·Task Type별 기여 의미·비과장 조건을 확인했습니다.", "success");
       }
