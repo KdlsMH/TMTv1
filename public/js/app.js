@@ -144,10 +144,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const afterTextBox = document.getElementById("after-text");
   const finalBeforeTextBox = document.getElementById("final-before-text");
   const finalAfterTextBox = document.getElementById("final-after-text");
-  const finalStrategyBadges = document.getElementById("final-strategy-badges");
-  const finalStrategyPrimary = document.getElementById("final-strategy-primary");
-  const finalStrategySecondary = document.getElementById("final-strategy-secondary");
-
   const psychologyFactorPanel = document.getElementById("psychology-factor-panel");
   const llmProviderBadge = document.getElementById("llm-provider-badge");
   const factorTaskTypes = document.getElementById("factor-task-types");
@@ -429,7 +425,20 @@ document.addEventListener("DOMContentLoaded", () => {
   const renderWorkerPreviewFrameKeywords = (taskTypeValue = selectedTaskType) => {
     const selection = TaskTypeConfig.getStrategySelection(taskTypeValue);
     renderWorkerFrameKeywords(workerBeforeFrameKeywords, selection.selectedFrames, "before");
-    renderWorkerFrameKeywords(workerAfterFrameKeywords, selection.selectedFrames, "after");
+    if (workerAfterFrameKeywords) {
+      workerAfterFrameKeywords.innerHTML = "";
+      [
+        ["Meaningfulness", "contribution to OCR improvement"],
+        ["Appreciation", "time and judgment acknowledged"]
+      ].forEach(([frame, keyword], index) => {
+        const item = document.createElement("span");
+        item.dataset.priority = index === 0 ? "core" : "supporting";
+        const label = document.createElement("b");
+        label.textContent = frame;
+        item.append(label, document.createTextNode(` — ${keyword}`));
+        workerAfterFrameKeywords.appendChild(item);
+      });
+    }
   };
 
   const renderSurveyEvidenceTable = () => {
@@ -832,23 +841,6 @@ document.addEventListener("DOMContentLoaded", () => {
       "Relatedness": "관계성"
     };
     return labelMap[label] || label;
-  };
-
-  const toStrategyBadgeLabel = value => {
-    const frame = String(value || "");
-    if (/Autonomy|자율/.test(frame)) return "Autonomy";
-    if (/Competence|유능/.test(frame)) return "Competence";
-    if (/Relatedness|관계/.test(frame)) return "Relatedness";
-    return "";
-  };
-
-  const renderFinalStrategyBadges = (selectedFrames = []) => {
-    const primaryLabel = toStrategyBadgeLabel(selectedFrames[0]);
-    const secondaryLabel = toStrategyBadgeLabel(selectedFrames[1]);
-    const hasMetadata = Boolean(primaryLabel && secondaryLabel);
-    finalStrategyBadges?.classList.toggle("hidden", !hasMetadata);
-    if (finalStrategyPrimary) finalStrategyPrimary.textContent = primaryLabel ? `핵심 · ${primaryLabel}` : "";
-    if (finalStrategySecondary) finalStrategySecondary.textContent = secondaryLabel ? `보조 · ${secondaryLabel}` : "";
   };
 
   const renderPills = (container, items = []) => {
@@ -1264,7 +1256,6 @@ document.addEventListener("DOMContentLoaded", () => {
     synthesizedBeforeOptions = [];
     synthesizedAfterOptions = [];
     latestPsychologicalFactors = null;
-    renderFinalStrategyBadges([]);
     previewContainer?.classList.add("hidden");
     reviewEmptyState?.classList.remove("hidden");
     shareCard?.classList.add("hidden");
@@ -1439,7 +1430,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       renderOptionSelectors();
       renderPsychologicalFactors(results.psychologicalFactors, latestLLMProvider, latestLLMModel);
-      renderFinalStrategyBadges(results.selectedFrames);
 
       beforeTextBox.value = synthesizedBeforeOptions[0];
       afterTextBox.value = synthesizedAfterOptions[0];

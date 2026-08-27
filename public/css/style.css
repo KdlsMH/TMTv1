@@ -3404,34 +3404,6 @@ textarea.form-control,
   line-height: 1.4 !important;
 }
 
-.final-strategy-metadata {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 0.4rem;
-}
-
-.final-strategy-badge {
-  display: inline-flex;
-  align-items: center;
-  min-height: 1.75rem;
-  padding: 0.3rem 0.6rem;
-  border: 1px solid #c7d2fe;
-  border-radius: 999px;
-  background: #eef2ff;
-  color: #3730a3;
-  font-size: 0.68rem;
-  font-weight: 800;
-  line-height: 1.2;
-  white-space: nowrap;
-}
-
-.final-strategy-secondary {
-  border-color: #dbe4f0;
-  background: #f8fafc;
-  color: #475569;
-}
-
 .final-message-layer {
   border-radius: 8px !important;
   background: #f9fafb !important;
@@ -4404,8 +4376,11 @@ body.worker-mode .app-container {
 .sdt-card-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
 
 .sdt-card {
-  min-height: 300px;
-  padding: 1.8rem;
+  display: flex;
+  min-height: 210px;
+  padding: 1.4rem 1.5rem;
+  flex-direction: column;
+  justify-content: center;
   border: 1px solid #dbe4f0;
   border-top: 4px solid #64748b;
   border-radius: 0;
@@ -4415,7 +4390,8 @@ body.worker-mode .app-container {
 .sdt-card[data-sdt="autonomy"] { border-top-color: #4f46e5; }
 .sdt-card[data-sdt="competence"] { border-top-color: #047857; }
 .sdt-card[data-sdt="relatedness"] { border-top-color: #b45309; }
-.sdt-card > i { display: block; margin: 1.4rem 0 0.85rem; color: #334155; font-size: 1.45rem; }
+.sdt-card > i,
+.sdt-card > svg { display: none !important; }
 .sdt-card h3 { color: #0f172a; font-size: 1.18rem; }
 .sdt-card h3 small { display: block; margin-top: 0.2rem; color: #64748b; font-size: 0.76rem; }
 .sdt-card blockquote { margin-top: 0.7rem; color: #334155; font-size: 0.9rem; font-weight: 750; }
@@ -4931,14 +4907,6 @@ body.worker-mode .app-container {
   background-position: right 0.85rem center !important;
   background-repeat: no-repeat !important;
   background-size: 1.2rem 1.2rem !important;
-}
-
-#final-strategy-primary,
-#final-strategy-secondary {
-  border: 0 !important;
-  background: transparent !important;
-  color: #64748b !important;
-  padding-inline: 0 !important;
 }
 
 #task-social-impact,
