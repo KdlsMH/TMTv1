@@ -102,7 +102,8 @@ const buildMessages = (payload) => {
       "3문장 이하 또는 6문장 이상은 허용하지 않으며, 같은 의미를 반복하거나 짧은 구절을 마침표로 나누어 문장 수만 맞추지 마세요.",
       "문구는 과장, 압박, 죄책감, 홍보성 표현 없이 차분하고 구체적으로 작성하세요.",
       "한국어 화자가 실제 requester에게서 받을 법한 자연스러운 안내문처럼 작성하고, 번역투나 지나치게 형식적인 표현을 피하세요.",
-      "작업 제목에는 따옴표, 괄호, 굵은 표시 등 불필요한 강조 기호를 추가하지 마세요.",
+      'beforeOptions, afterOptions, finalBeforeText, finalAfterText의 메시지 내용에는 큰따옴표(")를 사용하지 마세요. JSON 구문에 필요한 큰따옴표는 예외입니다.',
+      "작업 제목에도 따옴표, 괄호, 굵은 표시 등 불필요한 강조 기호를 추가하지 마세요.",
 
       // --------------------------------------------------
       // Pre-task strategy
@@ -126,11 +127,13 @@ const buildMessages = (payload) => {
       "작업 완료 후 메시지는 Pre-task의 Core/Supporting 전략을 그대로 반복하지 마세요.",
       "Post-task 메시지의 중심 목적은 작업자가 자신의 작업이 어디에 기여했는지 이해하도록 하는 것과, 작업자의 시간·노력·판단을 인정하고 감사하는 것입니다.",
       "따라서 Post-task에서는 Meaningfulness를 중심 전략으로, Appreciation/Relatedness를 보완 전략으로 사용하세요.",
+      "작업 완료 후 메시지에서는 보상 유무, 보상 금액, 지급 또는 정산에 관한 내용을 언급하지 마세요.",
 
       `작업 결과물의 기여 정보: ${clean(payload.contribution)}`,
 
-      "작업 결과물의 기여 정보에 적힌 내용을 근거로, 작업자의 결과가 어떤 데이터, 시스템, 연구 또는 결과물에 활용되는지 구체적으로 설명하세요.",
-      "입력된 기여 정보를 넘어서는 사회적 영향이나 효과를 임의로 만들어내거나 과장하지 마세요.",
+      "작업 완료 후 메시지는 반드시 위의 작업 결과물의 기여 정보를 활용하여 작성하세요.",
+      "작업 결과물의 기여 정보에 명시된 내용만 사실적 근거로 사용하여, 작업자의 결과가 어떤 데이터, 시스템, 연구 또는 결과물에 활용되는지 구체적으로 설명하세요.",
+      "입력된 기여 정보를 넘어서는 사실, 의도, 영향, 효과 또는 결과를 임의로 추측하거나 판단하여 작성하지 말고 과장하지도 마세요.",
       "단순히 '도움이 됩니다', '중요합니다'라고 말하기보다, 작업 결과가 무엇에 사용되거나 어떤 품질을 높이는지 가능한 범위에서 구체적으로 설명하세요.",
 
       "Post-task에는 다음 세 요소를 반드시 포함하세요:",
@@ -157,7 +160,7 @@ const buildMessages = (payload) => {
       // --------------------------------------------------
       "JSON을 반환하기 전에 Pre-task를 자체 점검하세요: 완전한 4~5문장인지, Task Type에 맞는지, Core가 중심이고 Supporting이 보완적으로 표현되었는지, 반복이 없는지, 내부 전략명이 노출되지 않았는지 확인하세요.",
 
-      "Post-task도 별도로 자체 점검하세요: 완전한 4~5문장인지, 작업 완료 acknowledgment가 있는지, 시간·노력·판단에 대한 appreciation이 있는지, 작업 결과물의 기여 정보를 기반으로 meaningfulness가 설명되었는지, 과장되거나 검증되지 않은 주장이 없는지 확인하세요.",
+      "Post-task도 별도로 자체 점검하세요: 완전한 4~5문장인지, 작업 완료 acknowledgment가 있는지, 시간·노력·판단에 대한 appreciation이 있는지, 작업 결과물의 기여 정보를 기반으로 meaningfulness가 설명되었는지, 보상 관련 언급이 없는지, 임의 추측·판단·과장 또는 검증되지 않은 주장이 없는지 확인하세요.",
 
       "어느 조건이라도 맞지 않으면 내부적으로 문장을 수정한 뒤 수정이 끝난 JSON만 반환하세요.",
 
@@ -247,12 +250,28 @@ const parseModelJson = (content) => {
   }
 };
 
-const normalizeMessageText = (message) => String(message || "").replace(/\s+/g, " ").trim();
+const normalizeMessageText = (message) => String(message || "")
+  .replace(/["“”]/g, "")
+  .replace(/\s+/g, " ")
+  .trim();
 
 const ensureBeforeOpening = (message, title) => {
-  const opening = `안녕하세요, "${clean(title)}" 작업에 참여해 주셔서 감사합니다.`;
-  const body = normalizeMessageText(message).replace(/^안녕하세요,\s*["“][^"”]+["”]\s*작업에\s*참여해\s*주셔서\s*감사합니다[.!]?\s*/i, "");
+  const opening = `안녕하세요. ${clean(title)}에 참여해 주셔서 감사합니다.`;
+  const body = normalizeMessageText(message).replace(/^안녕하세요[,.]\s*.+?에\s*참여해\s*주셔서\s*감사합니다[.!]?\s*/i, "");
   return normalizeMessageText(`${opening} ${body}`);
+};
+
+const normalizeGeneratedMessageContent = (parsed, payload) => {
+  for (const optionKey of ["beforeOptions", "afterOptions"]) {
+    if (!Array.isArray(parsed[optionKey])) continue;
+    parsed[optionKey] = parsed[optionKey].map(option => ({
+      ...option,
+      message: normalizeMessageText(option?.message)
+    }));
+  }
+  if (parsed.finalBeforeText) parsed.finalBeforeText = ensureBeforeOpening(parsed.finalBeforeText, payload.title);
+  if (parsed.finalAfterText) parsed.finalAfterText = normalizeMessageText(parsed.finalAfterText);
+  return parsed;
 };
 
 const applyGenerationMetadata = (parsed, payload) => {
@@ -315,9 +334,10 @@ module.exports = async (req, res) => {
       const content = extractOpenAIText(transport);
       if (!content) throw new Error("OpenAI API response did not include output text.");
 
-      const parsed = applyGenerationMetadata(parseModelJson(content), payload);
-      if (parsed.finalBeforeText) parsed.finalBeforeText = ensureBeforeOpening(parsed.finalBeforeText, payload.title);
-      if (parsed.finalAfterText) parsed.finalAfterText = normalizeMessageText(parsed.finalAfterText);
+      const parsed = normalizeGeneratedMessageContent(
+        applyGenerationMetadata(parseModelJson(content), payload),
+        payload
+      );
 
       return json(res, 200, {
         provider: "openai",
@@ -351,9 +371,10 @@ module.exports = async (req, res) => {
     const content = transport.choices?.[0]?.message?.content;
     if (!content) throw new Error("Upstage API response did not include message content.");
 
-    const parsed = applyGenerationMetadata(parseModelJson(content), payload);
-    if (parsed.finalBeforeText) parsed.finalBeforeText = ensureBeforeOpening(parsed.finalBeforeText, payload.title);
-    if (parsed.finalAfterText) parsed.finalAfterText = normalizeMessageText(parsed.finalAfterText);
+    const parsed = normalizeGeneratedMessageContent(
+      applyGenerationMetadata(parseModelJson(content), payload),
+      payload
+    );
 
     json(res, 200, {
       provider: "upstage",

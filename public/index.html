@@ -7,7 +7,7 @@
   <meta name="description" content="Worker의 내재적 동기와 작업 경험을 고려해 작업 전후 메시지를 설계하는 SDT 기반 Crowd Task Message Design System입니다.">
   
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="css/style.css?v=20260827-square-ui-v5">
+  <link rel="stylesheet" href="css/style.css?v=20260827-square-ui-v8">
   
   <!-- Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css">
@@ -113,7 +113,7 @@
                 <h2 id="survey-evidence-title">Crowdworker Survey (N=120)</h2>
               </div>
             </div>
-            <p class="survey-evidence-summary"><strong>Based on a survey of 120 crowdworkers.</strong> The Core and Supporting Frames are determined from workers' preferred motivational framing for each task type.</p>
+            <p class="survey-evidence-summary"><strong>In our preliminary study, we surveyed 120 crowdworkers.</strong> The Core and Supporting Frames are determined from workers' preferred motivational framing for each task type.</p>
             <div class="survey-evidence-table-wrap" tabindex="0" aria-label="Task Type별 Survey 기반 Frame 우선순위 표">
               <table class="survey-evidence-table">
                 <thead>
@@ -162,11 +162,11 @@
             <h2 id="how-title">이제 실제 화면에서 설계 흐름을 확인하세요.</h2>
           </div>
           <ol class="how-preview-steps">
-            <li><div class="how-step-copy"><span>STEP 1</span><h3>작업 정보 입력</h3><p>작업 목적, Task Type, Worker가 수행할 내용과 메시지 참고 정보를 입력합니다.</p></div><div class="mini-ui-preview"><label>작업 제목</label><div class="mini-form-control">도로 장면 객체 분류</div><label>작업자가 할 일</label><div class="mini-form-control muted">보행자·차량·장애물 분류</div></div></li>
-            <li><div class="how-step-copy"><span>STEP 2</span><h3>작업 특성 분석</h3><p>선택한 Task Type에 연결된 핵심·보조 메시지 전략을 확인합니다.</p></div><div class="mini-ui-preview"><small>Applied Message Strategy</small><div class="mini-support-row"><b>Competence</b><span>Core</span></div><div class="mini-support-row"><b>Relatedness</b><span>Supporting</span></div><p>Task Type별 고정 매핑을 메시지 설계 기준으로 사용합니다.</p></div></li>
-            <li><div class="how-step-copy"><span>STEP 3</span><h3>전략 기반 메시지 생성</h3><p>핵심·보조 전략을 바탕으로 Before / After 후보 메시지를 생성합니다.</p></div><div class="mini-ui-preview mini-candidates"><div><span class="candidate-frame-tag">Competence</span><p>세심한 판단이 데이터 품질을…</p></div><div><span class="candidate-frame-tag">Relatedness</span><p>들여 주신 시간과 노력은…</p></div></div></li>
-            <li><div class="how-step-copy"><span>STEP 4</span><h3>메시지 검토 및 수정</h3><p>적용된 핵심·보조 전략을 확인하고 메시지를 선택·수정합니다.</p></div><div class="mini-ui-preview"><div class="mini-review-title"><i class="lucide-badge-check"></i><b>Competence</b><span>핵심</span></div><p>신중한 판단이 중요한 작업이므로 Worker의 판단 능력을 인정하는 표현을 확인합니다.</p><div class="mini-textarea">최종 메시지를 직접 수정할 수 있습니다.</div></div></li>
-            <li><div class="how-step-copy"><span>STEP 5</span><h3>Worker에게 배포</h3><p>Worker Link를 생성합니다. Worker는 작업 전과 완료 후 메시지를 경험합니다.</p></div><div class="mini-ui-preview"><small>작업자 접속 URL</small><div class="mini-share-link">https://…/#worker?taskId=… <i class="lucide-copy"></i></div><div class="mini-worker-flow"><span>Before</span><i class="lucide-arrow-right"></i><span>Task</span><i class="lucide-arrow-right"></i><span>After</span></div></div></li>
+            <li><div class="how-step-copy"><span>Step 1</span><h3>작업 정보 입력</h3><p>작업 목적, Task Type, Worker가 수행할 내용과 메시지 참고 정보를 입력합니다.</p></div><div class="mini-ui-preview"><label>작업 제목</label><div class="mini-form-control">도로 장면 객체 분류</div><label>작업자가 할 일</label><div class="mini-form-control muted">보행자·차량·장애물 분류</div></div></li>
+            <li><div class="how-step-copy"><span>Step 2</span><h3>작업 특성 분석</h3><p>선택한 Task Type에 연결된 핵심·보조 메시지 전략을 확인합니다.</p></div><div class="mini-ui-preview"><small>Applied Message Strategy</small><div class="mini-support-row"><b>Competence</b><span>Core</span></div><div class="mini-support-row"><b>Relatedness</b><span>Supporting</span></div><p>Task Type별 고정 매핑을 메시지 설계 기준으로 사용합니다.</p></div></li>
+            <li><div class="how-step-copy"><span>Step 3</span><h3>전략 기반 메시지 생성</h3><p>핵심·보조 전략을 바탕으로 Before / After 후보 메시지를 생성합니다.</p></div><div class="mini-ui-preview mini-candidates"><div><span class="candidate-frame-tag">Competence</span><p>세심한 판단이 데이터 품질을…</p></div><div><span class="candidate-frame-tag">Relatedness</span><p>들여 주신 시간과 노력은…</p></div></div></li>
+            <li><div class="how-step-copy"><span>Step 4</span><h3>메시지 검토 및 수정</h3><p>적용된 핵심·보조 전략을 확인하고 메시지를 선택·수정합니다.</p></div><div class="mini-ui-preview"><div class="mini-review-title"><i class="lucide-badge-check"></i><b>Competence</b><span>핵심</span></div><p>신중한 판단이 중요한 작업이므로 Worker의 판단 능력을 인정하는 표현을 확인합니다.</p><div class="mini-textarea">최종 메시지를 직접 수정할 수 있습니다.</div></div></li>
+            <li><div class="how-step-copy"><span>Step 5</span><h3>Worker에게 배포</h3><p>Worker Link를 생성합니다. Worker는 작업 전과 완료 후 메시지를 경험합니다.</p></div><div class="mini-ui-preview"><small>작업자 접속 URL</small><div class="mini-share-link">https://…/#worker?taskId=… <i class="lucide-copy"></i></div><div class="mini-worker-flow"><span>Before</span><i class="lucide-arrow-right"></i><span>Task</span><i class="lucide-arrow-right"></i><span>After</span></div></div></li>
           </ol>
         </section>
 
@@ -271,8 +271,8 @@
                         <dl>
                           <div><dt>정서적 부담</dt><dd>중간</dd></div>
                           <div><dt>반복·집중 부담</dt><dd>중간</dd></div>
-                          <div><dt>사회적 기여</dt><dd>도로 위험 인식 데이터의 품질을 높여 안전 검토에 활용</dd></div>
-                          <div><dt>작업 상황</dt><dd>작은 객체를 반복적으로 구분</dd></div>
+                          <div><dt>작업 결과물의 기여</dt><dd>도로 위험 인식 데이터의 품질을 높여 안전 검토에 활용</dd></div>
+                          <div><dt>작업 흐름</dt><dd>작은 객체를 반복적으로 구분</dd></div>
                           <div><dt>보상·시간</dt><dd>1.80 USD · 작업 12분</dd></div>
                         </dl>
                       </div>
@@ -387,7 +387,7 @@
                       <div id="factor-task-types" class="factor-pill-list"></div>
                     </div>
                     <div class="factor-block">
-                      <span class="factor-label">선택 프레임 · 우선순위 순</span>
+                      <span class="factor-label">선택된 SDT 프레임</span>
                       <div id="factor-selected-frames" class="factor-pill-list"></div>
                     </div>
                     <div class="factor-block">
@@ -650,8 +650,8 @@
   </div>
 
   <!-- App Custom Logic Scripts -->
-  <script src="js/task-types.js?v=20260827-square-ui-v5"></script>
-  <script src="js/generator.js?v=20260827-square-ui-v5"></script>
-  <script src="js/app.js?v=20260827-square-ui-v5"></script>
+  <script src="js/task-types.js?v=20260827-square-ui-v6"></script>
+  <script src="js/generator.js?v=20260827-square-ui-v6"></script>
+  <script src="js/app.js?v=20260827-square-ui-v6"></script>
 </body>
 </html>

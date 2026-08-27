@@ -4127,8 +4127,14 @@ body.worker-mode .app-container {
 .criterion-priority.support { background: #ecfdf5; color: #047857; }
 .criterion-priority.optional { background: #f1f5f9; color: #64748b; }
 
-.option-select-btn { align-items: flex-start; }
-.candidate-btn-copy { display: grid; gap: 0.35rem; text-align: left; }
+.option-select-btn {
+  min-height: 38px;
+  height: 38px;
+  align-items: center;
+  justify-content: center;
+  padding-block: 0.35rem;
+}
+.candidate-btn-copy { display: grid; gap: 0; text-align: center; }
 .candidate-frame-tags { display: flex; gap: 0.3rem; flex-wrap: wrap; }
 .candidate-frame-tag { padding: 0.18rem 0.42rem; border-radius: 999px; background: #eef2ff; color: #4338ca; font-size: 0.65rem; font-weight: 800; }
 
@@ -4449,22 +4455,27 @@ body.worker-mode .app-container {
   display: flex;
   align-items: center;
   justify-content: center;
+  aspect-ratio: 1.15 / 1;
   overflow: hidden;
   border: 1px solid #dbe4f0;
   border-radius: 0;
-  background: #000;
+  background: #fff;
 }
 
 .worker-preview-image img {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
   object-fit: contain;
   border-radius: 0;
 }
 .message-annotations { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.75rem; }
 .message-annotations span { padding: 0.4rem 0.55rem; border: 0; border-radius: 0; color: #64748b; font-size: 0.67rem; }
 .message-annotations b { color: #334155; }
+#worker-before-frame-keywords,
+#worker-after-frame-keywords { display: grid; grid-template-columns: 1fr; }
+#worker-before-frame-keywords span,
+#worker-after-frame-keywords span { display: block; width: 100%; }
 
 .worker-flow-line {
   display: flex;
@@ -4505,7 +4516,7 @@ body.worker-mode .app-container {
 .how-section { padding: 7.5rem clamp(1rem, 4vw, 3.25rem); border-radius: 24px; }
 .how-preview-steps { display: grid; gap: 1rem; list-style: none; }
 .how-preview-steps > li { display: grid; grid-template-columns: minmax(0, 0.7fr) minmax(420px, 1.3fr); align-items: center; gap: 2rem; min-height: 260px; padding: 2rem; border: 1px solid #dbe4f0; border-radius: 0; background: #fff; }
-.how-step-copy > span { color: #4f46e5; font-size: 0.7rem; font-weight: 850; letter-spacing: 0.1em; }
+.how-step-copy > span { color: #4f46e5; font-size: 20px; font-weight: 850; letter-spacing: 0.1em; }
 .how-step-copy h3 { margin-top: 0.55rem; color: #0f172a; font-size: 1.25rem; }
 .how-step-copy p { margin-top: 0.6rem; color: #64748b; font-size: 0.82rem; line-height: 1.65; }
 

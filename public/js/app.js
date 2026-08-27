@@ -1487,13 +1487,7 @@ document.addEventListener("DOMContentLoaded", () => {
       copy.className = "candidate-btn-copy";
       const label = document.createElement("span");
       label.textContent = title;
-      const tags = document.createElement("span");
-      tags.className = "candidate-frame-tags";
-      const frameTag = document.createElement("span");
-      frameTag.className = "candidate-frame-tag";
-      frameTag.textContent = toDisplayFactorLabel(synthesizedBeforeFrames[idx] || "");
-      tags.appendChild(frameTag);
-      copy.append(label, tags);
+      copy.append(label);
       btn.append(icon, copy);
       btn.addEventListener("click", () => {
         syncSelectedCandidateText();
@@ -1522,13 +1516,7 @@ document.addEventListener("DOMContentLoaded", () => {
       copy.className = "candidate-btn-copy";
       const label = document.createElement("span");
       label.textContent = title;
-      const tags = document.createElement("span");
-      tags.className = "candidate-frame-tags";
-      const frameTag = document.createElement("span");
-      frameTag.className = "candidate-frame-tag";
-      frameTag.textContent = toDisplayFactorLabel(synthesizedAfterFrames[idx] || "");
-      tags.appendChild(frameTag);
-      copy.append(label, tags);
+      copy.append(label);
       btn.append(icon, copy);
       btn.addEventListener("click", () => {
         syncSelectedCandidateText();
