@@ -130,7 +130,7 @@ const buildMessages = (payload) => {
       "따라서 Post-task에서는 Meaningfulness를 중심 전략으로, Appreciation/Relatedness를 보완 전략으로 사용하세요.",
       "작업 완료 후 메시지에서는 보상 유무, 보상 금액, 지급 또는 정산에 관한 내용을 언급하지 마세요.",
 
-      `작업 결과물의 기여 정보: ${clean(payload.contribution)}`,
+      `작업 결과물의 기여 정보: ${clean(payload.socialImpact)}`,
 
       "작업 완료 후 메시지는 반드시 위의 작업 결과물의 기여 정보를 활용하여 작성하세요.",
       "작업 결과물의 기여 정보에 명시된 내용만 사실적 근거로 사용하여, 작업자의 결과가 어떤 데이터, 시스템, 연구 또는 결과물에 활용되는지 구체적으로 설명하세요.",
@@ -189,11 +189,16 @@ const buildMessages = (payload) => {
       `작업자가 겪을 수 있는 상황: ${clean(payload.workerContext)}`,
       `단일 작업 제한 시간: ${clean(payload.timeLimitMinutes)}분`,
       "",
-      "[최종 메시지 설계 기준]",
+      "[Pre-task 최종 메시지 설계 기준]",
       `Core strategy: ${coreStrategy}`,
       `Supporting strategy: ${supportingStrategy}`,
-      "Pre-task와 Post-task 최종 메시지 모두 Core를 중심으로 전개하고 Supporting을 보완적으로 반영하세요.",
-      "Post-task에는 Task Type에 맞는 기여 의미를 구체적으로 설명하세요: Annotation/Classification=정확성·품질·신뢰성, Data Collection/Creation=향후 분석·콘텐츠 구축 자료, Search/Verification=정보 정확성·신뢰성, Evaluation/Comparison=평가·의사결정, Content Moderation=안전하고 신뢰할 수 있는 환경, Surveys/Experiments=연구 결과·사용자 이해.",
+      "finalBeforeText는 Core를 중심으로 전개하고 Supporting을 보완적으로 반영하세요.",
+      "",
+      "[Post-task 최종 메시지 설계 기준]",
+      "Core strategy: Meaningfulness",
+      "Supporting strategy: Appreciation/Relatedness",
+      "finalAfterText는 작업 결과물의 구체적인 기여 의미를 중심으로 전개하고, 작업자의 시간·노력·판단에 대한 인정과 감사를 보완적으로 반영하세요.",
+      "Task Type에 맞는 기여 의미를 구체적으로 설명하세요: Annotation/Classification=정확성·품질·신뢰성, Data Collection/Creation=향후 분석·콘텐츠 구축 자료, Search/Verification=정보 정확성·신뢰성, Evaluation/Comparison=평가·의사결정, Content Moderation=안전하고 신뢰할 수 있는 환경, Surveys/Experiments=연구 결과·사용자 이해.",
       "",
       "[반환 JSON 스키마]",
       JSON.stringify({
@@ -224,12 +229,12 @@ const buildMessages = (payload) => {
           { label: "자율성/선택 존중", frame: "Autonomy", message: "자연스럽게 이어지는 완결된 4~5문장의 작업 시작 전 후보 문구" }
         ],
         afterOptions: [
-          { label: "관계성/기여 연결", frame: "Relatedness", message: "자연스럽게 이어지는 완결된 4~5문장의 작업 완료 후 후보 문구" },
-          { label: "유능감/수행 신뢰", frame: "Competence", message: "자연스럽게 이어지는 완결된 4~5문장의 작업 완료 후 후보 문구" },
-          { label: "자율성/선택 존중", frame: "Autonomy", message: "자연스럽게 이어지는 완결된 4~5문장의 작업 완료 후 후보 문구" }
+          { label: "기여 의미", frame: "Meaningfulness", message: "작업 결과물의 구체적인 활용과 기여 의미를 중심으로 자연스럽게 이어지는 완결된 4~5문장의 작업 완료 후 후보 문구" },
+          { label: "시간·노력 인정", frame: "Appreciation", message: "작업자의 시간과 노력을 구체적으로 인정하며 자연스럽게 이어지는 완결된 4~5문장의 작업 완료 후 후보 문구" },
+          { label: "판단·기여 인정", frame: "Relatedness", message: "작업자의 판단과 기여를 구체적으로 인정하며 자연스럽게 이어지는 완결된 4~5문장의 작업 완료 후 후보 문구" }
         ],
         finalBeforeText: "Core > Supporting 비중을 지키는 완결된 4~5문장의 최종 작업 시작 전 문구",
-        finalAfterText: "Core > Supporting + 시간·노력 감사 + Task Type별 기여 의미를 포함한 완결된 4~5문장 작업 완료 후 문구",
+        finalAfterText: "Meaningfulness > Appreciation/Relatedness 비중으로 Task Type별 기여 의미와 시간·노력·판단에 대한 인정을 포함한 완결된 4~5문장 작업 완료 후 문구",
         structuredPromptSummary: "프롬프트 구조 요약"
       }, null, 2)
     ].join("\n")
