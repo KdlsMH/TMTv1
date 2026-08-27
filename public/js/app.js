@@ -116,8 +116,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const taskSocialImpactBox = document.getElementById("task-social-impact");
   const taskWorkerContextBox = document.getElementById("task-worker-context");
   const taskTypeOptions = document.getElementById("task-type-options");
-  const taskTypeCoreStrategy = document.getElementById("task-type-core-strategy");
-  const taskTypeSupportingStrategy = document.getElementById("task-type-supporting-strategy");
   const surveyEvidenceTableBody = document.getElementById("survey-evidence-table-body");
   const workerBeforeFrameKeywords = document.getElementById("worker-before-frame-keywords");
   const workerAfterFrameKeywords = document.getElementById("worker-after-frame-keywords");
@@ -156,13 +154,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const factorSelectedFrames = document.getElementById("factor-selected-frames");
   const factorBurdens = document.getElementById("factor-burdens");
   const factorMotivators = document.getElementById("factor-motivators");
-  const factorSelectionReason = document.getElementById("factor-selection-reason");
   const reviewCriteriaList = document.getElementById("review-criteria-list");
-  const factorTaskTypeLabel = document.getElementById("factor-task-type-label");
-  const factorTaskTypeReason = document.getElementById("factor-task-type-reason");
-  const factorTaskContext = document.getElementById("factor-task-context");
   const factorTaskCharacteristics = document.getElementById("factor-task-characteristics");
-  const factorAppliedStrategies = document.getElementById("factor-applied-strategies");
   const factorContextRisk = document.getElementById("factor-context-risk");
   const factorContextFatigue = document.getElementById("factor-context-fatigue");
   const factorContextTime = document.getElementById("factor-context-time");
@@ -419,12 +412,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
 
-  const renderTaskTypeStrategySummary = (taskTypeValue = selectedTaskType) => {
-    const selection = TaskTypeConfig.getStrategySelection(taskTypeValue);
-    if (taskTypeCoreStrategy) taskTypeCoreStrategy.textContent = `핵심 · ${selection.coreStrategy}`;
-    if (taskTypeSupportingStrategy) taskTypeSupportingStrategy.textContent = `보조 · ${selection.supportingStrategy}`;
-  };
-
   const renderWorkerFrameKeywords = (container, selectedFrames = [], phase = "before") => {
     if (!container) return;
     container.innerHTML = "";
@@ -479,7 +466,6 @@ document.addEventListener("DOMContentLoaded", () => {
       currentTask.taskType = normalized;
       currentTask.taskTypeLabel = type?.label || "";
     }
-    renderTaskTypeStrategySummary(normalized);
     renderWorkerPreviewFrameKeywords(normalized);
     if (isGenerating) generationEditNotice?.classList.remove("hidden");
     if (sync && typeof syncFormToDraft === "function") syncFormToDraft();
@@ -905,18 +891,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const riskLabels = { low: "낮음", medium: "중간", high: "높음" };
     const fatigueLabels = { low: "낮음", medium: "중간", high: "높음" };
 
-    if (factorTaskTypeLabel) factorTaskTypeLabel.textContent = factors.taskTypeLabel || taskTypeDefinition?.label || factors.primaryTaskType || "—";
-    if (factorTaskTypeReason) factorTaskTypeReason.textContent = factors.taskTypeReason || taskTypeDefinition?.mappingReason || "—";
-    if (factorTaskContext) factorTaskContext.textContent = TASK_CONTEXT_LABELS[selectedCategory] || factors.taskContext || "General Crowd Task";
     if (factorTaskCharacteristics) factorTaskCharacteristics.textContent = characteristicLabels.join(" · ") || "—";
-    if (factorAppliedStrategies) factorAppliedStrategies.textContent = (factors.selectedFrames || []).map(toDisplayFactorLabel).join(" · ") || "—";
     if (factorContextRisk) factorContextRisk.textContent = riskLabels[taskRiskLevelSelect?.value] || "—";
     if (factorContextFatigue) factorContextFatigue.textContent = fatigueLabels[taskFatigueLevelSelect?.value] || "—";
     if (factorContextTime) factorContextTime.textContent = taskTimeLimitBox?.value ? `${taskTimeLimitBox.value} min` : "—";
 
-    if (factorSelectionReason) {
-      factorSelectionReason.textContent = factors.frameSelectionReason || "새 카테고리 규칙에 따라 작업 특성과 심리 프레임을 연결했습니다.";
-    }
     if (llmProviderBadge) {
       if (provider === "openai") {
         llmProviderBadge.textContent = `GPT 작성${model ? ` · ${model}` : ""}`;
@@ -1063,10 +1042,6 @@ document.addEventListener("DOMContentLoaded", () => {
   navWhySdt?.addEventListener("click", () => navigateToSection(navWhySdt, whySdt));
   navHowItWorks?.addEventListener("click", () => navigateToSection(navHowItWorks, howItWorks));
   navWorkspace?.addEventListener("click", () => navigateToSection(navWorkspace, requesterWorkspace, taskTitleBox));
-  document.querySelector(".motivation-to-sdt")?.addEventListener("click", event => {
-    event.preventDefault();
-    navigateToSection(navWhySdt, whySdt);
-  });
   requestNavigationUpdate();
 
   const syncSelectedCandidateText = () => {
@@ -2353,7 +2328,6 @@ document.addEventListener("DOMContentLoaded", () => {
   renderExampleTaskButtons();
   renderTaskTypeOptions();
   renderSurveyEvidenceTable();
-  renderTaskTypeStrategySummary();
   renderWorkerPreviewFrameKeywords();
   updateFormCompletion();
   // Workspace is revealed only after the CTA is clicked in the current visit.
