@@ -402,50 +402,54 @@
                   <div id="review-criteria-list" class="review-criteria-list" aria-live="polite"></div>
                 </div>
 
-                <!-- Before Task: Final message, then its candidates -->
-                <div class="intervention-item final-message-item">
-                  <div class="final-message-heading">
-                    <span class="intervention-badge badge-final">1-1. 최종 작업 시작 전 메시지</span>
-                  </div>
-                  <div class="final-message-stack">
-                    <div class="final-message-layer final-message-layer-before">
-                      <div class="final-message-layer-header">
-                        <label for="final-before-text" class="final-message-label">
-                          <i class="lucide-play-circle"></i>작업 시작 전 메시지
-                        </label>
+                <!-- Before Task Group: Final message, then its candidates -->
+                <div class="phase-group phase-group-before">
+                  <div class="intervention-item final-message-item">
+                    <div class="final-message-heading">
+                      <span class="intervention-badge badge-final">최종 작업 시작 전 메시지</span>
+                    </div>
+                    <div class="final-message-stack">
+                      <div class="final-message-layer final-message-layer-before">
+                        <div class="final-message-layer-header">
+                          <label for="final-before-text" class="final-message-label">
+                            <i class="lucide-play-circle"></i>작업 시작 전 메시지
+                          </label>
+                        </div>
+                        <textarea id="final-before-text" class="intervention-text-box final-text-box" rows="8" aria-label="최종 작업 전 동기부여 문구"></textarea>
                       </div>
-                      <textarea id="final-before-text" class="intervention-text-box final-text-box" rows="8" aria-label="최종 작업 전 동기부여 문구"></textarea>
                     </div>
                   </div>
-                </div>
 
-                <div class="intervention-item">
-                  <span class="intervention-badge badge-before">1-2. 작업 시작 전 후보 메시지 3개</span>
-                  <div id="before-options-select-group" class="option-select-grid" style="margin-bottom: 0.75rem;"></div>
-                  <textarea id="before-text" class="intervention-text-box" rows="5" aria-label="작업 전 동기부여 개입 문구" readonly aria-readonly="true"></textarea>
-                </div>
-
-                <!-- After Task: Final message, then its candidates -->
-                <div class="intervention-item final-message-item">
-                  <div class="final-message-heading">
-                    <span class="intervention-badge badge-final">2-1. 최종 작업 완료 후 메시지</span>
+                  <div class="intervention-item">
+                    <span class="intervention-badge badge-before">작업 시작 전 후보 메시지 3개</span>
+                    <div id="before-options-select-group" class="option-select-grid" style="margin-bottom: 0.75rem;"></div>
+                    <textarea id="before-text" class="intervention-text-box" rows="5" aria-label="작업 전 동기부여 개입 문구" readonly aria-readonly="true"></textarea>
                   </div>
-                  <div class="final-message-stack">
-                    <div class="final-message-layer final-message-layer-after">
-                      <div class="final-message-layer-header">
-                        <label for="final-after-text" class="final-message-label">
-                          <i class="lucide-award"></i>작업 완료 후 메시지
-                        </label>
+                </div>
+
+                <!-- After Task Group: Final message, then its candidates -->
+                <div class="phase-group phase-group-after">
+                  <div class="intervention-item final-message-item">
+                    <div class="final-message-heading">
+                      <span class="intervention-badge badge-final">최종 작업 완료 후 메시지</span>
+                    </div>
+                    <div class="final-message-stack">
+                      <div class="final-message-layer final-message-layer-after">
+                        <div class="final-message-layer-header">
+                          <label for="final-after-text" class="final-message-label">
+                            <i class="lucide-award"></i>작업 완료 후 메시지
+                          </label>
+                        </div>
+                        <textarea id="final-after-text" class="intervention-text-box final-text-box" rows="8" aria-label="최종 작업 후 감사 문구"></textarea>
                       </div>
-                      <textarea id="final-after-text" class="intervention-text-box final-text-box" rows="8" aria-label="최종 작업 후 감사 문구"></textarea>
                     </div>
                   </div>
-                </div>
 
-                <div class="intervention-item">
-                  <span class="intervention-badge badge-after">2-2. 작업 완료 후 후보 메시지 3개</span>
-                  <div id="after-options-select-group" class="option-select-grid" style="margin-bottom: 0.75rem;"></div>
-                  <textarea id="after-text" class="intervention-text-box" rows="5" aria-label="작업 후 동기부여 개입 문구" readonly aria-readonly="true"></textarea>
+                  <div class="intervention-item">
+                    <span class="intervention-badge badge-after">작업 완료 후 후보 메시지 3개</span>
+                    <div id="after-options-select-group" class="option-select-grid" style="margin-bottom: 0.75rem;"></div>
+                    <textarea id="after-text" class="intervention-text-box" rows="5" aria-label="작업 후 동기부여 개입 문구" readonly aria-readonly="true"></textarea>
+                  </div>
                 </div>
 
                 <button id="btn-publish" class="btn btn-teal" style="width: 100%;">

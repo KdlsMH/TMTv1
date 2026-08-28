@@ -1454,6 +1454,26 @@ textarea.form-control {
   padding: 1.15rem;
 }
 
+/* Groups the final message with its own candidate list so they read as one hierarchy */
+.phase-group {
+  border: 1px solid var(--border-glass);
+  border-radius: 14px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.phase-group-before {
+  border-color: rgba(139, 92, 246, 0.18);
+}
+
+.phase-group-after {
+  border-color: rgba(20, 184, 166, 0.18);
+}
+
+.phase-group > .intervention-item:last-child {
+  margin-bottom: 0;
+}
+
 .final-message-stack {
   display: flex;
   flex-direction: column;
