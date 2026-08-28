@@ -1619,27 +1619,6 @@ document.addEventListener("DOMContentLoaded", () => {
   taskSocialImpactBox.addEventListener("input", syncFormToDraft);
   taskWorkerContextBox.addEventListener("input", syncFormToDraft);
 
-  // Real-time synchronization of manual edits to the textareas
-  beforeTextBox.addEventListener("input", () => {
-    if (synthesizedBeforeOptions.length > 0) {
-      synthesizedBeforeOptions[selectedBeforeOptionIndex] = beforeTextBox.value;
-    }
-    if (currentTask) {
-      currentTask.beforeCandidates = [...synthesizedBeforeOptions];
-      saveDraftToStorage();
-    }
-  });
-
-  afterTextBox.addEventListener("input", () => {
-    if (synthesizedAfterOptions.length > 0) {
-      synthesizedAfterOptions[selectedAfterOptionIndex] = afterTextBox.value;
-    }
-    if (currentTask) {
-      currentTask.afterCandidates = [...synthesizedAfterOptions];
-      saveDraftToStorage();
-    }
-  });
-
   finalBeforeTextBox.addEventListener("input", () => {
     if (currentTask) {
       currentTask.beforeText = finalBeforeTextBox.value;

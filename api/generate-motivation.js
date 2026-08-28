@@ -161,14 +161,15 @@ const buildMessages = (payload) => {
       // --------------------------------------------------
       "JSON을 반환하기 전에 Pre-task를 자체 점검하세요: 완전한 4~5문장인지, Task Type에 맞는지, Core가 중심이고 Supporting이 보완적으로 표현되었는지, 반복이 없는지, 내부 전략명이 노출되지 않았는지 확인하세요.",
 
-      "Post-task도 별도로 자체 점검하세요: 완전한 4~5문장인지, 작업 완료 acknowledgment가 있는지, 시간·노력·판단에 대한 appreciation이 있는지, 작업 결과물의 기여 정보를 기반으로 meaningfulness가 설명되었는지, 보상 관련 언급이 없는지, 임의 추측·판단·과장 또는 검증되지 않은 주장이 없는지 확인하세요.",
+      "Post-task도 별도로 자체 점검하세요: 완전한 4~5문장인지, 작업 완료 acknowledgment가 있는지, 시간·노력·판단에 대한 appreciation이 있는지, 작업 결과물의 기여 정보를 기반으로 meaningfulness가 설명되었는지, 보상 관련 언급이 없는지, 마지막 문장이 정확히 '좋은 하루 되시길 바랍니다!'로 끝나는지, 임의 추측·판단·과장 또는 검증되지 않은 주장이 없는지 확인하세요.",
 
       "어느 조건이라도 맞지 않으면 내부적으로 문장을 수정한 뒤 수정이 끝난 JSON만 반환하세요.",
 
       // --------------------------------------------------
-      // Fixed opening
+      // Fixed opening / closing
       // --------------------------------------------------
-      `finalBeforeText는 반드시 다음 문장으로 시작하세요: 안녕하세요. ${clean(payload.title)}에 참여해 주셔서 감사합니다.`
+      `finalBeforeText는 반드시 다음 문장으로 시작하세요: 안녕하세요. ${clean(payload.title)}에 참여해 주셔서 감사합니다.`,
+      "finalAfterText는 반드시 다음 문장으로 끝나야 합니다 (이 문장을 마지막 문장으로 포함해 전체 4~5문장을 구성하세요): 좋은 하루 되시길 바랍니다!"
     ].join("\n")
   },
   {
@@ -234,7 +235,7 @@ const buildMessages = (payload) => {
           { label: "판단·기여 인정", frame: "Relatedness", message: "작업자의 판단과 기여를 구체적으로 인정하며 자연스럽게 이어지는 완결된 4~5문장의 작업 완료 후 후보 문구" }
         ],
         finalBeforeText: "Core > Supporting 비중을 지키는 완결된 4~5문장의 최종 작업 시작 전 문구",
-        finalAfterText: "Meaningfulness > Appreciation/Relatedness 비중으로 Task Type별 기여 의미와 시간·노력·판단에 대한 인정을 포함한 완결된 4~5문장 작업 완료 후 문구",
+        finalAfterText: "Meaningfulness > Appreciation/Relatedness 비중으로 Task Type별 기여 의미와 시간·노력·판단에 대한 인정을 포함하고, 반드시 '좋은 하루 되시길 바랍니다!'로 끝나는 완결된 4~5문장 작업 완료 후 문구",
         structuredPromptSummary: "프롬프트 구조 요약"
       }, null, 2)
     ].join("\n")
@@ -267,6 +268,13 @@ const ensureBeforeOpening = (message, title) => {
   return normalizeMessageText(`${opening} ${body}`);
 };
 
+const CLOSING_LINE = "좋은 하루 되시길 바랍니다!";
+
+const ensureAfterClosing = (message) => {
+  const body = normalizeMessageText(message).replace(/\s*좋은\s*하루[^.!?]*[.!?]?\s*$/i, "");
+  return normalizeMessageText(`${body} ${CLOSING_LINE}`);
+};
+
 const normalizeGeneratedMessageContent = (parsed, payload) => {
   for (const optionKey of ["beforeOptions", "afterOptions"]) {
     if (!Array.isArray(parsed[optionKey])) continue;
@@ -276,7 +284,7 @@ const normalizeGeneratedMessageContent = (parsed, payload) => {
     }));
   }
   if (parsed.finalBeforeText) parsed.finalBeforeText = ensureBeforeOpening(parsed.finalBeforeText, payload.title);
-  if (parsed.finalAfterText) parsed.finalAfterText = normalizeMessageText(parsed.finalAfterText);
+  if (parsed.finalAfterText) parsed.finalAfterText = ensureAfterClosing(parsed.finalAfterText);
   return parsed;
 };
 

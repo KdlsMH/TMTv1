@@ -4972,3 +4972,8 @@ body.worker-mode .app-container {
 .system-pipeline li:last-child {
   background: #ffffff !important;
 }
+
+.intervention-text-box[readonly] {
+  cursor: default;
+  opacity: 0.82;
+}
